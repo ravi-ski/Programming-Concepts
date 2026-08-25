@@ -1,0 +1,17 @@
+
+create table sick_days (
+    emp_name char(10),
+    sickdate date default(current)
+)
+
+john , 'may 15 2026'
+marry , 'jan 1 2026'
+john , jun 1 2026'
+
+select emp_name sickdate from sick_days where emp_name = 'john' order by sickdate;
+
+select emp_name , count(*) from sick_days group by emp_name 
+
+
+john 2
+marry 1

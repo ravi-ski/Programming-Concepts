@@ -1,0 +1,102 @@
+@SECTION: Networking
+@CHAPTER: VLAN
+
+@PROGRAM: What is a VLAN and why is it used?
+A VLAN (Virtual LAN) is a logical grouping of switch ports/devices that behaves like a single broadcast domain, independent of physical location or cabling. It is used to segment broadcast traffic, isolate groups of users or departments for security, and reorganize the network logically without rewiring, since a device's VLAN membership is configured in software on the switch.
+@END
+
+@PROGRAM: What is the difference between a VLAN and a physical LAN segment?
+A physical LAN segment is bound by the actual cabling and switch hardware, so all devices connected to it share one broadcast domain. A VLAN decouples logical grouping from physical topology: devices on different switches, in different rooms or buildings, can belong to the same VLAN, while devices plugged into the same physical switch can belong to different VLANs.
+@END
+
+@PROGRAM: What is VLAN tagging and how does IEEE 802.1Q work?
+802.1Q tagging inserts a 4-byte tag into the Ethernet frame header (after the source MAC) containing a 12-bit VLAN ID (and a 3-bit priority field for QoS). When a frame leaves a trunk port, the switch adds this tag so the receiving switch knows which VLAN the frame belongs to; the tag is stripped before the frame reaches an access-port end device, which is unaware tagging ever happened.
+@END
+
+@PROGRAM: What is the difference between a trunk port and an access port?
+An access port belongs to exactly one VLAN and carries untagged frames to/from an end device such as a PC or printer. A trunk port carries traffic for multiple VLANs between switches (or to a router/firewall) using 802.1Q tags so the receiving device can distinguish which VLAN each frame belongs to.
+@END
+
+@PROGRAM: What is the native VLAN and why can it be a security risk?
+The native VLAN is the one VLAN on a trunk whose frames are sent untagged (by default VLAN 1 on most vendors). It exists for backward compatibility with devices that do not understand tagging. It is risky because an attacker can craft a double-tagged frame that rides the native VLAN untagged on the first hop and gets forwarded to a different VLAN on the next switch (VLAN hopping), so best practice is to change the native VLAN to an unused ID and never use it for real traffic.
+@END
+
+@PROGRAM: Explain the VLAN hopping attack and how to prevent it.
+VLAN hopping lets an attacker on one VLAN send traffic into another VLAN without going through a router. Two common methods: (1) Switch spoofing - the attacker's host negotiates a trunk via DTP, gaining access to all VLANs on that trunk. (2) Double tagging - the attacker sends a frame with two 802.1Q tags; the first switch strips the outer (native VLAN) tag and forwards the frame with the inner tag intact, causing it to land on a different VLAN. Prevention: disable DTP/auto-trunking on access ports (switchport nonegotiate), explicitly set access ports with switchport mode access, and never use the native VLAN as a working VLAN.
+@END
+
+@PROGRAM: What is Inter-VLAN routing and how is it achieved?
+Inter-VLAN routing allows devices in different VLANs (different broadcast/subnet domains) to communicate, since a Layer 2 switch alone cannot route between VLANs. It's achieved either via "router-on-a-stick" - a single trunk link from the switch to a router with sub-interfaces per VLAN, each acting as that VLAN's default gateway - or via a Layer 3 switch using Switched Virtual Interfaces (SVIs), which is more scalable and lower-latency than router-on-a-stick.
+@END
+
+@PROGRAM: What is VTP (VLAN Trunking Protocol) and what are its modes?
+VTP synchronizes VLAN database information (VLAN IDs and names) across switches in the same VTP domain, so you configure VLANs once on a server and they propagate automatically. Modes: Server (can create/modify/delete VLANs, advertises changes), Client (accepts and forwards updates, cannot modify VLANs locally), and Transparent (does not participate in the VTP domain, only forwards VTP advertisements and keeps its own local VLAN database).
+@END
+
+@PROGRAM: What are the risks of using VTP in production?
+The classic risk is a "VTP bomb": a new switch added to the network with a higher VTP revision number (even with an empty VLAN database) can overwrite the VLAN database on every switch in the domain, wiping out all configured VLANs and causing a network-wide outage. Mitigations include using VTP passwords, preferring VTP transparent mode or VTPv3 (which supports authentication and a primary server concept), and always resetting the revision number on any switch before adding it to the domain.
+@END
+
+@PROGRAM: What is the difference between normal-range and extended-range VLAN IDs?
+Normal-range VLANs are IDs 1-1005, stored in vlan.dat and synchronized by VTP versions 1 and 2. Extended-range VLANs are IDs 1006-4094, which are not stored in vlan.dat, are not advertised by VTPv1/v2 (only VTPv3 supports them), and are typically used in larger, more complex networks such as service-provider or data-center environments.
+@END
+
+@PROGRAM: Why should you avoid using the default VLAN (VLAN 1) for user traffic?
+VLAN 1 is the factory-default VLAN for all switch ports, cannot be renamed or deleted, and by default carries control-plane traffic like CDP, VTP, DTP and STP BPDUs. Because every device "trusts" VLAN 1 by default and it is also frequently the native VLAN, leaving user or management traffic on it increases exposure to VLAN-hopping and makes the network harder to secure; best practice is to move all real traffic off VLAN 1 and let it carry only control-plane protocol traffic.
+@END
+
+@PROGRAM: How does a switch handle a frame tagged with a VLAN ID it doesn't recognize?
+If a trunk port receives a frame tagged with a VLAN that is not defined (or not allowed) in the switch's VLAN database / trunk allowed-list, the switch drops the frame. This is why "switchport trunk allowed vlan" lists must be kept consistent across trunk links, and why pruning (manual or via VTP) is used to limit unnecessary VLAN traffic across trunks.
+@END
+
+@PROGRAM: What is a Private VLAN (PVLAN) and what are its port types?
+A Private VLAN subdivides a single VLAN/subnet into isolated sub-domains while sharing one gateway, commonly used in shared hosting or DMZ environments. Port types: Promiscuous (can talk to all ports in the PVLAN, typically the router/gateway), Isolated (can only talk to promiscuous ports, not to other isolated or community ports), and Community (can talk to other ports in the same community and to promiscuous ports, but not to isolated ports or other communities).
+@END
+
+@PROGRAM: What is the difference between a VLAN and a subnet?
+A VLAN is a Layer 2 construct that defines a broadcast domain at the switching level, while a subnet is a Layer 3 construct that defines an IP address range and routing boundary. Best practice is a strict one-to-one mapping (one VLAN = one IP subnet) so that Layer 2 segmentation and Layer 3 addressing stay aligned, simplifying troubleshooting, ACLs, and routing.
+@END
+
+@PROGRAM: How do you troubleshoot VLAN connectivity issues?
+Typical steps: verify the port's VLAN assignment with "show interface switchport" or "show vlan brief"; confirm the VLAN exists in the local VLAN database; check trunk configuration and allowed VLAN list with "show interface trunk"; verify native VLAN mismatches between trunk ends (a common cause of connectivity and CDP native VLAN mismatch warnings); check for STP blocking the port; and confirm the device's IP configuration matches the VLAN's subnet and default gateway.
+@END
+
+@PROGRAM: What is 802.1Q double tagging and how is it exploited?
+Double tagging is when an attacker crafts a frame with two stacked 802.1Q tags - an outer tag matching the trunk's native VLAN and an inner tag for the target VLAN. The first switch strips the outer tag (since native VLAN traffic is untagged) and forwards the frame still carrying the inner tag, so the next switch treats it as belonging to the target VLAN - allowing the attacker to send traffic into a VLAN it shouldn't have access to. It is a one-way attack (no return traffic) and is prevented by not using the native VLAN for user traffic and disabling it on unused trunk ports.
+@END
+
+@PROGRAM: What is the difference between static and dynamic VLAN assignment?
+Static VLAN assignment configures a specific VLAN directly on a switch port ("switchport access vlan X"), which is simple but requires manual reconfiguration if a device moves. Dynamic VLAN assignment uses a policy server, most commonly a RADIUS server with 802.1X, to assign a VLAN to a port based on the authenticated user or device identity, allowing consistent policy regardless of which physical port a device connects to.
+@END
+
+@PROGRAM: What is a VLAN Access Control List (VACL)?
+A VACL applies access control directly to traffic within or between VLANs at Layer 2/3 on the switch, regardless of whether the traffic is routed. Unlike a router ACL, which only inspects traffic that is being routed between subnets, a VACL can filter traffic even between two hosts in the same VLAN, making it useful for intra-VLAN security policies.
+@END
+
+@PROGRAM: How does Spanning Tree Protocol interact with VLANs (PVST+ vs MST)?
+Per-VLAN Spanning Tree Plus (PVST+) runs a separate STP instance per VLAN, allowing independent root bridge selection and load balancing across VLANs but consuming more CPU/BPDU overhead as VLAN count grows. Multiple Spanning Tree (MST) maps groups of VLANs to a smaller number of spanning-tree instances, reducing overhead while still allowing some load-balancing flexibility - a better fit for networks with a large number of VLANs.
+@END
+
+@PROGRAM: What is a voice VLAN and why is it used?
+A voice VLAN is a dedicated VLAN configured on an access port to separate IP phone traffic from data traffic coming from a PC connected behind the phone. It allows the switch to apply QoS trust and prioritization to voice traffic, keep phone and PC traffic in separate broadcast/subnet domains, and simplifies configuration since the phone can be auto-configured via CDP/LLDP-MED to use the voice VLAN while the PC uses the port's regular access VLAN.
+@END
+
+@PROGRAM: What happens to a switch port's VLAN membership if the assigned VLAN is deleted?
+If the VLAN assigned to an access port is deleted from the VLAN database, the port becomes "inactive" (shown as such in show vlan / show interface status) and stops forwarding traffic, even though its configuration still shows that VLAN number. Connectivity is only restored once the VLAN is recreated or the port is reassigned to an existing VLAN.
+@END
+
+@PROGRAM: What are common real-world use cases for VLANs in enterprise network design?
+Typical use cases: (1) Departmental segmentation - separating HR, Finance, Engineering traffic for security and broadcast control. (2) Guest/BYOD networks - isolating untrusted wireless or visitor traffic from the corporate LAN. (3) Voice/Video VLANs - keeping VoIP and video-conferencing traffic on a QoS-prioritized VLAN separate from data. (4) Server/DMZ segmentation - placing public-facing servers in their own VLAN with tighter firewall rules. (5) IoT/OT isolation - putting cameras, badge readers, and industrial devices on a restricted VLAN that cannot reach the corporate network directly. (6) Multi-tenant hosting - using PVLANs so tenants on the same subnet cannot see each other's traffic.
+@END
+
+@PROGRAM: What design considerations should you follow when planning a VLAN scheme?
+Key design practices: keep a strict one VLAN-to-one subnet mapping to simplify routing and troubleshooting; document a consistent VLAN numbering convention across sites (e.g., VLAN 10 = data, 20 = voice, 30 = guest at every branch); avoid using VLAN 1 or the native VLAN for real traffic; limit trunk "allowed VLAN" lists to only what's needed on each link (VLAN pruning) to reduce unnecessary broadcast propagation; plan for scalability using extended-range VLANs if you expect to exceed 1005 VLANs; align VLAN boundaries with security zones so ACLs/firewalls sit at natural VLAN-to-VLAN routing points; and keep the number of VLANs per switch/broadcast domain small enough that STP convergence and broadcast traffic remain manageable.
+@END
+
+@PROGRAM: How do you decide how many VLANs a network needs and where the boundaries should be?
+VLAN boundaries are usually driven by three factors: security/compliance requirements (data that must be isolated, e.g., PCI card-holder data or OT networks), functional grouping (voice, data, guest, management, IoT), and broadcast-domain size (keeping each VLAN's host count small enough to limit broadcast traffic, commonly a few hundred hosts). A good rule of thumb is to start from the security and traffic-type requirements first, then further subdivide by physical site or department only if it improves manageability, rather than creating VLANs purely along org-chart lines.
+@END
+
+@PROGRAM: What is a management VLAN and why should it be separated from user VLANs?
+The management VLAN carries traffic used to administer network devices themselves - SSH/HTTPS to switch/router management interfaces, SNMP, syslog. It should be a dedicated VLAN, not accessible from general user VLANs, and reachable only through a restricted path (jump host, ACL, or out-of-band network) so that a compromised user endpoint cannot directly reach switch/router management interfaces, which is a critical part of defense-in-depth network design.
+@END
