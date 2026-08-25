@@ -1,0 +1,42 @@
+@SECTION: Linux
+@CHAPTER: FILE SYSTEMS
+
+@PROGRAM: What is an inode and what does it store?
+An inode (index node) is a kernel data structure that stores all metadata about a file except its name and actual data content - including file size, permissions, owner (UID/GID), timestamps, link count, and pointers to the data blocks on disk. Every file and directory has exactly one inode, identified by a unique inode number within a filesystem.
+@END
+
+@PROGRAM: What is the difference between a hard link and a soft (symbolic) link?
+A hard link is a second directory entry pointing to the same inode as the original file, so both names are indistinguishable and the data isn't removed until every hard link is deleted; hard links cannot span filesystems or point to directories. A symbolic link is a separate small file that stores the path to another file; it can cross filesystems and point to directories, but breaks (becomes a "dangling link") if the target is removed.
+@END
+
+@PROGRAM: What is a superblock in a filesystem?
+The superblock is a data structure stored near the start of a filesystem that describes the filesystem as a whole - its type, size, block size, number of free/used blocks and inodes, and mount status. The kernel reads the superblock when mounting a filesystem to understand its layout; losing/corrupting it typically makes the filesystem unmountable.
+@END
+
+@PROGRAM: Explain the Linux Virtual File System (VFS) layer.
+The VFS is an abstraction layer in the kernel that provides a uniform interface (open, read, write, close, etc.) to user space regardless of the underlying filesystem type (ext4, xfs, NFS, etc.). Each concrete filesystem implements the VFS's function pointers, so applications can use the same system calls without knowing implementation details of the actual filesystem.
+@END
+
+@PROGRAM: What is the difference between ext4, XFS, and Btrfs at a high level?
+ext4 is a mature, journaling filesystem that is the long-standing Linux default, good general-purpose reliability and performance. XFS is a high-performance journaling filesystem optimized for large files and high parallel I/O throughput, common in enterprise/server storage. Btrfs is a copy-on-write filesystem offering built-in snapshots, checksums, and multi-device pooling, at the cost of more complexity and historically less mature RAID5/6 support.
+@END
+
+@PROGRAM: What happens when you delete a file that another process still has open?
+On Linux, unlink() removes the directory entry (the name) and decrements the link count, but the inode and its data blocks are only freed once the link count reaches zero AND no process has the file open. Any process that already had the file open (via its file descriptor) can continue reading/writing it normally until it closes the descriptor - this is why some tools show "deleted but still holding space" for open log files.
+@END
+
+@PROGRAM: What is a mount point and how does mounting work?
+A mount point is a directory in the existing filesystem tree where another filesystem (a disk partition, USB drive, network share, etc.) is attached, making its contents accessible under that directory. The mount() system call associates a device/filesystem with the mount point; before mounting, the directory usually appears empty (or shows whatever was there before, now hidden underneath the mount).
+@END
+
+@PROGRAM: What is the difference between an absolute path and a relative path, and how does the kernel resolve them?
+An absolute path starts from the root directory "/" and fully specifies a file's location regardless of the current working directory (e.g. /home/user/file.txt). A relative path is resolved starting from the process's current working directory (e.g. file.txt or ../file.txt). The kernel walks the path component by component, using the appropriate starting directory (root or cwd) and following each directory's entries to the next inode.
+@END
+
+@PROGRAM: What are file descriptors and how do they relate to inodes?
+A file descriptor is a small non-negative integer that a process uses to refer to an open file, socket, or pipe; the kernel maintains a per-process file descriptor table that points to system-wide open file table entries, which in turn point to the underlying inode. Multiple file descriptors (even in different processes) can point to the same open file table entry or the same inode, which is why file offset sharing behaves differently depending on how the descriptor was obtained (e.g. via dup() vs a fresh open()).
+@END
+
+@PROGRAM: What is journaling in a filesystem and why is it used?
+Journaling means the filesystem writes a record of intended changes (metadata, and optionally data) to a dedicated journal/log area before actually committing them to their final location. If the system crashes or loses power mid-write, the filesystem can replay or discard incomplete journal entries on the next mount to quickly restore a consistent state, avoiding a full, slow filesystem check (fsck) of the entire disk.
+@END

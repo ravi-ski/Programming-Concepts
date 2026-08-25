@@ -1,0 +1,42 @@
+@SECTION: Linux
+@CHAPTER: SHARED MEMORY
+
+@PROGRAM: What is shared memory and why is it the fastest IPC mechanism?
+Shared memory maps the same physical memory region into the address space of multiple processes, so they can read and write it directly like normal memory - no data copying through the kernel, no system calls needed for each access after the initial setup. This makes it the fastest IPC mechanism, since pipes, message queues, and sockets all require the kernel to copy data between user and kernel buffers on every send/receive.
+@END
+
+@PROGRAM: What is the difference between System V shared memory and POSIX shared memory (mmap-based)?
+System V shared memory (shmget/shmat/shmdt/shmctl) uses an integer key and shmid, managed via ipcs/ipcrm, and segments persist until explicitly removed. POSIX shared memory (shm_open + mmap) is named like a file under /dev/shm, uses standard file descriptor semantics (ftruncate to size it, close to release the descriptor), and integrates more naturally with other POSIX APIs like mmap-based memory-mapped files.
+@END
+
+@PROGRAM: Why does shared memory need explicit synchronization (semaphores/mutexes)?
+Because the kernel provides no built-in coordination for shared memory access - any process can read or write the region at any time, so concurrent read-modify-write operations (like incrementing a counter) can race and produce incorrect results (lost updates). Unlike message queues or pipes, where the kernel serializes messages, shared memory requires the application to add its own locking (semaphores, mutexes in shared memory, or file locks) to protect critical sections.
+@END
+
+@PROGRAM: What happens to a shared memory segment if all processes detach but don't remove it?
+The segment remains allocated in the kernel (visible in "ipcs -m" with nattch=0) and continues consuming system resources until a process explicitly calls shmctl with IPC_RMID (System V) or shm_unlink (POSIX), or the system reboots. This is a common source of resource leaks in long-running systems if cleanup code doesn't run (e.g. on a crash).
+@END
+
+@PROGRAM: What is the role of shmid and key in System V shared memory?
+The key (often produced by ftok()) is how independent processes agree in advance on which shared memory segment to use, similar to a rendezvous point. shmget() takes that key and returns a shmid, the actual per-boot identifier the kernel uses internally to track the segment and which subsequent calls (shmat, shmctl) operate on.
+@END
+
+@PROGRAM: Explain memory-mapped files (mmap) and how they relate to shared memory.
+mmap() maps a file (or an anonymous memory region) directly into a process's virtual address space, so file I/O becomes simple memory reads/writes handled by the kernel's page cache. POSIX shared memory is built on this: shm_open() creates/opens a special file-like object in a tmpfs-backed area, and mmap() with MAP_SHARED on its descriptor gives multiple processes a common view of the same physical pages.
+@END
+
+@PROGRAM: What are the security/permission considerations with shared memory segments?
+Shared memory segments have Unix-style permission bits (like files) set at creation (e.g. 0666), so any process satisfying those permissions can attach and read/write the data - including unrelated or malicious processes if permissions are too permissive. Best practice is to use the most restrictive permissions possible, avoid predictable keys/names for sensitive data, and validate/sanitize any data read from shared memory since it could have been modified by another process.
+@END
+
+@PROGRAM: How does shared memory performance compare to message passing for large data transfers?
+For large or frequently updated data, shared memory is significantly faster because the data is written and read in place with no copying through the kernel, whereas message queues and pipes require copying the entire payload into a kernel buffer on send and back out on receive. The tradeoff is that shared memory requires manual synchronization, while message passing gives you copy semantics and ordering "for free" at the cost of throughput for large payloads.
+@END
+
+@PROGRAM: What happens when two processes attach shared memory at different virtual addresses?
+Each process's shmat() (or mmap()) call can return a different virtual address, since the mapping is only guaranteed to point to the same physical memory, not the same address in every process's address space. This means pointer values stored inside the shared memory (as opposed to offsets from the segment's base) are not valid across processes - data structures shared this way should use relative offsets, not raw pointers, if pointers might be embedded in the data.
+@END
+
+@PROGRAM: How would you check active shared memory segments on a Linux system?
+"ipcs -m" lists active System V shared memory segments with their key, shmid, owner, permissions, size, and number of attached processes (nattch); "ipcrm -m <shmid>" removes one. For POSIX shared memory, "ls /dev/shm" shows named objects created via shm_open(), which can be removed directly with "rm /dev/shm/<name>" or via shm_unlink().
+@END

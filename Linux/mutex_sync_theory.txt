@@ -1,0 +1,42 @@
+@SECTION: Linux
+@CHAPTER: SYNCHRONIZATION USING MUTEX
+
+@PROGRAM: What is a mutex and how does it differ from a semaphore?
+A mutex (mutual exclusion lock) allows only one thread to hold it at a time and is specifically meant for protecting a critical section, with the concept of "ownership" - typically only the thread that locked it may unlock it, which enables optimizations like priority inheritance. A semaphore is a more general counting primitive with no ownership concept - any thread can signal it, and it can allow more than one holder (a counting semaphore), making it suited for both resource counting and cross-thread signaling, not just mutual exclusion.
+@END
+
+@PROGRAM: What is a critical section and why must it be protected?
+A critical section is a piece of code that accesses shared data/resources that must not be concurrently modified by more than one thread/process at a time, or the data could end up in an inconsistent or corrupted state. It must be protected (typically with a mutex) so that only one thread executes it at a time, ensuring operations like read-modify-write are effectively atomic from the perspective of other threads.
+@END
+
+@PROGRAM: What is a race condition? Give a simple example.
+A race condition occurs when the correctness of a program depends on the relative timing of two or more threads/processes accessing shared data without proper synchronization. A classic example is two threads both executing "counter++" (read counter, add 1, write counter back) - if both read the same old value before either writes back, one increment is lost, so the final value ends up less than expected.
+@END
+
+@PROGRAM: What is deadlock and what are the four necessary conditions for it?
+Deadlock is a state where two or more threads/processes are blocked forever, each waiting for a resource held by another. The four necessary (Coffman) conditions are: mutual exclusion (resources can't be shared), hold and wait (a thread holds one resource while waiting for another), no preemption (resources can't be forcibly taken away), and circular wait (a cycle of threads each waiting on the next). Breaking any one of these conditions prevents deadlock.
+@END
+
+@PROGRAM: What is a recursive mutex and when is it needed?
+A recursive mutex allows the same thread to lock it multiple times without deadlocking itself, as long as it unlocks it the same number of times before another thread can acquire it. It's needed when a function that locks a mutex might call itself recursively, or when multiple functions that each lock the same mutex might call each other, and refactoring to avoid nested locking isn't practical.
+@END
+
+@PROGRAM: What is priority inversion and how does a priority-inheritance mutex help?
+Priority inversion happens when a low-priority thread holds a lock needed by a high-priority thread, and a medium-priority thread preempts the low-priority holder, effectively letting medium-priority work delay high-priority work indefinitely. A priority-inheritance mutex temporarily boosts the lock holder's priority to match the highest-priority waiter, so it can finish and release the lock quickly, preventing medium-priority threads from starving the high-priority one.
+@END
+
+@PROGRAM: What is the difference between spinlocks and mutexes?
+A spinlock makes a waiting thread busy-loop (spin), continuously checking if the lock is free, consuming CPU the whole time but avoiding the overhead of a context switch/sleep - useful for very short critical sections, especially in kernel code or multi-core systems where the wait is expected to be brief. A mutex instead puts the waiting thread to sleep (blocking it) so the CPU can be used by other work, which is more efficient when the lock might be held for longer periods.
+@END
+
+@PROGRAM: What is a condition variable and how does it work with a mutex?
+A condition variable lets a thread sleep until notified that some condition may have changed, without busy-waiting. It's always used together with a mutex: a thread locks the mutex, checks the condition in a loop, and calls pthread_cond_wait() (which atomically unlocks the mutex and sleeps) if the condition is false; another thread that changes the condition calls pthread_cond_signal()/broadcast() after locking the same mutex to wake waiters, which then re-acquire the mutex before re-checking the condition.
+@END
+
+@PROGRAM: What is the difference between a user-space mutex (pthread) and kernel-level locking (futex)?
+A pthread mutex is implemented in user space using a "fast userspace mutex" (futex) under the hood on Linux: in the uncontended case, locking/unlocking is done entirely in user space with a single atomic CPU instruction, with no system call at all. Only when there's actual contention (a thread must wait) does the implementation fall back to a futex() system call to let the kernel put the thread to sleep and later wake it - this hybrid design makes pthread mutexes very fast in the common, uncontended case.
+@END
+
+@PROGRAM: What is starvation and how can it occur with mutexes?
+Starvation is when a thread is perpetually denied access to a resource it needs, even though the system as a whole is making progress, because other threads keep getting scheduled ahead of it. With mutexes, this can happen if the underlying implementation isn't fair (e.g. always grants the lock to the most recently queued waiter, or to whichever thread happens to retry fastest), so a particular thread can be repeatedly passed over indefinitely even without a full deadlock.
+@END

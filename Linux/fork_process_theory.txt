@@ -1,0 +1,42 @@
+@SECTION: Linux
+@CHAPTER: FORK AND CHILD PROCESSES
+
+@PROGRAM: What is a process and what is a Process Control Block (PCB)?
+A process is an instance of a running program, with its own address space, file descriptors, and execution state. The kernel tracks each process using a Process Control Block (on Linux, task_struct) that stores its PID, state, CPU register context, memory maps, open file table, scheduling info, and parent/child relationships.
+@END
+
+@PROGRAM: Explain fork() and copy-on-write.
+fork() creates a new process (the child) that is an almost exact duplicate of the calling process (the parent), duplicating its memory, file descriptors, and execution point (fork returns twice - 0 in the child, child PID in the parent). Rather than physically copying all memory pages immediately, Linux uses copy-on-write: parent and child share the same physical pages marked read-only, and a page is only duplicated when either process actually writes to it, making fork() fast even for large processes.
+@END
+
+@PROGRAM: What is the difference between a process and a thread?
+A process has its own independent address space, file descriptors, and resources, and is created with fork()/exec(); communication between processes requires IPC. A thread shares the same address space, open files, and most resources with other threads in the same process, only having its own stack and register set, so switching between threads and sharing data between them is much cheaper than between processes.
+@END
+
+@PROGRAM: Explain zombie vs orphan processes.
+A zombie is a process that has terminated but whose exit status has not yet been collected by its parent via wait()/waitpid(); it stays in the process table (shown as <defunct>) until reaped. An orphan is a process whose parent terminated before it did; it gets reparented (typically to init/PID 1 or the nearest "subreaper"), which will eventually reap it when it exits, so orphans do not become permanent zombies.
+@END
+
+@PROGRAM: What are the typical process states (Running, Ready, Waiting, Zombie, etc.)?
+Common Linux process states: Running (R, executing or ready to run on a CPU), Sleeping/Waiting (S/D, blocked waiting for an event or I/O, interruptible or uninterruptible), Stopped (T, suspended by a signal like SIGSTOP), and Zombie (Z, terminated but not yet reaped by its parent). The scheduler moves processes between Running and Waiting/Ready based on CPU availability and blocking calls.
+@END
+
+@PROGRAM: Explain the exec() family of functions and how fork()+exec() work together.
+The exec() family (execl, execv, execlp, execvp, execve, etc.) replaces the current process's memory image with a new program, keeping the same PID but resetting the code, data, and stack to the new program's; it does not create a new process. The common pattern fork()+exec() first duplicates the calling process (fork), then the child overlays itself with a different program (exec), which is exactly how shells launch external commands while the shell process itself continues running.
+@END
+
+@PROGRAM: What is the difference between vfork() and fork()?
+vfork() also creates a new process but, unlike fork(), does not copy the parent's address space at all - the child temporarily shares the parent's memory and the parent is suspended until the child calls exec() or _exit(). It's a legacy optimization for the common "fork immediately followed by exec" pattern, largely superseded today by copy-on-write fork() and posix_spawn(), and misusing it (e.g. modifying variables before exec) can corrupt the parent's state.
+@END
+
+@PROGRAM: What is process context switching?
+A context switch is when the CPU scheduler suspends one process/thread and resumes another, saving the current process's CPU register state, program counter, and other context into its PCB, then loading the next process's saved context. It enables multitasking on a single CPU core but has overhead (cache/TLB flushes), so excessive context switching can hurt performance.
+@END
+
+@PROGRAM: What exactly does a child share with its parent immediately after fork()?
+Immediately after fork(), the child gets a copy of the parent's memory (via copy-on-write), a duplicate of the parent's open file descriptor table (the descriptors refer to the same underlying open file descriptions, so file offsets are shared), the same environment variables, and the same working directory - but it gets its own PID, its own copy of memory that diverges once either process writes to a page, and its own signal-pending mask.
+@END
+
+@PROGRAM: What is a PID, PPID, and process group/session?
+A PID (Process ID) uniquely identifies a running process; PPID (Parent Process ID) identifies the process that created it via fork(). A process group is a collection of related processes (e.g. all processes in a pipeline) that can be signaled together, and a session is a collection of process groups, typically associated with a single controlling terminal, used by shells to manage job control (foreground/background jobs).
+@END

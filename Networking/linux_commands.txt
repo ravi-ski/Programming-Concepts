@@ -1,0 +1,102 @@
+@SECTION: Networking
+@CHAPTER: LINUX NETWORKING COMMANDS
+
+@PROGRAM: ip addr (ip a) - show and manage IP addresses
+Displays IP addresses assigned to every network interface. Common forms: "ip addr show" or "ip a" to list all, "ip addr show eth0" for one interface, "ip addr add 192.168.1.10/24 dev eth0" to add an address, "ip addr del 192.168.1.10/24 dev eth0" to remove one. It is the modern replacement for "ifconfig".
+@END
+
+@PROGRAM: ip link - show and manage network interfaces
+Shows interface state (UP/DOWN), MAC address, and MTU. "ip link show" lists all interfaces, "ip link set eth0 up" / "down" brings an interface up or down, "ip link set eth0 mtu 1400" changes MTU, and "ip link show type vlan" lists only VLAN sub-interfaces.
+@END
+
+@PROGRAM: ifconfig - legacy interface configuration tool
+The older (often deprecated, from net-tools) command to view/configure interfaces: "ifconfig" alone lists all interfaces with IP, netmask, and traffic counters; "ifconfig eth0 up/down" enables/disables an interface. Most modern distros favor "ip" but ifconfig is still common in scripts and older systems.
+@END
+
+@PROGRAM: ip route - show and manage the routing table
+"ip route show" (or "ip r") displays the kernel routing table including the default gateway. "ip route add 10.0.0.0/24 via 192.168.1.1" adds a static route, "ip route del 10.0.0.0/24" removes one, and "ip route get 8.8.8.8" shows which route/interface would be used to reach a destination.
+@END
+
+@PROGRAM: route -n - legacy routing table view
+Shows the routing table in numeric form (no DNS lookups) using the older net-tools suite. Useful for a quick view of the default gateway and destination networks on systems where "ip route" is unavailable, though "ip route" is the modern preferred equivalent.
+@END
+
+@PROGRAM: netstat -tulnp - show listening ports and connections
+Lists (t)CP and (u)DP sockets that are (l)istening, in (n)umeric form, with the owning (p)rocess. Widely used to check which service is bound to a port, e.g. confirming a web server is listening on port 80/443, though it's deprecated in favor of "ss" on modern Linux.
+@END
+
+@PROGRAM: ss -tulnp - modern socket statistics tool
+The modern, faster replacement for netstat, showing listening/established sockets with process info. "ss -tulnp" lists listening TCP/UDP sockets, "ss -t -a" shows all TCP connections, and "ss -s" prints summary statistics of socket usage.
+@END
+
+@PROGRAM: ping - test basic reachability and latency
+Sends ICMP echo requests to a host to verify connectivity and measure round-trip time. "ping -c 4 8.8.8.8" sends 4 packets and stops. It confirms Layer 3 reachability but does not by itself prove that a specific service/port is reachable.
+@END
+
+@PROGRAM: traceroute / tracepath - trace the network path to a destination
+Shows every router hop between the local host and a destination, along with the round-trip time at each hop, helping identify where in the path packets are being delayed or dropped. "tracepath" is a similar tool that does not require root privileges.
+@END
+
+@PROGRAM: mtr - combined ping and traceroute in real time
+"mtr <host>" continuously pings every hop along the route and displays live loss percentage and latency per hop, making it much better than a single traceroute snapshot for diagnosing intermittent packet loss along a path.
+@END
+
+@PROGRAM: tcpdump - capture and inspect network packets
+A command-line packet capture tool. "tcpdump -i eth0" captures all traffic on eth0, "tcpdump -i eth0 port 80" filters by port, "tcpdump -i eth0 host 10.0.0.5" filters by host, and "tcpdump -w capture.pcap" writes to a file for later analysis in Wireshark.
+@END
+
+@PROGRAM: nslookup / dig - DNS lookup tools
+Both resolve hostnames to IP addresses and query specific DNS record types. "dig example.com" (or "dig example.com MX") gives detailed, script-friendly DNS resolver output including TTL and authoritative servers; "nslookup example.com" gives a simpler interactive-style lookup.
+@END
+
+@PROGRAM: arp -a / ip neigh - view the ARP / neighbor table
+Shows the mapping of IP addresses to MAC addresses that the kernel has learned on the local network. "arp -a" (legacy) or "ip neigh show" (modern) lists these entries; useful for detecting duplicate IPs or confirming a device is reachable at Layer 2.
+@END
+
+@PROGRAM: ethtool - inspect and configure NIC hardware/driver settings
+"ethtool eth0" shows link speed, duplex mode, and whether the link is up; "ethtool -S eth0" shows detailed driver statistics (errors, drops); useful for diagnosing physical-layer issues like a NIC negotiated at the wrong speed/duplex.
+@END
+
+@PROGRAM: nmcli - NetworkManager command-line interface
+Used on systems managed by NetworkManager to view and configure connections. "nmcli device status" shows interface state, "nmcli connection show" lists configured connections, and "nmcli connection up <name>" activates a connection.
+@END
+
+@PROGRAM: iftop / nload - real-time bandwidth monitoring
+"iftop -i eth0" shows live bandwidth usage per connection/host on an interface in a top-like view; "nload eth0" shows a simpler live graph of incoming/outgoing throughput. Both are useful for spotting which host or connection is consuming bandwidth right now.
+@END
+
+@PROGRAM: hostname -I / hostname -i - quickly show the host's IP addresses
+"hostname -I" prints all IP addresses assigned to the host (a quick way to get the primary IP without parsing "ip addr" output); "hostname -i" resolves the hostname to an address via DNS/hosts file.
+@END
+
+@PROGRAM: ip -d link show eth0.10 - show VLAN sub-interface details
+For a VLAN interface created with "ip link add", this shows the 802.1Q VLAN ID and the parent interface it is bound to, confirming the sub-interface's VLAN tagging configuration (e.g. "vlan protocol 802.1Q id 10").
+@END
+
+@PROGRAM: ip link add link eth0 name eth0.10 type vlan id 10 - create a VLAN sub-interface
+Creates a tagged VLAN sub-interface named eth0.10 on top of physical interface eth0 for VLAN ID 10. Follow with "ip link set eth0.10 up" and "ip addr add 192.168.10.1/24 dev eth0.10" to bring it up and assign an IP for that VLAN.
+@END
+
+@PROGRAM: cat /proc/net/vlan/config - list all configured VLAN interfaces
+Reading this pseudo-file shows every 802.1Q VLAN interface currently configured on the host, its VLAN ID, and its parent (real) device - a quick way to audit VLAN interfaces without needing "ip link show type vlan".
+@END
+
+@PROGRAM: vconfig add eth0 10 - legacy VLAN interface creation tool
+The older 8021q utility used to create VLAN sub-interfaces before "ip link ... type vlan" became standard: "vconfig add eth0 10" creates eth0.10, and "vconfig rem eth0.10" removes it. Still seen in older scripts/distros, though "ip link" is now preferred.
+@END
+
+@PROGRAM: bridge vlan show - show VLAN membership on bridge ports
+On a Linux bridge with VLAN filtering enabled, this lists which VLAN IDs are allowed on each bridge port and whether a VLAN is tagged (T) or the PVID/untagged (Untagged, PVID) for that port - the Linux equivalent of "show vlan brief" on a physical switch.
+@END
+
+@PROGRAM: bridge vlan add vid 10 dev eth0 - add a VLAN to a bridge port
+Adds VLAN ID 10 to the allowed list on bridge port eth0 (used with Linux bridge VLAN filtering, "bridge vlan" subsystem). Add "pvid untagged" flags to also mark it as the port's native/untagged VLAN, mirroring switchport trunk/access configuration on a physical switch.
+@END
+
+@PROGRAM: tcpdump -e -i eth0 vlan 10 - capture only tagged traffic for a specific VLAN
+The "-e" flag prints the link-layer (Ethernet) header including the 802.1Q tag, and the "vlan 10" filter captures only frames tagged for VLAN 10 on a trunk interface - useful for confirming that expected VLAN tags are actually arriving on a trunk port.
+@END
+
+@PROGRAM: ip link show type vlan - list every VLAN-type interface on the host
+Filters "ip link show" output to only the sub-interfaces created as 802.1Q VLAN devices, quickly showing all VLANs configured on the host along with their parent interfaces (e.g. eth0.10@eth0, eth0.20@eth0).
+@END

@@ -1,0 +1,42 @@
+@SECTION: Linux
+@CHAPTER: PIPES AND FIFOS
+
+@PROGRAM: What is a pipe and how does the kernel implement it?
+A pipe is a unidirectional, in-kernel byte stream connecting two file descriptors: data written to the write end can be read from the read end, in FIFO (first-in-first-out) order. The kernel implements it as a fixed-size circular buffer held entirely in kernel memory (not backed by a file on disk), with the read/write system calls simply manipulating that buffer.
+@END
+
+@PROGRAM: What is the difference between anonymous pipes and named pipes (FIFOs)?
+An anonymous pipe is created with pipe() and only exists as file descriptors in memory, usable only by the creating process and its descendants (since descriptors are inherited via fork()). A named pipe (FIFO), created with mkfifo(), has a name/path in the filesystem, so any two unrelated processes that know the path can open and use it for communication, even though the data itself still just flows through a kernel buffer, not actual disk storage.
+@END
+
+@PROGRAM: Can two unrelated processes communicate via an anonymous pipe? Why or why not?
+No - an anonymous pipe's file descriptors only exist in the process that created it and any children that inherit them via fork(); there's no name or path by which an unrelated process can open it. To let unrelated processes communicate, you need a named pipe (FIFO) or another IPC mechanism (message queue, shared memory, socket) that can be referenced by name/key.
+@END
+
+@PROGRAM: What happens if you write to a pipe whose read end is closed?
+The writing process receives the SIGPIPE signal, and if that signal isn't caught or ignored, the process is terminated by default; the write() call itself, if SIGPIPE is ignored, returns -1 with errno set to EPIPE. This is the standard way pipelines detect that a downstream reader has stopped consuming.
+@END
+
+@PROGRAM: What is the default pipe buffer size and what happens when it's full?
+On Linux the default pipe capacity is typically 64 KB (65536 bytes), tunable per-pipe via fcntl(F_SETPIPE_SZ). When the buffer is full, a blocking write() call simply blocks (sleeps) until the reader drains enough data to make room; with O_NONBLOCK set, the call instead returns immediately with -1/EAGAIN.
+@END
+
+@PROGRAM: Explain the half-duplex nature of pipes and why two pipes are needed for bidirectional communication.
+A single pipe only carries data in one direction: one end is only ever meant to write, the other only to read. To let two processes exchange data in both directions (like a real conversation), you create two separate pipes, each dedicated to one direction, giving each process a "send" pipe and a "receive" pipe.
+@END
+
+@PROGRAM: How does dup2 enable command piping like the shell's "cmd1 | cmd2"?
+dup2(oldfd, newfd) makes newfd become a duplicate of oldfd, closing newfd first if it was already open. A shell implements "cmd1 | cmd2" by creating a pipe, then in cmd1's child process calling dup2(pipeWriteEnd, STDOUT_FILENO) so its output goes into the pipe, and in cmd2's child process calling dup2(pipeReadEnd, STDIN_FILENO) so its input comes from the pipe - effectively rewiring standard streams through the pipe.
+@END
+
+@PROGRAM: What is the difference between blocking and non-blocking I/O in the context of pipes/FIFOs?
+In blocking mode (the default), a read() call waits until at least some data is available (or the write end is closed), and a write() call waits if the buffer is full. In non-blocking mode (set via O_NONBLOCK), these calls return immediately with -1/EAGAIN instead of waiting, which lets a program poll or handle other work rather than stalling indefinitely.
+@END
+
+@PROGRAM: How does a FIFO persist compared to an anonymous pipe?
+A FIFO's name persists in the filesystem (as a special file type) until explicitly removed with unlink()/rm, even though its data buffer, like any pipe, still only lives in kernel memory and vanishes once both ends are closed and no data remains. An anonymous pipe has no filesystem presence at all - it disappears entirely once every process holding its descriptors exits or closes them.
+@END
+
+@PROGRAM: What are the limitations of pipes as an IPC mechanism?
+Pipes only support byte-stream communication between related (or, for FIFOs, filesystem-visible) processes on the same host - they don't preserve message boundaries by default, have limited buffering capacity (risking blocking under backpressure), aren't suited for random access or many-to-many communication patterns, and can't be used across a network like sockets can.
+@END

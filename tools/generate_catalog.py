@@ -84,6 +84,7 @@ def parse_tag(path: Path, pattern: re.Pattern):
 def build_catalog():
     sections = {}
     order = []
+    chapter_index = {}  # (section_name, chapter_title) -> chapter dict
     for path in sorted(ROOT.rglob("*")):
         if path.suffix.lower() not in CHAPTER_EXTS:
             continue
@@ -94,16 +95,31 @@ def build_catalog():
             continue
         rel = path.relative_to(ROOT)
         section_name = parse_tag(path, SECTION_RE) or DEFAULT_SECTION
-        chapter = {
-            "chapter": parse_tag(path, CHAPTER_RE) or path.name,
-            "folder": str(rel.parent).replace("\\", "/"),
-            "path": str(rel).replace("\\", "/"),
-            "programs": programs,
-        }
+        chapter_title = parse_tag(path, CHAPTER_RE) or path.name
+
         if section_name not in sections:
             sections[section_name] = []
             order.append(section_name)
+
+        key = (section_name, chapter_title)
+        existing = chapter_index.get(key)
+        if existing is not None:
+            existing["programs"].extend(programs)
+            existing["paths"].append(str(rel).replace("\\", "/"))
+            continue
+
+        chapter = {
+            "chapter": chapter_title,
+            "folder": str(rel.parent).replace("\\", "/"),
+            "paths": [str(rel).replace("\\", "/")],
+            "programs": programs,
+        }
+        chapter_index[key] = chapter
         sections[section_name].append(chapter)
+
+    for section in sections.values():
+        for chapter in section:
+            chapter["path"] = ", ".join(chapter.pop("paths"))
 
     return [{"section": name, "chapters": sections[name]} for name in order]
 

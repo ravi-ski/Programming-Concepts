@@ -1,0 +1,42 @@
+@SECTION: Linux
+@CHAPTER: BOOTING CONCEPTS
+
+@PROGRAM: What are the stages of the Linux boot process?
+At a high level: (1) firmware (BIOS/UEFI) performs power-on self-test and locates a boot device, (2) the bootloader (typically GRUB) loads and runs, (3) the bootloader loads the Linux kernel and an initial RAM filesystem (initramfs) into memory and hands control to the kernel, (4) the kernel initializes hardware/drivers and mounts the real root filesystem, then (5) the kernel starts the init process (PID 1, usually systemd), which brings up all other services in the correct order.
+@END
+
+@PROGRAM: What is the role of BIOS/UEFI at boot?
+BIOS (legacy) or UEFI (modern) firmware is the first code that runs when a machine powers on; it performs hardware initialization (POST - power-on self-test), then locates a bootable device according to configured boot order and hands off execution to the bootloader found there (via the MBR for BIOS, or the EFI System Partition for UEFI). UEFI additionally supports Secure Boot, larger disks (GPT), and a richer pre-OS environment than legacy BIOS.
+@END
+
+@PROGRAM: What is a bootloader (e.g. GRUB) and what does it do?
+A bootloader is a small program that runs after firmware and before the OS kernel; its job is to locate, load, and start the kernel (and initramfs) into memory with the correct boot parameters. GRUB (GRand Unified Bootloader) additionally provides a menu to choose between multiple kernels/OS installations, lets you edit boot parameters at boot time, and supports chain-loading other bootloaders for multi-boot setups.
+@END
+
+@PROGRAM: What is the kernel's role during boot regarding initramfs and the root filesystem?
+Once loaded, the kernel initializes core subsystems (memory management, scheduler) and essential drivers, then mounts a temporary root filesystem from initramfs, which contains just enough tools/drivers to locate and mount the real root filesystem (e.g. drivers for a RAID/LVM/encrypted disk). After the real root filesystem is mounted, the kernel switches root (pivot_root/switch_root) from the initramfs to it and finally executes the init program from there.
+@END
+
+@PROGRAM: What is initramfs/initrd and why is it needed?
+initramfs (or the older initrd) is a small, temporary root filesystem image loaded into RAM by the bootloader alongside the kernel, containing modules and utilities needed to mount the real root filesystem. It's needed because the kernel may require drivers (e.g. for RAID, LVM, encrypted volumes, or unusual storage controllers) that can't be built into the kernel image itself or need to be loaded dynamically before the actual root device is accessible.
+@END
+
+@PROGRAM: What is init (PID 1) and how does systemd differ from SysV init?
+Init is the first user-space process the kernel starts (always PID 1), responsible for starting and supervising all other processes/services and reaping orphaned processes. SysV init ran shell scripts sequentially in numbered runlevel directories (rc0.d, rc1.d, etc.) largely one at a time, while systemd uses declarative "unit" files with explicit dependency graphs, allowing services to start in parallel where possible and providing built-in service supervision, socket activation, and logging (journald).
+@END
+
+@PROGRAM: What are runlevels (SysV) versus targets (systemd)?
+SysV runlevels are numbered states (0=halt, 1=single-user, 3=multi-user text mode, 5=multi-user with GUI, 6=reboot) that determine which set of services run. systemd replaces this with named "targets" (e.g. multi-user.target, graphical.target, rescue.target) that are more flexible unit files themselves, can depend on and pull in other targets/units, and map roughly onto the old runlevel numbers for backward compatibility (e.g. runlevel 5 ~ graphical.target).
+@END
+
+@PROGRAM: How does the boot sequence order work for services under systemd?
+Each systemd unit file declares its dependencies and ordering relative to other units (After=, Before=, Requires=, Wants=), and systemd builds a dependency graph from all enabled units, starting independent units in parallel and only serializing where an explicit ordering dependency exists. This is fundamentally different from SysV's fixed numeric script ordering, and generally results in significantly faster boot times.
+@END
+
+@PROGRAM: What is dual-booting and how does GRUB handle multiple OS entries?
+Dual-booting means having two or more operating systems installed on the same machine (often on separate partitions), letting the user choose which to start at boot time. GRUB detects other installed operating systems (via os-prober or manual configuration), adds a menu entry for each, and either loads that OS's kernel directly (for another Linux) or chain-loads that partition's own bootloader (e.g. for Windows), based on the user's selection at the boot menu.
+@END
+
+@PROGRAM: How would you diagnose a slow boot on a Linux system with systemd?
+"systemd-analyze" shows total boot time split between firmware, bootloader, kernel, and userspace (initrd + userspace startup); "systemd-analyze blame" lists units sorted by how long each took to initialize; and "systemd-analyze critical-chain" shows the chain of units that determined the critical path/longest dependency sequence delaying boot completion - together these pinpoint exactly which service(s) are slowing things down.
+@END

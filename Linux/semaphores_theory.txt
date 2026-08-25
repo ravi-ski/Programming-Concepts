@@ -1,0 +1,42 @@
+@SECTION: Linux
+@CHAPTER: SEMAPHORES
+
+@PROGRAM: What is a semaphore and who introduced the concept?
+A semaphore is a synchronization primitive holding an integer count, accessed only through two atomic operations - wait/P (decrement, blocking if the result would go below zero) and signal/V (increment, waking a waiter if any) - used to control access to a limited number of shared resources. The concept was introduced by Edsger Dijkstra in 1965 as part of his work on process synchronization (P and V stand for the Dutch "Proberen"/try and "Verhogen"/increment).
+@END
+
+@PROGRAM: What is the difference between a binary semaphore and a mutex?
+A binary semaphore has only two states (0 or 1) like a mutex and can be used for mutual exclusion, but conceptually it is a signaling mechanism with no concept of "ownership" - any thread/process can post (unlock) it, even one that never waited on it, making it suitable for signaling between threads. A mutex is specifically designed for mutual exclusion, is typically owned by the thread that locked it, and many implementations only allow that same thread to unlock it, which enables features like priority inheritance and recursive locking.
+@END
+
+@PROGRAM: What is the difference between a counting semaphore and a binary semaphore?
+A counting semaphore can hold any non-negative integer value and is used to manage a pool of N interchangeable resources (e.g. N available connections), allowing up to N holders concurrently. A binary semaphore is restricted to 0 or 1 and is used purely for mutual exclusion or simple signaling between exactly two states (available/unavailable).
+@END
+
+@PROGRAM: What is the difference between System V and POSIX semaphores?
+System V semaphores (semget/semop/semctl) are created in sets (a single semget can allocate an array of semaphores), identified by an integer key, and managed with ipcs/ipcrm; their API is more complex (semop takes an array of operations). POSIX semaphores (sem_init for unnamed/thread-shared, sem_open for named/process-shared) have a simpler, more intuitive sem_wait/sem_post API and integrate more naturally with pthreads.
+@END
+
+@PROGRAM: Explain the P (wait) and V (signal) operations.
+P (wait, sometimes called "down" or "acquire") atomically decrements the semaphore's value; if the result would be negative, the calling thread/process blocks until another releases it. V (signal, "up" or "release") atomically increments the value and, if any thread was blocked waiting, wakes one of them up - together these two operations are the only way a semaphore's value can change, guaranteeing safe coordination.
+@END
+
+@PROGRAM: What is priority inversion and how do semaphores relate to it?
+Priority inversion occurs when a low-priority task holds a lock (semaphore/mutex) that a high-priority task needs, and a medium-priority task preempts the low-priority holder, indirectly delaying the high-priority task far longer than expected. Plain semaphores don't inherently solve this (they have no notion of the waiter's priority), which is why real-time systems often use priority-inheritance mutexes instead, where the lock holder temporarily inherits the waiter's higher priority.
+@END
+
+@PROGRAM: What is a deadlock and how can improper semaphore use cause it?
+A deadlock is a state where two or more processes/threads are each waiting for a resource held by another, so none can proceed. With semaphores, this commonly happens when multiple semaphores are acquired in inconsistent order across different threads (thread A waits on sem1 then sem2, thread B waits on sem2 then sem1), or when a semaphore is never released due to an error path being missed.
+@END
+
+@PROGRAM: Explain the classic producer-consumer problem and how semaphores solve it.
+The producer-consumer problem involves a producer adding items to a shared, fixed-size buffer and a consumer removing them, with the constraints that the producer must not write to a full buffer and the consumer must not read from an empty one. The classic solution uses two counting semaphores - "empty" (initialized to buffer size, tracking free slots) and "full" (initialized to 0, tracking filled slots) - plus a mutex to protect the buffer indices, so producers wait on "empty"/signal "full" and consumers do the reverse.
+@END
+
+@PROGRAM: What happens if a process crashes while holding a semaphore?
+With System V semaphores, an optional SEM_UNDO flag can be set so the kernel automatically reverses the semaphore adjustment if the process exits without releasing it, preventing a permanently "stuck" semaphore. Plain POSIX semaphores have no such automatic recovery - if a process dies mid-critical-section without calling sem_post(), other waiters can block forever, which is why robust mutexes (pthread robust mutexes) exist specifically to detect and recover from this scenario.
+@END
+
+@PROGRAM: What is the difference between a semaphore and a condition variable?
+A semaphore maintains its own internal counter and can be signaled even before anyone is waiting (the signal is "remembered" as an increment), making it useful for resource counting. A condition variable has no memory of its own - it must always be used together with a mutex, and a signal sent when no thread is waiting is simply lost - so it's used to wait for a specific condition/predicate to become true rather than to count available resources.
+@END

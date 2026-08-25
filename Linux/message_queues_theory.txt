@@ -1,0 +1,42 @@
+@SECTION: Linux
+@CHAPTER: MESSAGE QUEUES
+
+@PROGRAM: What is a message queue and how does it differ from a pipe?
+A message queue is a kernel-managed list of discrete, typed messages that processes can send to and receive from, preserving message boundaries (unlike a pipe's raw byte stream). Message queues also allow selective/priority-based reads (e.g. filtering by message type) and, unlike pipes, are addressed by a system-wide key or name rather than requiring a parent-child relationship or an open file descriptor to share.
+@END
+
+@PROGRAM: What is the difference between System V message queues and POSIX message queues?
+System V message queues (msgget/msgsnd/msgrcv) are identified by an integer key (often generated with ftok()) and managed with ipcs/ipcrm; they use a "message type" long field for filtering. POSIX message queues (mq_open/mq_send/mq_receive) are identified by a name string (e.g. "/myqueue"), behave more like file descriptors (support poll/select and O_NONBLOCK naturally), and support real message priorities rather than just a type field.
+@END
+
+@PROGRAM: What is an IPC key and how is it generated (ftok)?
+An IPC key is an identifier used by System V IPC calls (msgget, shmget, semget) so unrelated processes can agree on the same IPC object without directly sharing a numeric ID. ftok(path, id) generates a key by combining the inode number of an existing file (path) with a project id (id), so any process using the same file path and id gets the same key.
+@END
+
+@PROGRAM: How does message queue persistence work?
+Both System V and POSIX message queues are kernel-persistent: once created, a queue and any messages in it remain in the kernel even after the creating process exits, until it is explicitly removed (msgctl with IPC_RMID, or mq_unlink) or the system reboots. This differs from anonymous pipes, which disappear as soon as all their file descriptors are closed.
+@END
+
+@PROGRAM: What is message type filtering used for in msgrcv?
+The "type" field on a System V message lets a receiver selectively read messages: requesting type 0 gets the oldest message regardless of type, a positive type gets the first message of exactly that type, and a negative type gets the first message with the lowest type less than or equal to its absolute value - useful for implementing priority queues or separate logical channels within one queue.
+@END
+
+@PROGRAM: What are the size limits of a message queue?
+Both mechanisms are bounded by kernel-configurable limits: System V queues are limited by msgmnb (max bytes per queue) and msgmax (max bytes per message), tunable via /proc/sys/kernel/msgmnb and msgmax. POSIX queues have a default max message count and max message size (mq_maxmsg, mq_msgsize) set at creation and capped by /proc/sys/fs/mqueue limits; sends beyond capacity block or fail depending on blocking mode.
+@END
+
+@PROGRAM: How do you list and remove IPC message queues from the command line?
+"ipcs -q" lists active System V message queues with their key, id, owner, and current size; "ipcrm -q <msqid>" removes a specific one by id. For POSIX message queues, they typically appear as files under /dev/mqueue/ and can be removed with "rm /dev/mqueue/<name>" or programmatically with mq_unlink().
+@END
+
+@PROGRAM: What is the difference between blocking and non-blocking message queue operations?
+By default, msgsnd()/msgrcv() and mq_send()/mq_receive() block: send blocks if the queue is full, receive blocks if no matching message exists. Passing IPC_NOWAIT (System V) or opening with O_NONBLOCK (POSIX) makes these calls return immediately with an error (EAGAIN/ENOMSG) instead of waiting, letting the caller poll or do other work.
+@END
+
+@PROGRAM: When would you prefer message queues over shared memory?
+Message queues are preferable when you want the kernel to handle synchronization and message boundaries for you (no need for manual locking), when messages are relatively small and discrete (commands, notifications, structured requests), or when you want built-in prioritization/filtering. Shared memory is better for large or frequently-updated data where copying overhead from message passing would be too costly, but it requires you to implement your own synchronization.
+@END
+
+@PROGRAM: What are common pitfalls with message queues?
+Common mistakes include forgetting to remove a queue (IPC_RMID / mq_unlink), leaving it to leak system resources across reboots-free systems or fill up kernel limits; not checking/handling a full queue causing indefinite blocking; using incorrect permissions so other processes can't access the queue; and assuming FIFO ordering across different message types when only same-type messages are strictly ordered.
+@END
