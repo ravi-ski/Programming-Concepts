@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Scans source files for @PROGRAM/@INPUT/@OUTPUT/@END blocks and generates
-gui/data.js consumed by the GUI viewer.
+docs/data.js consumed by the GUI viewer.
 
 Convention (works inside any comment style // /* */ # --, or plain text):
     @SECTION: <top-level heading, optional, defaults to "General">
@@ -18,7 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CHAPTER_EXTS = {".c", ".cpp", ".h", ".hpp", ".py", ".go", ".sql", ".txt"}
-SKIP_DIRS = {".git", ".vscode", ".agents", "gui", "tools"}
+SKIP_DIRS = {".git", ".vscode", ".agents", "docs", "tools"}
 DEFAULT_SECTION = "General"
 
 BLOCK_RE = re.compile(
@@ -126,7 +126,7 @@ def build_catalog():
 
 def main():
     catalog = build_catalog()
-    out_dir = ROOT / "gui"
+    out_dir = ROOT / "docs"
     out_dir.mkdir(exist_ok=True)
     out_file = out_dir / "data.js"
     out_file.write_text(

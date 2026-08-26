@@ -7,19 +7,37 @@ networking/concept notes, browsable through a small offline GUI.
 
 The GUI is a static, no-build web page — no server required.
 
-1. Open [`gui/index.html`](gui/index.html) directly in any browser:
+### On this laptop
+
+1. Open [`docs/index.html`](docs/index.html) directly in any browser:
    - Double-click the file in File Explorer, **or**
    - Open a browser and navigate to:
-     `file:///C:/Users/ravi/Desktop/Programs/gui/index.html`
-2. The page shows top-level **Sections** (e.g. "C Programming", "Networking").
-   Click a section to expand its **Chapters** (source files), then click a
+     `file:///C:/Users/ravi/Desktop/Programs/docs/index.html`
+2. The page shows top-level **Sections** (e.g. "C Programming", "Networking",
+   "Linux"). Click a section to expand its **Chapters**, then click a
    program/question name to expand its code (or answer text) along with
    sample input/output.
 3. Use the search box at the top to filter chapters/programs by name.
 
+### On a phone/tablet, or any device without the laptop (GitHub Pages)
+
+The `docs/` folder is set up to be served directly by **GitHub Pages**, so you
+can study from any browser tab once it's enabled:
+
+1. On GitHub, go to the repo → **Settings → Pages**.
+2. Under "Build and deployment", set **Source** to `Deploy from a branch`,
+   branch `main`, folder `/docs`, then **Save**.
+3. After a minute, the site goes live at:
+   `https://ravi-ski.github.io/Programming-Concepts/`
+4. Bookmark that URL on your phone/tablet — no laptop, clone, or install
+   needed, just an internet connection and a browser tab.
+
+Since it's a static page, any push to `main` (after running the catalog
+generator below) automatically updates the live site within a minute or two.
+
 ## Regenerating the catalog
 
-The GUI reads from [`gui/data.js`](gui/data.js), which is generated from the
+The GUI reads from [`docs/data.js`](docs/data.js), which is generated from the
 source files by a Python script. Whenever you add or edit a `@PROGRAM` block
 in any source file, regenerate the catalog:
 
@@ -58,10 +76,11 @@ C/            Core C programs (pointers, strings, bitwise, structures, etc.)
 CPP/          C++ language feature examples
 DSA/          Data structures and algorithms
 Go/           Go programs
-Linux/        Linux/shell notes and scripts
-Networking/   Networking concept notes (e.g. VLAN interview Q&A)
+Linux/        Linux systems programming + theory (fork, IPC, mutex, boot, etc.)
+Networking/   Networking concept notes (VLAN, Linux networking commands)
 Python/       Python programs
 SQL/          SQL scripts
-gui/          Static GUI (index.html, app.js, style.css, generated data.js)
-tools/        generate_catalog.py — builds gui/data.js from source files
+docs/         Static GUI (index.html, app.js, style.css, generated data.js) —
+              also the GitHub Pages source folder
+tools/        generate_catalog.py — builds docs/data.js from source files
 ```
