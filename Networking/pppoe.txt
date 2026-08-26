@@ -1,0 +1,62 @@
+@SECTION: Networking
+@CHAPTER: PPPoE
+
+@PROGRAM: What is PPPoE and where is it commonly used?
+PPPoE (Point-to-Point Protocol over Ethernet) encapsulates PPP frames inside Ethernet frames, letting a broadband subscriber's device establish an authenticated, point-to-point-style session over a shared Ethernet-based access network (like DSL or fiber). It's the traditional mechanism ISPs use to authenticate individual subscribers, assign an IP address, and apply per-subscriber policies over what is otherwise a shared physical medium.
+@END
+
+@PROGRAM: Describe the PPPoE Discovery stage (PADI, PADO, PADR, PADS).
+Discovery establishes which PPPoE server (Access Concentrator) the client will use: the client broadcasts a PADI (Active Discovery Initiation); one or more Access Concentrators respond with a PADO (Active Discovery Offer); the client picks one and unicasts a PADR (Active Discovery Request) to it; that server replies with a PADS (Active Discovery Session-confirmation) containing a unique session ID, completing Discovery before the PPP Session stage begins.
+@END
+
+@PROGRAM: What happens in the PPPoE Session stage and LCP negotiation?
+Once a session ID is assigned, standard PPP takes over inside the PPPoE encapsulation: LCP (Link Control Protocol) negotiates link parameters (MRU, authentication method, magic numbers) between client and server, followed by an authentication phase and then NCP (typically IPCP) to negotiate and assign the actual IP configuration, after which user data can flow.
+@END
+
+@PROGRAM: What is the difference between PAP and CHAP authentication in PPP?
+PAP (Password Authentication Protocol) sends the username and password in clear text during a simple two-way handshake, making it weak against eavesdropping. CHAP (Challenge Handshake Authentication Protocol) instead uses a challenge-response exchange with a hashed value derived from a shared secret and a random challenge, so the password itself is never transmitted, and CHAP can also re-challenge periodically during the session for extra security.
+@END
+
+@PROGRAM: Why does PPPoE typically use an MTU of 1492 instead of Ethernet's 1500?
+PPPoE adds an 8-byte header (6 bytes PPPoE header + 2 bytes PPP protocol field) on top of the standard 1500-byte Ethernet payload, so to avoid fragmentation the effective MTU for user traffic is reduced to 1492 bytes. Applications or devices unaware of this smaller MTU can experience fragmented or dropped large packets ("black hole" MTU issues) if Path MTU Discovery isn't working correctly end-to-end.
+@END
+
+@PROGRAM: Design consideration: how is PPPoE typically deployed in ISP broadband networks?
+ISPs deploy PPPoE where they need explicit subscriber authentication and per-session accounting/billing over a shared access network (common in DSL and some fiber deployments) - the subscriber's router acts as the PPPoE client, the ISP's BRAS (Broadband Remote Access Server) acts as the Access Concentrator, and RADIUS is typically used behind the BRAS for authentication, IP assignment, and usage accounting, giving fine-grained control per subscriber even though the underlying access network is shared Ethernet.
+@END
+
+@PROGRAM: What are PPPoE session limits and why do they matter?
+Access Concentrators typically have a configurable maximum number of concurrent PPPoE sessions they can support (both per-server and sometimes per-MAC-address, to mitigate denial-of-service attempts). Capacity planning must account for expected concurrent subscriber counts, since exceeding session limits causes new connection attempts to fail even though the underlying network has spare bandwidth.
+@END
+
+@PROGRAM: What is the difference between a PPPoE client and a PPPoE server/BRAS?
+The PPPoE client (typically a subscriber's router or modem in bridge mode) initiates Discovery and requests a session. The PPPoE server, usually a carrier-grade BRAS (Broadband Remote Access Server) or similbest-effort software implementation, listens for PADI broadcasts, allocates session IDs, performs or proxies authentication (often via RADIUS), and assigns IP addressing - it's the aggregation point terminating potentially thousands of subscriber PPPoE sessions.
+@END
+
+@PROGRAM: How does VLAN tagging interact with PPPoE in DSL/fiber deployments?
+In many access networks, each subscriber (or a group of subscribers on a DSLAM/OLT) is placed on its own VLAN or a shared VLAN with per-subscriber PPPoE sessions layered on top, so VLAN tagging provides Layer 2 segregation while PPPoE provides subscriber-level authentication and IP assignment on top of that segregation - the combination lets an ISP separate traffic engineering/isolation concerns (VLAN) from subscriber management concerns (PPPoE/RADIUS).
+@END
+
+@PROGRAM: How do you troubleshoot a PPPoE connection failing at the discovery stage?
+If the client never progresses past sending PADI, check physical/Layer 2 connectivity first (link lights, correct VLAN tagging if applicable), then verify the Access Concentrator is actually reachable at Layer 2 and configured to respond (server-side session limits or ACLs could be silently dropping PADI); a packet capture on the client's Ethernet interface showing PADI going out with no PADO coming back strongly points to an upstream/access-network issue rather than a client misconfiguration.
+@END
+
+@PROGRAM: How do you troubleshoot intermittent PPPoE disconnects related to LCP echo failures?
+PPP uses periodic LCP Echo Request/Reply keepalives to detect a dead link; if these are missed repeatedly (due to congestion, a flapping physical link, or an overloaded BRAS), the session is torn down and must renegotiate from Discovery. Check interface error counters and link stability on both ends, review BRAS logs for the specific disconnect reason, and consider whether keepalive intervals/timeouts are too aggressive for the actual link's jitter characteristics.
+@END
+
+@PROGRAM: What commands are commonly used to inspect PPPoE session state?
+On carrier equipment (Cisco-style): "show pppoe session" lists active sessions with their session IDs and interfaces, and "debug pppoe events/errors" traces Discovery and session negotiation in real time. On Linux (using rp-pppoe or similar), "pppoe-status" and inspecting "/var/log/syslog" (or journalctl for the pppd service) show client-side connection state and negotiation logs.
+@END
+
+@PROGRAM: What is a common PPPoE-related MTU/fragmentation issue?
+Because PPPoE's effective MTU is 1492 rather than 1500, a client, server, or intermediate device that still advertises/assumes a 1500-byte MTU can cause large packets to be silently dropped rather than fragmented (a "black hole" if ICMP Fragmentation Needed messages are filtered somewhere along the path) - symptoms include small requests working fine (DNS, pings) while large downloads or specific websites hang, since Path MTU Discovery can't succeed.
+@END
+
+@PROGRAM: What is the difference between using PPPoE vs DHCP for ISP subscriber management?
+PPPoE provides an explicit, session-based authentication and accounting model well suited to controlled, billed access with strong per-subscriber policy enforcement, at the cost of extra negotiation overhead and client-side configuration complexity. DHCP-based subscriber management (common in cable/DOCSIS and many fiber deployments) is simpler for the end user (plug-and-play addressing) but typically relies on other mechanisms (e.g. DHCP option 82, MAC/port binding) rather than PPP-level authentication to identify and control individual subscribers.
+@END
+
+@PROGRAM: What security considerations apply to PPPoE authentication?
+Prefer CHAP over PAP since PAP transmits credentials in clear text; ensure the RADIUS communication between the BRAS and the authentication server is itself secured (e.g. via IPsec or a trusted management network) since RADIUS shared secrets protect that channel; and apply session/MAC rate limiting on Access Concentrators to mitigate PADI flood denial-of-service attempts from compromised or malicious clients on the access network.
+@END

@@ -3429,6 +3429,491 @@ const CATALOG = [
     "section": "Networking",
     "chapters": [
       {
+        "chapter": "802.1X (DOT1X)",
+        "folder": "Networking",
+        "programs": [
+          {
+            "name": "What is 802.1X and what problem does it solve?",
+            "input": "",
+            "output": "",
+            "code": "IEEE 802.1X is a standard for port-based network access control: a switch port (or wireless association) stays effectively closed to normal traffic until the connecting device successfully authenticates, preventing unauthorized devices from simply plugging in (or associating) and getting network access. It's the foundation of modern \"zero trust at the edge\" wired/wireless access designs."
+          },
+          {
+            "name": "What are the three roles in 802.1X?",
+            "input": "",
+            "output": "",
+            "code": "The Supplicant is the client device requesting network access (or its 802.1X client software). The Authenticator is the network device controlling the port - typically a switch or wireless access point - which blocks/allows traffic based on authentication outcome but doesn't make the authentication decision itself. The Authentication Server (almost always RADIUS) actually verifies credentials and tells the authenticator whether to allow the port to open."
+          },
+          {
+            "name": "What is EAP and what are common EAP methods used with 802.1X?",
+            "input": "",
+            "output": "",
+            "code": "EAP (Extensible Authentication Protocol) is a flexible authentication framework carried inside 802.1X (as \"EAP over LAN\"/EAPOL between supplicant and authenticator) and inside RADIUS (between authenticator and authentication server) - it isn't itself an authentication method but a container for various methods. Common methods: EAP-TLS (certificate-based, strongest, requires client certificates), PEAP (wraps a second authentication method, often MS-CHAPv2, inside a TLS tunnel using just a server certificate), and EAP-TTLS (similar to PEAP with more flexible inner methods)."
+          },
+          {
+            "name": "Describe the overall 802.1X authentication process flow.",
+            "input": "",
+            "output": "",
+            "code": "When a device connects, the authenticator sends an EAP-Request/Identity; the supplicant responds with its identity; the authenticator forwards this (via RADIUS Access-Request) to the authentication server; the server and supplicant then exchange further EAP challenge/response messages (relayed through the authenticator) according to the chosen EAP method, until the server sends a final RADIUS Access-Accept or Access-Reject, which the authenticator uses to open or keep closed the port."
+          },
+          {
+            "name": "What role does a RADIUS server play in 802.1X?",
+            "input": "",
+            "output": "",
+            "code": "RADIUS (Remote Authentication Dial-In User Service) acts as the Authentication Server: it validates the supplicant's credentials or certificate (often against an identity store like Active Directory), applies policy (e.g. which VLAN or access level this user/device should get), and returns an Access-Accept or Access-Reject to the authenticator, along with any additional attributes like a VLAN assignment."
+          },
+          {
+            "name": "How does dynamic VLAN assignment work with 802.1X?",
+            "input": "",
+            "output": "",
+            "code": "On successful authentication, the RADIUS server can return specific attributes (such as Tunnel-Private-Group-ID) in its Access-Accept response instructing the switch to place that port into a particular VLAN based on the authenticated user or device's identity/group - meaning a laptop plugged into any port on the network can automatically land on the correct VLAN (e.g. corporate, guest, or a departmental VLAN) without manual per-port VLAN configuration."
+          },
+          {
+            "name": "Design consideration: monitor mode vs enforcement mode for an 802.1X rollout?",
+            "input": "",
+            "output": "",
+            "code": "Monitor mode (\"open authentication\" combined with 802.1X running in the background) allows all traffic while still performing authentication and logging the results, letting administrators validate that supplicants, RADIUS policy, and device compatibility all work correctly across the real production network before impacting anyone. Only after confirming a clean monitor-mode rollout should enforcement mode (actually blocking unauthenticated devices) be enabled, avoiding a \"big bang\" cutover that locks out unprepared or misconfigured devices."
+          },
+          {
+            "name": "What is MAB (MAC Authentication Bypass) and when is it used?",
+            "input": "",
+            "output": "",
+            "code": "Not all devices support 802.1X (printers, IP cameras, some IoT devices), so MAB allows the switch to authenticate a device by its MAC address alone as a fallback when no 802.1X response is received within a timeout, checking that MAC against a RADIUS-authorized list. It's inherently weaker than certificate/credential-based 802.1X (MAC addresses can be spoofed) but is a practical necessity for supporting legacy or non-802.1X-capable devices in an otherwise enforced environment."
+          },
+          {
+            "name": "What are guest VLAN and auth-fail VLAN, and how do they differ?",
+            "input": "",
+            "output": "",
+            "code": "A Guest VLAN is assigned to a port when no supplicant responds at all to 802.1X (e.g. a device with no 802.1X client installed), routing it to a restricted/Internet-only segment. An Auth-Fail VLAN is assigned when a supplicant does respond but authentication explicitly fails (e.g. wrong credentials), which can be configured to place the device in a remediation or restricted-access VLAN rather than fully denying the port."
+          },
+          {
+            "name": "How does 802.1X differ between wired and wireless networks?",
+            "input": "",
+            "output": "",
+            "code": "On wired ports, 802.1X directly controls whether the physical switch port forwards traffic. On wireless, 802.1X is layered into the WPA2/WPA3-Enterprise authentication process itself - the access point acts as the authenticator during the 802.11 association process, and successful EAP authentication is what allows the 4-way handshake (deriving encryption keys) to complete, tying network access control directly to the encryption key derivation."
+          },
+          {
+            "name": "How do you troubleshoot a device stuck in an unauthorized/unauthenticated state?",
+            "input": "",
+            "output": "",
+            "code": "Check the switch port's authentication session state (\"show authentication sessions\" / \"show dot1x interface\" on Cisco-style gear) to see whether the supplicant is even sending EAPOL frames; if not, the device's 802.1X client may be disabled or misconfigured. If EAPOL frames are seen but authentication fails, check RADIUS server logs for the specific rejection reason (bad credentials, certificate trust failure, policy denial) rather than assuming it's purely a switch-side problem."
+          },
+          {
+            "name": "How do you troubleshoot 802.1X failures caused by an unreachable RADIUS server?",
+            "input": "",
+            "output": "",
+            "code": "If the RADIUS server is unreachable, authenticators typically fail closed (deny access) unless a fallback policy is configured; check RADIUS server reachability from the switch/AP (\"test aaa\" commands on Cisco gear, or simple UDP reachability tests to port 1812/1813), review switch logs for \"RADIUS server not responding\" style messages, and confirm the shared secret matches on both the switch and RADIUS server, since a mismatched secret can silently cause every request to be rejected or ignored."
+          },
+          {
+            "name": "What commands help inspect 802.1X/authentication session state on network equipment?",
+            "input": "",
+            "output": "",
+            "code": "Cisco-style commands: \"show dot1x all\" summarizes 802.1X status across interfaces; \"show authentication sessions\" (used for the more modern unified authentication framework, covering 802.1X, MAB, and web-auth together) lists each session's method, state, and assigned VLAN; \"show authentication sessions interface <if>\" narrows this to one specific port for focused troubleshooting."
+          },
+          {
+            "name": "What causes certificate trust failures in EAP-TLS deployments?",
+            "input": "",
+            "output": "",
+            "code": "EAP-TLS requires both sides to trust each other's certificates: common failure causes include the supplicant not trusting the RADIUS server's certificate chain (missing root/intermediate CA in its trust store), an expired client or server certificate, a certificate issued to the wrong subject name/SAN not matching what's expected, or clock skew between devices causing certificate validity period checks to fail - all of which typically show up as an EAP-TLS handshake failure in RADIUS logs even though the certificates themselves may be otherwise valid."
+          },
+          {
+            "name": "What are the security benefits of 802.1X compared to open network access?",
+            "input": "",
+            "output": "",
+            "code": "802.1X ensures only authenticated, authorized devices/users can send traffic on a given port or wireless network at all, rather than relying solely on downstream controls (firewalls, ACLs) after a device is already on the network. Combined with dynamic VLAN assignment, it also enables automatic, identity-based network segmentation, and (on wireless) ties directly into per-session encryption key derivation, meaning unauthorized devices can't simply eavesdrop on an open or shared-key network."
+          }
+        ],
+        "path": "Networking/dot1x.txt"
+      },
+      {
+        "chapter": "ICMP",
+        "folder": "Networking",
+        "programs": [
+          {
+            "name": "What is ICMP and what is its purpose?",
+            "input": "",
+            "output": "",
+            "code": "Internet Control Message Protocol (ICMP) is a network-layer protocol used by devices to report errors and exchange diagnostic/control information about IP packet delivery - it's not used to carry application data, but to tell a sender things like \"this destination is unreachable,\" \"this packet's TTL expired,\" or to respond to connectivity tests like ping."
+          },
+          {
+            "name": "What are some common ICMP message types?",
+            "input": "",
+            "output": "",
+            "code": "Key types: Echo Request/Reply (type 8/0, used by ping), Destination Unreachable (type 3, with codes for network/host/port/protocol unreachable), Time Exceeded (type 11, sent when TTL reaches zero, used by traceroute), Redirect (type 5, tells a host a better route exists), and Fragmentation Needed (a Destination Unreachable sub-code used in Path MTU Discovery)."
+          },
+          {
+            "name": "How does ping use ICMP Echo Request/Reply?",
+            "input": "",
+            "output": "",
+            "code": "\"ping\" sends an ICMP Echo Request to a target host; if the host is reachable and permits ICMP, it responds with an ICMP Echo Reply. The tool measures round-trip time for each reply and reports packet loss for any requests that don't receive a reply within the timeout, providing a simple, quick reachability and latency test."
+          },
+          {
+            "name": "How does traceroute use ICMP Time Exceeded and TTL?",
+            "input": "",
+            "output": "",
+            "code": "\"traceroute\" sends a series of probes with increasing TTL values, starting at 1: the first probe expires at the first-hop router, which replies with an ICMP Time Exceeded message revealing its own address; the next probe (TTL=2) expires at the second hop, and so on, building a hop-by-hop map of the path until the destination is finally reached and responds normally (or with a Destination Unreachable/port-specific message, depending on implementation)."
+          },
+          {
+            "name": "What are ICMP Redirect messages and what are their security implications?",
+            "input": "",
+            "output": "",
+            "code": "A router sends an ICMP Redirect to inform a host that a better next-hop exists for a particular destination than the one it used, so the host can update its route accordingly. Because a redirect can silently change a host's forwarding behavior, and can be spoofed by an attacker on the local segment to redirect traffic through a malicious device (a man-in-the-middle vector), redirects are often disabled or filtered in security-conscious environments."
+          },
+          {
+            "name": "What is ICMPv6 and how is its role expanded compared to ICMPv4?",
+            "input": "",
+            "output": "",
+            "code": "ICMPv6 retains the basic error-reporting and echo request/reply functions of ICMPv4, but takes on a much larger role in IPv6: it carries the entire Neighbor Discovery Protocol (Router/Neighbor Solicitation and Advertisement messages), which replaces ARP, handles duplicate address detection, and drives SLAAC autoconfiguration - meaning blocking ICMPv6 too aggressively can break core IPv6 functionality, not just diagnostics."
+          },
+          {
+            "name": "Design consideration: should you block ICMP entirely or filter it selectively?",
+            "input": "",
+            "output": "",
+            "code": "Blocking ICMP entirely is a common but often counterproductive security instinct - it breaks legitimate diagnostics (ping, traceroute) and, more seriously, can silently break Path MTU Discovery (if Fragmentation Needed messages are blocked), causing large packets to be dropped with no visible error. Best practice is selective filtering: allow Echo Request/Reply and Fragmentation Needed/Time Exceeded from trusted or all sources as needed, while restricting less essential types (like Redirects) at the network edge."
+          },
+          {
+            "name": "What is ICMP rate limiting and why does it matter (e.g. smurf attacks)?",
+            "input": "",
+            "output": "",
+            "code": "Because ICMP can be trivially generated and, historically, be amplified (a \"smurf attack\" spoofs a victim's source address and broadcasts ICMP Echo Requests to a whole subnet, causing every host to reply to the victim simultaneously), most modern routers/hosts rate-limit ICMP responses to prevent this kind of abuse from overwhelming a device or link, while still allowing legitimate, low-volume diagnostic use."
+          },
+          {
+            "name": "What is Path MTU Discovery and how does it use ICMP?",
+            "input": "",
+            "output": "",
+            "code": "Path MTU Discovery lets a sender find the largest packet size that can traverse a path without fragmentation: it sends packets with the \"Don't Fragment\" flag set, and if a router along the path finds the packet too large for the next link's MTU, it drops it and sends back an ICMP \"Fragmentation Needed\" message specifying the correct smaller MTU, prompting the sender to reduce its packet size accordingly for that destination."
+          },
+          {
+            "name": "How does ICMP error reporting differ from TCP/UDP error handling?",
+            "input": "",
+            "output": "",
+            "code": "ICMP operates at the network layer and reports problems about IP packet delivery itself (unreachable destinations, TTL expiry, fragmentation issues) regardless of what's inside the packet. TCP has its own transport-layer error handling (retransmissions, RST for refused connections) for issues within an established or attempted connection, while UDP has no built-in error handling at all - applications using UDP often rely on ICMP messages (like port unreachable) as their only signal that something went wrong at the network level."
+          },
+          {
+            "name": "How do you troubleshoot a \"Destination Host Unreachable\" error?",
+            "input": "",
+            "output": "",
+            "code": "This message specifically means a router along the path has no route to the destination network (or the destination host itself is known to be down on a directly connected segment), as opposed to a timeout (which just means no reply was received in time). Check the routing table at the router generating the message (\"show ip route\" / \"ip route\" for that destination), verify the destination network is actually configured/advertised, and confirm there isn't a missing or withdrawn route causing the black hole."
+          },
+          {
+            "name": "How do you distinguish intermittent ping loss caused by network issues from a firewall blocking ICMP?",
+            "input": "",
+            "output": "",
+            "code": "If pings fail 100% of the time with no replies at all despite other protocols (like a web request) working fine to the same host, a firewall selectively blocking ICMP is a likely cause. If pings succeed most of the time but occasionally time out or show high jitter, that's more indicative of a real network issue (congestion, a flaky link, or an overloaded device) - correlating with \"mtr\" over time and checking for consistent loss at a specific hop helps distinguish the two."
+          },
+          {
+            "name": "What are useful commands for ICMP-based diagnostics?",
+            "input": "",
+            "output": "",
+            "code": "\"ping\" (Windows/Linux/macOS) for basic reachability and latency; \"tracert\" (Windows) or \"traceroute\" (Linux/macOS) for path discovery; \"pathping\" (Windows) combines traceroute-style path discovery with extended ping-style statistics per hop, giving a more detailed loss/latency breakdown along the path than either tool alone."
+          },
+          {
+            "name": "What is a common ICMP-related issue involving firewalls and Path MTU Discovery?",
+            "input": "",
+            "output": "",
+            "code": "If a firewall blocks all ICMP \"to be safe,\" it can inadvertently block Fragmentation Needed messages too, silently breaking Path MTU Discovery: large packets get dropped by an intermediate router but the sender never receives the notification telling it to reduce packet size, resulting in connections that work for small requests but hang or fail for large transfers - a classic \"PMTUD black hole\" that's often misdiagnosed as an application bug."
+          },
+          {
+            "name": "What are common ICMP-based attacks and how are they mitigated?",
+            "input": "",
+            "output": "",
+            "code": "Ping flood attacks overwhelm a target with a high volume of ICMP Echo Requests to exhaust its bandwidth or processing capacity; smurf attacks amplify this using spoofed source addresses and broadcast addressing so many hosts reply to one victim simultaneously. Mitigations include ICMP rate limiting, disabling directed broadcast forwarding on routers (which prevents the smurf amplification vector), and using firewalls/IDS to detect and drop abnormally high ICMP volumes from a single source."
+          }
+        ],
+        "path": "Networking/icmp.txt"
+      },
+      {
+        "chapter": "IGMP",
+        "folder": "Networking",
+        "programs": [
+          {
+            "name": "What is IGMP and why is it used?",
+            "input": "",
+            "output": "",
+            "code": "Internet Group Management Protocol (IGMP) lets IPv4 hosts inform their local router which multicast groups they want to receive traffic for, and lets routers/switches track group membership so multicast traffic (e.g. IPTV, stock feeds, video conferencing) is only forwarded to segments that actually have interested receivers, rather than flooding it everywhere like broadcast."
+          },
+          {
+            "name": "What are the differences between IGMP versions 1, 2, and 3?",
+            "input": "",
+            "output": "",
+            "code": "IGMPv1 supports basic join and relies on a timeout to detect a host leaving (no explicit leave message). IGMPv2 adds an explicit \"Leave Group\" message and a Group-Specific Query so routers can quickly confirm whether any host still wants a group, reducing leave latency. IGMPv3 adds source filtering (Source-Specific Multicast), letting a host request traffic only from specific sources within a group instead of any source."
+          },
+          {
+            "name": "Describe the IGMP Join and Leave process.",
+            "input": "",
+            "output": "",
+            "code": "To join, a host sends an IGMP Membership Report for the desired multicast group address; the local router adds that interface to its outgoing list for that group's traffic. To leave (IGMPv2+), the host sends a Leave Group message, and the router sends a Group-Specific Query to check if any other host on the segment still wants that group before actually stopping forwarding."
+          },
+          {
+            "name": "What is IGMP snooping on switches and why is it needed?",
+            "input": "",
+            "output": "",
+            "code": "By default, a Layer 2 switch would flood multicast traffic out every port, just like broadcast, wasting bandwidth on ports with no interested receivers. IGMP snooping lets the switch \"listen in\" on IGMP Join/Leave/Query messages passing through it, building its own table of which ports have members for which groups, so it only forwards multicast frames out the ports that actually need them."
+          },
+          {
+            "name": "What is IGMP querier election and why does it matter?",
+            "input": "",
+            "output": "",
+            "code": "On a multicast-enabled segment, one router (or switch, in IGMP snooping deployments without a router) is elected the \"querier,\" responsible for periodically sending General Queries to refresh group membership state; typically the device with the lowest IP address on the segment wins the election. If there's no active querier (e.g. misconfiguration or a device failure), membership timers can expire incorrectly and multicast forwarding can break or begin flooding."
+          },
+          {
+            "name": "What is the IPv4 multicast address range?",
+            "input": "",
+            "output": "",
+            "code": "IPv4 multicast addresses fall in 224.0.0.0/4 (224.0.0.0 to 239.255.255.255). The 224.0.0.0/24 sub-range is reserved for local network control traffic (e.g. 224.0.0.1 = all hosts, 224.0.0.5/6 = OSPF routers) and is never forwarded by routers, while the rest of the range is used for routed application multicast traffic."
+          },
+          {
+            "name": "Design consideration: how should IGMP/multicast be planned for IPTV or streaming deployments?",
+            "input": "",
+            "output": "",
+            "code": "Key considerations: ensure IGMP snooping is enabled on all access switches to avoid flooding (which can saturate access-layer links carrying many TV channels), plan for a stable querier (often the multicast-enabled router/core switch), size IGMP query intervals and leave latency to match channel-change responsiveness expectations, and consider IGMPv3/SSM if you need source-level control (e.g. only accepting streams from a specific known head-end)."
+          },
+          {
+            "name": "What is the difference between an IGMP proxy and full IGMP/multicast routing?",
+            "input": "",
+            "output": "",
+            "code": "An IGMP proxy device sits between hosts and an upstream multicast router, aggregating downstream IGMP membership reports and forwarding a single summarized report upstream, without implementing a full multicast routing protocol itself - simpler and lighter-weight, common on smaller edge/CPE devices. Full multicast routing (e.g. with PIM) is needed when a device must make actual forwarding decisions across multiple router hops, not just proxy membership information to one upstream router."
+          },
+          {
+            "name": "How does IGMP relate to PIM (Protocol Independent Multicast)?",
+            "input": "",
+            "output": "",
+            "code": "IGMP operates between hosts and their local (first-hop) router, communicating group membership on that segment. PIM operates between routers, using that IGMP-derived membership information (along with unicast routing tables) to build multicast distribution trees across the network so multicast traffic is efficiently routed from sources to all the segments that reported interested receivers via IGMP."
+          },
+          {
+            "name": "What is IGMP report suppression and what is its impact?",
+            "input": "",
+            "output": "",
+            "code": "In IGMPv1/v2, when a router sends a query, hosts wanting the same group historically delayed their report by a random interval and cancelled it if they heard another host's report for the same group first (since only one report per group per segment is needed) - this reduces query-response traffic but means a switch relying only on seeing reports (without snooping-aware suppression handling) might undercount actual members; modern IGMP snooping implementations account for this behavior explicitly."
+          },
+          {
+            "name": "How do you troubleshoot a multicast stream not reaching a host?",
+            "input": "",
+            "output": "",
+            "code": "Check, in order: does the host send an IGMP Join for the correct group (packet capture on the host's segment); does the access switch's IGMP snooping table show that port as a member of the group (\"show ip igmp snooping groups\"); is there an active querier on the segment; and does the upstream router's multicast routing table (PIM) show an active outgoing interface toward that segment for the source/group in question."
+          },
+          {
+            "name": "How do you verify the IGMP snooping table on a switch?",
+            "input": "",
+            "output": "",
+            "code": "Commands like \"show ip igmp snooping groups\" (Cisco-style) list which multicast groups are active and which switch ports are registered as members for each group, letting you confirm whether a specific port (and thus a specific host) is correctly registered before assuming a routing or source-side problem."
+          },
+          {
+            "name": "What are common commands for inspecting IGMP state on a router?",
+            "input": "",
+            "output": "",
+            "code": "\"show ip igmp groups\" lists multicast groups the router has learned via IGMP and on which interfaces; \"show ip igmp interface\" shows per-interface IGMP configuration (version, query interval, querier status); these are typically used alongside \"show ip mroute\" to see the actual multicast routing/forwarding state built from that membership information."
+          },
+          {
+            "name": "What is a common IGMP issue involving querier timeout?",
+            "input": "",
+            "output": "",
+            "code": "If the elected querier fails or its query interval/timeout is misconfigured, hosts' membership state can expire on routers/switches even though hosts are still actively receiving/wanting the stream, sometimes causing brief multicast outages, or conversely causing a segment to fall back to flooding multicast to all ports if snooping loses track of valid membership - correct querier redundancy and consistent timer configuration across the segment prevents this."
+          },
+          {
+            "name": "What are the benefits of IGMPv3 Source-Specific Multicast (SSM)?",
+            "input": "",
+            "output": "",
+            "code": "SSM lets a receiver specify not just the group it wants but the exact source IP it expects traffic from (e.g. \"give me group G only from source S\"), which simplifies multicast routing (no need to discover arbitrary sources via a rendezvous point), improves security (traffic from spoofed/unauthorized sources for that group is simply ignored), and is well suited to one-to-many broadcast-style applications like IPTV where the source is known in advance."
+          }
+        ],
+        "path": "Networking/igmp.txt"
+      },
+      {
+        "chapter": "IPv4",
+        "folder": "Networking",
+        "programs": [
+          {
+            "name": "What is the structure of an IPv4 address and the historical address classes?",
+            "input": "",
+            "output": "",
+            "code": "An IPv4 address is a 32-bit number, written as four dotted decimal octets (e.g. 192.168.1.10). Historically it was divided into classes: Class A (1-126, /8, huge networks), Class B (128-191, /16), Class C (192-223, /24, small networks), Class D (224-239, multicast), and Class E (240-255, reserved/experimental) - classful addressing is now obsolete, replaced by classless CIDR."
+          },
+          {
+            "name": "What is subnetting and CIDR notation?",
+            "input": "",
+            "output": "",
+            "code": "Subnetting divides a larger network into smaller logical sub-networks by borrowing bits from the host portion of an address for additional network bits. CIDR (Classless Inter-Domain Routing) notation expresses this as address/prefix-length (e.g. 192.168.1.0/24 means the first 24 bits are the network portion), replacing rigid classful boundaries with flexible, efficiently-sized subnets."
+          },
+          {
+            "name": "What are the private IPv4 address ranges and why do they exist?",
+            "input": "",
+            "output": "",
+            "code": "RFC 1918 reserves three private ranges that are not routable on the public Internet: 10.0.0.0/8, 172.16.0.0/12, and 192.168.0.0/16. They exist to conserve the limited IPv4 address space - organizations use these internally combined with NAT so many private hosts can share a small number of public IP addresses when accessing the Internet."
+          },
+          {
+            "name": "What is a default gateway and how are routing decisions made?",
+            "input": "",
+            "output": "",
+            "code": "The default gateway is the router a host sends traffic to when the destination is outside its own subnet. A host compares the destination IP against its subnet mask; if the destination isn't on the local subnet, the packet is forwarded to the default gateway, which then consults its own routing table to determine the next hop, and so on until the packet reaches its destination network."
+          },
+          {
+            "name": "What is NAT (Network Address Translation) and PAT?",
+            "input": "",
+            "output": "",
+            "code": "NAT translates private IP addresses to a public IP address (and vice versa) as traffic crosses a router/firewall, allowing many internal hosts to share one or a few public IPs. PAT (Port Address Translation, or \"NAT overload\") is the most common form, additionally remapping source ports so that many internal hosts can share a single public IP simultaneously, with the NAT device tracking each unique internal-IP:port to public-port mapping."
+          },
+          {
+            "name": "How does ARP resolve IPv4 addresses to MAC addresses?",
+            "input": "",
+            "output": "",
+            "code": "Address Resolution Protocol (ARP) lets a host find the MAC address associated with a known IP address on the same local network: the host broadcasts an ARP request (\"who has 192.168.1.5?\"), and the owning host replies directly with an ARP reply containing its MAC address, which the requester caches in its ARP table for a period of time to avoid repeating the lookup for every packet."
+          },
+          {
+            "name": "What are some key fields in the IPv4 header?",
+            "input": "",
+            "output": "",
+            "code": "Notable fields: TTL (Time To Live, decremented at each router hop, packet dropped and an ICMP message sent when it hits zero, preventing routing loops from persisting forever), Header Checksum (detects corruption in the header), Flags and Fragment Offset (control and reassemble fragmented packets), Protocol (identifies the next-layer protocol, e.g. 6 for TCP, 17 for UDP, 1 for ICMP), and Source/Destination Address."
+          },
+          {
+            "name": "What is the difference between unicast, broadcast, and multicast in IPv4?",
+            "input": "",
+            "output": "",
+            "code": "Unicast is one-to-one communication between a single source and a single destination. Broadcast (e.g. to 255.255.255.255 or a subnet's broadcast address) is sent to every host on the local network segment. Multicast (224.0.0.0-239.255.255.255) is one-to-many, delivered only to hosts that have explicitly joined a particular multicast group, avoiding the network-wide flooding cost of broadcast."
+          },
+          {
+            "name": "Design consideration: how should you plan subnet sizing and VLSM?",
+            "input": "",
+            "output": "",
+            "code": "Variable Length Subnet Masking (VLSM) lets you size each subnet according to its actual host count rather than using one fixed mask everywhere, avoiding wasted address space (e.g. a point-to-point WAN link only needs a /30, while a user VLAN might need a /24). Good practice: inventory expected host counts per segment, add headroom for growth, allocate the smallest subnet that comfortably fits that need, and document the addressing plan centrally to avoid overlaps as the network scales."
+          },
+          {
+            "name": "What is IPv4 address exhaustion and why was IPv6 created?",
+            "input": "",
+            "output": "",
+            "code": "IPv4 provides roughly 4.3 billion addresses, which - especially after classful allocation waste and explosive Internet/device growth - proved insufficient for a globally connected world; regional registries have already exhausted their free IPv4 pools. IPv6 was created with a vastly larger 128-bit address space (approximately 3.4 x 10^38 addresses) specifically to solve this exhaustion problem long-term, alongside other improvements like simplified headers and built-in support for autoconfiguration."
+          },
+          {
+            "name": "What is the difference between static and dynamic (DHCP) IP addressing?",
+            "input": "",
+            "output": "",
+            "code": "A static IP is manually configured on a device and never changes, appropriate for servers, printers, and network infrastructure that other systems need to reliably reach. Dynamic addressing via DHCP (Dynamic Host Configuration Protocol) automatically leases an IP address (plus subnet mask, gateway, DNS servers) to a device for a limited time, simplifying management for end-user devices that come and go on the network."
+          },
+          {
+            "name": "How do you troubleshoot and verify IP configuration on a host?",
+            "input": "",
+            "output": "",
+            "code": "Windows: \"ipconfig /all\" shows IP, subnet mask, gateway, DNS, and DHCP lease info. Linux/macOS: \"ip addr\" (modern) or \"ifconfig\" (legacy) shows the same. Look for a missing/incorrect IP (APIPA addresses like 169.254.x.x indicate a failed DHCP request), wrong subnet mask, or missing default gateway/DNS entries as common misconfiguration symptoms."
+          },
+          {
+            "name": "How do you diagnose a subnet mask misconfiguration causing unreachable hosts?",
+            "input": "",
+            "output": "",
+            "code": "Symptoms include a host being unable to reach other devices that are physically on the same segment but were assigned addresses the misconfigured host now considers \"remote\" (or vice versa), since the subnet mask determines which addresses are treated as local. Verify with \"ip addr\"/\"ipconfig\" on both hosts, confirm they share the same network address after applying their masks, and check that the mask matches what the DHCP server or network design specifies."
+          },
+          {
+            "name": "What are the most useful IPv4 diagnostic commands?",
+            "input": "",
+            "output": "",
+            "code": "\"ping\" for basic reachability, \"arp -a\" to inspect the local ARP cache and confirm MAC-to-IP resolution, \"route print\" (Windows) or \"ip route\" (Linux) to inspect the routing table and default gateway, \"nslookup\"/\"dig\" for DNS resolution issues, and \"tracert\"/\"traceroute\" to see the hop-by-hop path when a destination is unreachable."
+          },
+          {
+            "name": "How do you detect a duplicate IP address conflict on the network?",
+            "input": "",
+            "output": "",
+            "code": "Symptoms include intermittent connectivity, one or both devices with the duplicate address losing network access randomly, or OS pop-up warnings (\"Windows has detected an IP address conflict\"). Diagnosis: \"arp -a\" may show the same IP resolving to two different MAC addresses over time, or a persistent ping to that IP shows replies from inconsistent MAC addresses (visible via packet capture); resolving it means reconfiguring one device to a unique address, often by fixing a static assignment that overlaps the DHCP pool."
+          }
+        ],
+        "path": "Networking/ipv4.txt"
+      },
+      {
+        "chapter": "IPv6",
+        "folder": "Networking",
+        "programs": [
+          {
+            "name": "Why was IPv6 introduced and how large is its address space?",
+            "input": "",
+            "output": "",
+            "code": "IPv6 was introduced primarily to solve IPv4 address exhaustion, using 128-bit addresses instead of IPv4's 32-bit addresses - roughly 3.4 x 10^38 possible addresses, effectively unlimited for the foreseeable future. Beyond address space, it also simplified the header format, built in autoconfiguration, and removed the need for NAT in most designs since every device can have a globally unique address."
+          },
+          {
+            "name": "What is the IPv6 address format and its abbreviation rules?",
+            "input": "",
+            "output": "",
+            "code": "An IPv6 address is 128 bits written as eight groups of four hexadecimal digits separated by colons (e.g. 2001:0db8:0000:0000:0000:ff00:0042:8329). Abbreviation rules: leading zeros in each group can be omitted (0db8 -> db8), and one contiguous run of all-zero groups can be replaced with \"::\" exactly once per address (e.g. the example becomes 2001:db8::ff00:42:8329)."
+          },
+          {
+            "name": "What are the main IPv6 address types (no broadcast)?",
+            "input": "",
+            "output": "",
+            "code": "IPv6 has unicast (one-to-one), multicast (one-to-many, replacing IPv4 broadcast entirely), and anycast (one-to-nearest, where multiple hosts share an address and traffic is routed to the topologically closest one). There is no broadcast address type in IPv6 - functions that used broadcast in IPv4 (like DHCP discovery or ARP) are handled via multicast instead."
+          },
+          {
+            "name": "What are link-local, unique local, and global unicast addresses in IPv6?",
+            "input": "",
+            "output": "",
+            "code": "Link-local addresses (fe80::/10) are automatically assigned to every interface and only valid on the local link, used for neighbor discovery and routing protocol communication - never routed. Unique local addresses (fc00::/7) are the IPv6 equivalent of private IPv4 space, for internal use not intended for global routing. Global unicast addresses (2000::/3) are publicly routable, the IPv6 equivalent of public IPv4 addresses."
+          },
+          {
+            "name": "What is SLAAC and how does it differ from DHCPv6?",
+            "input": "",
+            "output": "",
+            "code": "SLAAC (Stateless Address Autoconfiguration) lets a host generate its own IPv6 address using the network prefix advertised by a router (via Router Advertisement messages) combined with an interface identifier, without needing a central server to track leases. DHCPv6 is the stateful alternative, similar to IPv4 DHCP, where a server explicitly assigns and tracks addresses - some deployments combine both (SLAAC for the address, DHCPv6 for other options like DNS servers)."
+          },
+          {
+            "name": "What is Neighbor Discovery Protocol (NDP) and how does it replace ARP?",
+            "input": "",
+            "output": "",
+            "code": "NDP is a suite of ICMPv6 messages (Router Solicitation/Advertisement, Neighbor Solicitation/Advertisement) that IPv6 uses for address autoconfiguration, duplicate address detection, and resolving IPv6 addresses to MAC addresses - replacing IPv4's ARP entirely. Neighbor Solicitation/Advertisement specifically perform the same MAC-address-resolution role ARP did, but using multicast rather than broadcast."
+          },
+          {
+            "name": "How is the IPv6 header simplified compared to the IPv4 header?",
+            "input": "",
+            "output": "",
+            "code": "The IPv6 header is a fixed 40 bytes with fewer fields than IPv4's variable-length header - it drops the header checksum (relying on lower and upper layers for integrity), removes built-in fragmentation fields (fragmentation is handled via an optional extension header, not by routers in transit), and moves rarely-used options into a chain of optional extension headers, making the base header simpler and faster for routers to process."
+          },
+          {
+            "name": "What is the difference between dual-stack and tunneling for IPv4/IPv6 coexistence?",
+            "input": "",
+            "output": "",
+            "code": "Dual-stack runs both IPv4 and IPv6 simultaneously on the same devices/network, letting each connection use whichever protocol is available end-to-end - the most straightforward but requires both protocols to be configured everywhere. Tunneling techniques (like 6to4 or Teredo) encapsulate IPv6 packets inside IPv4 packets (or vice versa) to traverse networks that only support one protocol, useful as a transitional bridge but adding overhead and complexity compared to native dual-stack."
+          },
+          {
+            "name": "Design consideration: how should you plan an IPv6 addressing scheme for an enterprise?",
+            "input": "",
+            "output": "",
+            "code": "Because address space is effectively unlimited, best practice is to allocate generously and hierarchically rather than conserving bits like IPv4: typically a /48 per site, /64 per subnet (required for SLAAC to function), with a documented, consistent numbering convention by function/location (mirroring good IPv4 VLAN design) rather than trying to minimize prefix sizes - the goal shifts from address conservation to logical organization and route summarization."
+          },
+          {
+            "name": "What are IPv6 extension headers?",
+            "input": "",
+            "output": "",
+            "code": "Extension headers are optional headers chained after the fixed IPv6 header to carry additional information only when needed (e.g. Hop-by-Hop Options, Routing, Fragment, Authentication, Encapsulating Security Payload) instead of bloating every packet's base header like IPv4 options did. Routers along the path only need to process headers relevant to them, improving overall forwarding efficiency."
+          },
+          {
+            "name": "How do you troubleshoot basic IPv6 connectivity?",
+            "input": "",
+            "output": "",
+            "code": "\"ping6\"/\"ping -6\" tests basic reachability using ICMPv6 Echo Request/Reply, and \"traceroute6\"/\"tracert -6\" reveals the hop-by-hop IPv6 path. Since NDP replaces ARP, checking the neighbor cache (\"ip -6 neigh\" on Linux, \"netsh interface ipv6 show neighbors\" on Windows) is the IPv6 equivalent of checking an ARP table when local-link resolution seems to be failing."
+          },
+          {
+            "name": "What are common SLAAC/DHCPv6 misconfiguration symptoms?",
+            "input": "",
+            "output": "",
+            "code": "A host with only a link-local address (fe80::...) and no global address suggests it never received a valid Router Advertisement, often due to a misconfigured or missing router or an intermediate switch not forwarding the necessary multicast traffic. Duplicate or unexpected addresses can indicate multiple routers advertising conflicting prefixes, or a rogue router advertisement being sent on the network (a known IPv6 security concern)."
+          },
+          {
+            "name": "What are useful commands for inspecting and testing IPv6?",
+            "input": "",
+            "output": "",
+            "code": "Linux: \"ip -6 addr\" (interface addresses), \"ip -6 route\" (routing table), \"ip -6 neigh\" (neighbor/NDP cache). Windows: \"ipconfig /all\" (shows IPv6 alongside IPv4), \"netsh interface ipv6 show ...\" subcommands. Network devices commonly use \"show ipv6 interface\" and \"show ipv6 route\" (Cisco-style) to inspect IPv6 configuration and routing state."
+          },
+          {
+            "name": "What are important IPv6 security considerations?",
+            "input": "",
+            "output": "",
+            "code": "Because IPv6 removes NAT as a default, every device can be globally reachable, making host-level firewalling more important than relying on NAT for implicit protection. Extension header chains can be abused to evade simple packet filters that don't fully parse them, and rogue Router Advertisements (an attacker impersonating a router via NDP) can hijack traffic or cause denial of service - mitigated by RA Guard and similar switch-level protections."
+          },
+          {
+            "name": "How does IPv6 multicast usage differ from IPv4 broadcast use cases?",
+            "input": "",
+            "output": "",
+            "code": "Where IPv4 relied on broadcast for things like DHCP discovery, ARP, and some routing protocol traffic (flooding every host on the segment), IPv6 uses specific, purpose-built multicast groups instead (e.g. ff02::1 for all nodes, ff02::2 for all routers), so only interested hosts process the traffic rather than every device on the link having to inspect and discard irrelevant broadcast frames."
+          }
+        ],
+        "path": "Networking/ipv6.txt"
+      },
+      {
         "chapter": "LINUX NETWORKING COMMANDS",
         "folder": "Networking",
         "programs": [
@@ -3586,6 +4071,103 @@ const CATALOG = [
         "path": "Networking/linux_commands.txt"
       },
       {
+        "chapter": "PPPoE",
+        "folder": "Networking",
+        "programs": [
+          {
+            "name": "What is PPPoE and where is it commonly used?",
+            "input": "",
+            "output": "",
+            "code": "PPPoE (Point-to-Point Protocol over Ethernet) encapsulates PPP frames inside Ethernet frames, letting a broadband subscriber's device establish an authenticated, point-to-point-style session over a shared Ethernet-based access network (like DSL or fiber). It's the traditional mechanism ISPs use to authenticate individual subscribers, assign an IP address, and apply per-subscriber policies over what is otherwise a shared physical medium."
+          },
+          {
+            "name": "Describe the PPPoE Discovery stage (PADI, PADO, PADR, PADS).",
+            "input": "",
+            "output": "",
+            "code": "Discovery establishes which PPPoE server (Access Concentrator) the client will use: the client broadcasts a PADI (Active Discovery Initiation); one or more Access Concentrators respond with a PADO (Active Discovery Offer); the client picks one and unicasts a PADR (Active Discovery Request) to it; that server replies with a PADS (Active Discovery Session-confirmation) containing a unique session ID, completing Discovery before the PPP Session stage begins."
+          },
+          {
+            "name": "What happens in the PPPoE Session stage and LCP negotiation?",
+            "input": "",
+            "output": "",
+            "code": "Once a session ID is assigned, standard PPP takes over inside the PPPoE encapsulation: LCP (Link Control Protocol) negotiates link parameters (MRU, authentication method, magic numbers) between client and server, followed by an authentication phase and then NCP (typically IPCP) to negotiate and assign the actual IP configuration, after which user data can flow."
+          },
+          {
+            "name": "What is the difference between PAP and CHAP authentication in PPP?",
+            "input": "",
+            "output": "",
+            "code": "PAP (Password Authentication Protocol) sends the username and password in clear text during a simple two-way handshake, making it weak against eavesdropping. CHAP (Challenge Handshake Authentication Protocol) instead uses a challenge-response exchange with a hashed value derived from a shared secret and a random challenge, so the password itself is never transmitted, and CHAP can also re-challenge periodically during the session for extra security."
+          },
+          {
+            "name": "Why does PPPoE typically use an MTU of 1492 instead of Ethernet's 1500?",
+            "input": "",
+            "output": "",
+            "code": "PPPoE adds an 8-byte header (6 bytes PPPoE header + 2 bytes PPP protocol field) on top of the standard 1500-byte Ethernet payload, so to avoid fragmentation the effective MTU for user traffic is reduced to 1492 bytes. Applications or devices unaware of this smaller MTU can experience fragmented or dropped large packets (\"black hole\" MTU issues) if Path MTU Discovery isn't working correctly end-to-end."
+          },
+          {
+            "name": "Design consideration: how is PPPoE typically deployed in ISP broadband networks?",
+            "input": "",
+            "output": "",
+            "code": "ISPs deploy PPPoE where they need explicit subscriber authentication and per-session accounting/billing over a shared access network (common in DSL and some fiber deployments) - the subscriber's router acts as the PPPoE client, the ISP's BRAS (Broadband Remote Access Server) acts as the Access Concentrator, and RADIUS is typically used behind the BRAS for authentication, IP assignment, and usage accounting, giving fine-grained control per subscriber even though the underlying access network is shared Ethernet."
+          },
+          {
+            "name": "What are PPPoE session limits and why do they matter?",
+            "input": "",
+            "output": "",
+            "code": "Access Concentrators typically have a configurable maximum number of concurrent PPPoE sessions they can support (both per-server and sometimes per-MAC-address, to mitigate denial-of-service attempts). Capacity planning must account for expected concurrent subscriber counts, since exceeding session limits causes new connection attempts to fail even though the underlying network has spare bandwidth."
+          },
+          {
+            "name": "What is the difference between a PPPoE client and a PPPoE server/BRAS?",
+            "input": "",
+            "output": "",
+            "code": "The PPPoE client (typically a subscriber's router or modem in bridge mode) initiates Discovery and requests a session. The PPPoE server, usually a carrier-grade BRAS (Broadband Remote Access Server) or similbest-effort software implementation, listens for PADI broadcasts, allocates session IDs, performs or proxies authentication (often via RADIUS), and assigns IP addressing - it's the aggregation point terminating potentially thousands of subscriber PPPoE sessions."
+          },
+          {
+            "name": "How does VLAN tagging interact with PPPoE in DSL/fiber deployments?",
+            "input": "",
+            "output": "",
+            "code": "In many access networks, each subscriber (or a group of subscribers on a DSLAM/OLT) is placed on its own VLAN or a shared VLAN with per-subscriber PPPoE sessions layered on top, so VLAN tagging provides Layer 2 segregation while PPPoE provides subscriber-level authentication and IP assignment on top of that segregation - the combination lets an ISP separate traffic engineering/isolation concerns (VLAN) from subscriber management concerns (PPPoE/RADIUS)."
+          },
+          {
+            "name": "How do you troubleshoot a PPPoE connection failing at the discovery stage?",
+            "input": "",
+            "output": "",
+            "code": "If the client never progresses past sending PADI, check physical/Layer 2 connectivity first (link lights, correct VLAN tagging if applicable), then verify the Access Concentrator is actually reachable at Layer 2 and configured to respond (server-side session limits or ACLs could be silently dropping PADI); a packet capture on the client's Ethernet interface showing PADI going out with no PADO coming back strongly points to an upstream/access-network issue rather than a client misconfiguration."
+          },
+          {
+            "name": "How do you troubleshoot intermittent PPPoE disconnects related to LCP echo failures?",
+            "input": "",
+            "output": "",
+            "code": "PPP uses periodic LCP Echo Request/Reply keepalives to detect a dead link; if these are missed repeatedly (due to congestion, a flapping physical link, or an overloaded BRAS), the session is torn down and must renegotiate from Discovery. Check interface error counters and link stability on both ends, review BRAS logs for the specific disconnect reason, and consider whether keepalive intervals/timeouts are too aggressive for the actual link's jitter characteristics."
+          },
+          {
+            "name": "What commands are commonly used to inspect PPPoE session state?",
+            "input": "",
+            "output": "",
+            "code": "On carrier equipment (Cisco-style): \"show pppoe session\" lists active sessions with their session IDs and interfaces, and \"debug pppoe events/errors\" traces Discovery and session negotiation in real time. On Linux (using rp-pppoe or similar), \"pppoe-status\" and inspecting \"/var/log/syslog\" (or journalctl for the pppd service) show client-side connection state and negotiation logs."
+          },
+          {
+            "name": "What is a common PPPoE-related MTU/fragmentation issue?",
+            "input": "",
+            "output": "",
+            "code": "Because PPPoE's effective MTU is 1492 rather than 1500, a client, server, or intermediate device that still advertises/assumes a 1500-byte MTU can cause large packets to be silently dropped rather than fragmented (a \"black hole\" if ICMP Fragmentation Needed messages are filtered somewhere along the path) - symptoms include small requests working fine (DNS, pings) while large downloads or specific websites hang, since Path MTU Discovery can't succeed."
+          },
+          {
+            "name": "What is the difference between using PPPoE vs DHCP for ISP subscriber management?",
+            "input": "",
+            "output": "",
+            "code": "PPPoE provides an explicit, session-based authentication and accounting model well suited to controlled, billed access with strong per-subscriber policy enforcement, at the cost of extra negotiation overhead and client-side configuration complexity. DHCP-based subscriber management (common in cable/DOCSIS and many fiber deployments) is simpler for the end user (plug-and-play addressing) but typically relies on other mechanisms (e.g. DHCP option 82, MAC/port binding) rather than PPP-level authentication to identify and control individual subscribers."
+          },
+          {
+            "name": "What security considerations apply to PPPoE authentication?",
+            "input": "",
+            "output": "",
+            "code": "Prefer CHAP over PAP since PAP transmits credentials in clear text; ensure the RADIUS communication between the BRAS and the authentication server is itself secured (e.g. via IPsec or a trusted management network) since RADIUS shared secrets protect that channel; and apply session/MAC rate limiting on Access Concentrators to mitigate PADI flood denial-of-service attempts from compromised or malicious clients on the access network."
+          }
+        ],
+        "path": "Networking/pppoe.txt"
+      },
+      {
         "chapter": "SELECT, POLL, ASYNC IO AND SYNCHRONIZATION",
         "folder": "Networking",
         "programs": [
@@ -3621,6 +4203,103 @@ const CATALOG = [
           }
         ],
         "path": "Networking/select_poll.cpp"
+      },
+      {
+        "chapter": "TCP/IP",
+        "folder": "Networking",
+        "programs": [
+          {
+            "name": "What is the TCP/IP model and its four layers?",
+            "input": "",
+            "output": "",
+            "code": "The TCP/IP model is the practical, four-layer networking model the Internet is built on: Network Access (Link) layer (physical/MAC addressing, e.g. Ethernet), Internet layer (logical addressing and routing, IP/ICMP/ARP), Transport layer (end-to-end delivery, TCP/UDP), and Application layer (user-facing protocols like HTTP, DNS, SSH). Each layer only needs to know how to talk to the layer directly above/below it, which is what allows independent evolution of protocols at each layer."
+          },
+          {
+            "name": "What is the difference between the OSI model and the TCP/IP model?",
+            "input": "",
+            "output": "",
+            "code": "The OSI model is a 7-layer conceptual reference model (Physical, Data Link, Network, Transport, Session, Presentation, Application) used mainly for teaching and troubleshooting terminology. TCP/IP is a simpler 4-layer model that reflects how protocols are actually implemented in practice, merging OSI's Session/Presentation/Application layers into one Application layer and combining Physical/Data Link into a single Network Access layer."
+          },
+          {
+            "name": "Explain the TCP three-way handshake.",
+            "input": "",
+            "output": "",
+            "code": "TCP establishes a connection with three segments: the client sends a SYN (synchronize) with an initial sequence number, the server responds with SYN-ACK (acknowledging the client's sequence number and sending its own), and the client replies with an ACK confirming the server's sequence number. Only after this handshake completes do both sides consider the connection established and begin exchanging data reliably."
+          },
+          {
+            "name": "Explain TCP connection termination (the four-way close).",
+            "input": "",
+            "output": "",
+            "code": "Either side can initiate termination: the closing side sends a FIN, the other side ACKs it (and may continue sending its own remaining data), then when that side is also done it sends its own FIN, which the original closer ACKs. This is typically four segments (FIN, ACK, FIN, ACK) because TCP is full-duplex and each direction is closed independently, though the middle ACK+FIN can sometimes be combined."
+          },
+          {
+            "name": "What is the core difference between TCP and UDP?",
+            "input": "",
+            "output": "",
+            "code": "TCP is connection-oriented, providing reliable, ordered, flow-controlled, and congestion-controlled delivery via handshakes, acknowledgments, and retransmissions - at the cost of overhead and latency. UDP is connectionless and unreliable (no handshake, no retransmission, no ordering guarantee), trading reliability for lower latency and overhead, making it suitable for real-time applications like VoIP, video streaming, and DNS queries."
+          },
+          {
+            "name": "What is TCP flow control and how does the sliding window work?",
+            "input": "",
+            "output": "",
+            "code": "Flow control prevents a fast sender from overwhelming a slow receiver's buffer. Each TCP segment's ACK includes a \"window size\" advertising how much more data the receiver can currently buffer; the sender is only allowed to have that many unacknowledged bytes in flight at once, and the window shrinks/grows dynamically as the receiver's buffer fills or drains."
+          },
+          {
+            "name": "What is TCP congestion control (slow start and congestion avoidance)?",
+            "input": "",
+            "output": "",
+            "code": "Congestion control prevents the sender from overwhelming the network itself (as opposed to the receiver). Slow start begins with a small congestion window that doubles each round-trip until a threshold or packet loss is detected; after that, congestion avoidance increases the window more conservatively (roughly linearly), and on packet loss the window is reduced sharply (e.g. halved) to relieve congestion, then the cycle repeats."
+          },
+          {
+            "name": "What is TCP retransmission and the Retransmission Timeout (RTO)?",
+            "input": "",
+            "output": "",
+            "code": "If a sender doesn't receive an ACK for a segment within its Retransmission Timeout, it assumes the segment (or its ACK) was lost and retransmits it. RTO is calculated dynamically from measured round-trip times (smoothed RTT and RTT variance) so it adapts to changing network conditions - too short an RTO causes unnecessary retransmissions, too long delays recovery from real loss."
+          },
+          {
+            "name": "What are well-known ports and some common examples?",
+            "input": "",
+            "output": "",
+            "code": "Well-known ports (0-1023) are reserved for standard services by IANA, so clients know which port to connect to without prior negotiation. Common examples: 20/21 FTP, 22 SSH, 23 Telnet, 25 SMTP, 53 DNS, 80 HTTP, 443 HTTPS, 110/143 POP3/IMAP - registered ports (1024-49151) and dynamic/private ports (49152-65535) are used for other services and ephemeral client connections respectively."
+          },
+          {
+            "name": "Design consideration: when should you choose TCP vs UDP for an application?",
+            "input": "",
+            "output": "",
+            "code": "Choose TCP when correctness and completeness matter more than latency - file transfer, web pages, database connections, anything where a missing or reordered byte would corrupt the result. Choose UDP when low latency and tolerance for occasional loss matter more - live video/audio, gaming, DNS lookups - especially if the application can implement its own lightweight reliability (e.g. QUIC) tailored to its specific needs rather than paying for TCP's general-purpose guarantees."
+          },
+          {
+            "name": "What is MTU and how does fragmentation relate to TCP/IP?",
+            "input": "",
+            "output": "",
+            "code": "The Maximum Transmission Unit (MTU) is the largest packet size a link can carry without fragmentation, typically 1500 bytes for Ethernet. If a packet exceeds the MTU of a link along its path, IPv4 routers may fragment it (unless the Don't Fragment flag is set, which triggers an ICMP \"Fragmentation Needed\" message instead) - fragmentation adds overhead and failure points, so protocols like TCP use Path MTU Discovery to avoid it by sizing segments appropriately."
+          },
+          {
+            "name": "What is TCP window scaling and why does it matter for high-latency links?",
+            "input": "",
+            "output": "",
+            "code": "The original TCP header only allows a 16-bit window size field (max 65,535 bytes), which severely limits throughput on high-bandwidth, high-latency (\"long fat\") networks like satellite or transcontinental links. The window scaling option (negotiated during the handshake) multiplies the advertised window by a scale factor, allowing effective windows in the megabytes so the sender can keep enough data in flight to fully utilize available bandwidth despite the round-trip delay."
+          },
+          {
+            "name": "How do you troubleshoot TCP connection states using netstat/ss?",
+            "input": "",
+            "output": "",
+            "code": "\"ss -tan\" or \"netstat -tan\" lists TCP sockets with their state (LISTEN, ESTABLISHED, TIME_WAIT, CLOSE_WAIT, SYN_SENT, etc.). A large number of CLOSE_WAIT sockets often indicates the application isn't closing connections properly; many SYN_SENT with no corresponding ESTABLISHED suggests the remote host or a firewall is dropping the handshake; excessive TIME_WAIT under high connection churn may require tuning (e.g. SO_REUSEADDR, reducing TIME_WAIT duration)."
+          },
+          {
+            "name": "How do you troubleshoot packet loss and latency using ping, traceroute, and mtr?",
+            "input": "",
+            "output": "",
+            "code": "\"ping\" establishes basic reachability and round-trip time, and consistent packet loss or high jitter points to a network problem. \"traceroute\"/\"tracert\" (using increasing TTL values) reveals the path and per-hop latency, helping identify which hop introduces delay or loss. \"mtr\" combines both, continuously probing every hop to reveal exactly where intermittent loss is occurring rather than a single snapshot."
+          },
+          {
+            "name": "What are the most useful command-line tools for TCP/IP diagnostics?",
+            "input": "",
+            "output": "",
+            "code": "Key tools: \"netstat\"/\"ss\" for socket and connection state inspection; \"tcpdump\"/Wireshark for packet-level capture and analysis; \"curl\"/\"wget\" for testing HTTP(S) endpoints directly; \"telnet <host> <port>\" or \"nc -zv <host> <port>\" for quick TCP port reachability checks; \"ping\"/\"traceroute\"/\"mtr\" for reachability and path diagnostics; and \"ip route\"/\"route -n\" for routing table inspection when connectivity issues are routing-related."
+          }
+        ],
+        "path": "Networking/tcp_ip.txt"
       },
       {
         "chapter": "VLAN",

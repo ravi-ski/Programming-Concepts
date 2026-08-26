@@ -1,0 +1,62 @@
+@SECTION: Networking
+@CHAPTER: IGMP
+
+@PROGRAM: What is IGMP and why is it used?
+Internet Group Management Protocol (IGMP) lets IPv4 hosts inform their local router which multicast groups they want to receive traffic for, and lets routers/switches track group membership so multicast traffic (e.g. IPTV, stock feeds, video conferencing) is only forwarded to segments that actually have interested receivers, rather than flooding it everywhere like broadcast.
+@END
+
+@PROGRAM: What are the differences between IGMP versions 1, 2, and 3?
+IGMPv1 supports basic join and relies on a timeout to detect a host leaving (no explicit leave message). IGMPv2 adds an explicit "Leave Group" message and a Group-Specific Query so routers can quickly confirm whether any host still wants a group, reducing leave latency. IGMPv3 adds source filtering (Source-Specific Multicast), letting a host request traffic only from specific sources within a group instead of any source.
+@END
+
+@PROGRAM: Describe the IGMP Join and Leave process.
+To join, a host sends an IGMP Membership Report for the desired multicast group address; the local router adds that interface to its outgoing list for that group's traffic. To leave (IGMPv2+), the host sends a Leave Group message, and the router sends a Group-Specific Query to check if any other host on the segment still wants that group before actually stopping forwarding.
+@END
+
+@PROGRAM: What is IGMP snooping on switches and why is it needed?
+By default, a Layer 2 switch would flood multicast traffic out every port, just like broadcast, wasting bandwidth on ports with no interested receivers. IGMP snooping lets the switch "listen in" on IGMP Join/Leave/Query messages passing through it, building its own table of which ports have members for which groups, so it only forwards multicast frames out the ports that actually need them.
+@END
+
+@PROGRAM: What is IGMP querier election and why does it matter?
+On a multicast-enabled segment, one router (or switch, in IGMP snooping deployments without a router) is elected the "querier," responsible for periodically sending General Queries to refresh group membership state; typically the device with the lowest IP address on the segment wins the election. If there's no active querier (e.g. misconfiguration or a device failure), membership timers can expire incorrectly and multicast forwarding can break or begin flooding.
+@END
+
+@PROGRAM: What is the IPv4 multicast address range?
+IPv4 multicast addresses fall in 224.0.0.0/4 (224.0.0.0 to 239.255.255.255). The 224.0.0.0/24 sub-range is reserved for local network control traffic (e.g. 224.0.0.1 = all hosts, 224.0.0.5/6 = OSPF routers) and is never forwarded by routers, while the rest of the range is used for routed application multicast traffic.
+@END
+
+@PROGRAM: Design consideration: how should IGMP/multicast be planned for IPTV or streaming deployments?
+Key considerations: ensure IGMP snooping is enabled on all access switches to avoid flooding (which can saturate access-layer links carrying many TV channels), plan for a stable querier (often the multicast-enabled router/core switch), size IGMP query intervals and leave latency to match channel-change responsiveness expectations, and consider IGMPv3/SSM if you need source-level control (e.g. only accepting streams from a specific known head-end).
+@END
+
+@PROGRAM: What is the difference between an IGMP proxy and full IGMP/multicast routing?
+An IGMP proxy device sits between hosts and an upstream multicast router, aggregating downstream IGMP membership reports and forwarding a single summarized report upstream, without implementing a full multicast routing protocol itself - simpler and lighter-weight, common on smaller edge/CPE devices. Full multicast routing (e.g. with PIM) is needed when a device must make actual forwarding decisions across multiple router hops, not just proxy membership information to one upstream router.
+@END
+
+@PROGRAM: How does IGMP relate to PIM (Protocol Independent Multicast)?
+IGMP operates between hosts and their local (first-hop) router, communicating group membership on that segment. PIM operates between routers, using that IGMP-derived membership information (along with unicast routing tables) to build multicast distribution trees across the network so multicast traffic is efficiently routed from sources to all the segments that reported interested receivers via IGMP.
+@END
+
+@PROGRAM: What is IGMP report suppression and what is its impact?
+In IGMPv1/v2, when a router sends a query, hosts wanting the same group historically delayed their report by a random interval and cancelled it if they heard another host's report for the same group first (since only one report per group per segment is needed) - this reduces query-response traffic but means a switch relying only on seeing reports (without snooping-aware suppression handling) might undercount actual members; modern IGMP snooping implementations account for this behavior explicitly.
+@END
+
+@PROGRAM: How do you troubleshoot a multicast stream not reaching a host?
+Check, in order: does the host send an IGMP Join for the correct group (packet capture on the host's segment); does the access switch's IGMP snooping table show that port as a member of the group ("show ip igmp snooping groups"); is there an active querier on the segment; and does the upstream router's multicast routing table (PIM) show an active outgoing interface toward that segment for the source/group in question.
+@END
+
+@PROGRAM: How do you verify the IGMP snooping table on a switch?
+Commands like "show ip igmp snooping groups" (Cisco-style) list which multicast groups are active and which switch ports are registered as members for each group, letting you confirm whether a specific port (and thus a specific host) is correctly registered before assuming a routing or source-side problem.
+@END
+
+@PROGRAM: What are common commands for inspecting IGMP state on a router?
+"show ip igmp groups" lists multicast groups the router has learned via IGMP and on which interfaces; "show ip igmp interface" shows per-interface IGMP configuration (version, query interval, querier status); these are typically used alongside "show ip mroute" to see the actual multicast routing/forwarding state built from that membership information.
+@END
+
+@PROGRAM: What is a common IGMP issue involving querier timeout?
+If the elected querier fails or its query interval/timeout is misconfigured, hosts' membership state can expire on routers/switches even though hosts are still actively receiving/wanting the stream, sometimes causing brief multicast outages, or conversely causing a segment to fall back to flooding multicast to all ports if snooping loses track of valid membership - correct querier redundancy and consistent timer configuration across the segment prevents this.
+@END
+
+@PROGRAM: What are the benefits of IGMPv3 Source-Specific Multicast (SSM)?
+SSM lets a receiver specify not just the group it wants but the exact source IP it expects traffic from (e.g. "give me group G only from source S"), which simplifies multicast routing (no need to discover arbitrary sources via a rendezvous point), improves security (traffic from spoofed/unauthorized sources for that group is simply ignored), and is well suited to one-to-many broadcast-style applications like IPTV where the source is known in advance.
+@END

@@ -1,0 +1,62 @@
+@SECTION: Networking
+@CHAPTER: IPv4
+
+@PROGRAM: What is the structure of an IPv4 address and the historical address classes?
+An IPv4 address is a 32-bit number, written as four dotted decimal octets (e.g. 192.168.1.10). Historically it was divided into classes: Class A (1-126, /8, huge networks), Class B (128-191, /16), Class C (192-223, /24, small networks), Class D (224-239, multicast), and Class E (240-255, reserved/experimental) - classful addressing is now obsolete, replaced by classless CIDR.
+@END
+
+@PROGRAM: What is subnetting and CIDR notation?
+Subnetting divides a larger network into smaller logical sub-networks by borrowing bits from the host portion of an address for additional network bits. CIDR (Classless Inter-Domain Routing) notation expresses this as address/prefix-length (e.g. 192.168.1.0/24 means the first 24 bits are the network portion), replacing rigid classful boundaries with flexible, efficiently-sized subnets.
+@END
+
+@PROGRAM: What are the private IPv4 address ranges and why do they exist?
+RFC 1918 reserves three private ranges that are not routable on the public Internet: 10.0.0.0/8, 172.16.0.0/12, and 192.168.0.0/16. They exist to conserve the limited IPv4 address space - organizations use these internally combined with NAT so many private hosts can share a small number of public IP addresses when accessing the Internet.
+@END
+
+@PROGRAM: What is a default gateway and how are routing decisions made?
+The default gateway is the router a host sends traffic to when the destination is outside its own subnet. A host compares the destination IP against its subnet mask; if the destination isn't on the local subnet, the packet is forwarded to the default gateway, which then consults its own routing table to determine the next hop, and so on until the packet reaches its destination network.
+@END
+
+@PROGRAM: What is NAT (Network Address Translation) and PAT?
+NAT translates private IP addresses to a public IP address (and vice versa) as traffic crosses a router/firewall, allowing many internal hosts to share one or a few public IPs. PAT (Port Address Translation, or "NAT overload") is the most common form, additionally remapping source ports so that many internal hosts can share a single public IP simultaneously, with the NAT device tracking each unique internal-IP:port to public-port mapping.
+@END
+
+@PROGRAM: How does ARP resolve IPv4 addresses to MAC addresses?
+Address Resolution Protocol (ARP) lets a host find the MAC address associated with a known IP address on the same local network: the host broadcasts an ARP request ("who has 192.168.1.5?"), and the owning host replies directly with an ARP reply containing its MAC address, which the requester caches in its ARP table for a period of time to avoid repeating the lookup for every packet.
+@END
+
+@PROGRAM: What are some key fields in the IPv4 header?
+Notable fields: TTL (Time To Live, decremented at each router hop, packet dropped and an ICMP message sent when it hits zero, preventing routing loops from persisting forever), Header Checksum (detects corruption in the header), Flags and Fragment Offset (control and reassemble fragmented packets), Protocol (identifies the next-layer protocol, e.g. 6 for TCP, 17 for UDP, 1 for ICMP), and Source/Destination Address.
+@END
+
+@PROGRAM: What is the difference between unicast, broadcast, and multicast in IPv4?
+Unicast is one-to-one communication between a single source and a single destination. Broadcast (e.g. to 255.255.255.255 or a subnet's broadcast address) is sent to every host on the local network segment. Multicast (224.0.0.0-239.255.255.255) is one-to-many, delivered only to hosts that have explicitly joined a particular multicast group, avoiding the network-wide flooding cost of broadcast.
+@END
+
+@PROGRAM: Design consideration: how should you plan subnet sizing and VLSM?
+Variable Length Subnet Masking (VLSM) lets you size each subnet according to its actual host count rather than using one fixed mask everywhere, avoiding wasted address space (e.g. a point-to-point WAN link only needs a /30, while a user VLAN might need a /24). Good practice: inventory expected host counts per segment, add headroom for growth, allocate the smallest subnet that comfortably fits that need, and document the addressing plan centrally to avoid overlaps as the network scales.
+@END
+
+@PROGRAM: What is IPv4 address exhaustion and why was IPv6 created?
+IPv4 provides roughly 4.3 billion addresses, which - especially after classful allocation waste and explosive Internet/device growth - proved insufficient for a globally connected world; regional registries have already exhausted their free IPv4 pools. IPv6 was created with a vastly larger 128-bit address space (approximately 3.4 x 10^38 addresses) specifically to solve this exhaustion problem long-term, alongside other improvements like simplified headers and built-in support for autoconfiguration.
+@END
+
+@PROGRAM: What is the difference between static and dynamic (DHCP) IP addressing?
+A static IP is manually configured on a device and never changes, appropriate for servers, printers, and network infrastructure that other systems need to reliably reach. Dynamic addressing via DHCP (Dynamic Host Configuration Protocol) automatically leases an IP address (plus subnet mask, gateway, DNS servers) to a device for a limited time, simplifying management for end-user devices that come and go on the network.
+@END
+
+@PROGRAM: How do you troubleshoot and verify IP configuration on a host?
+Windows: "ipconfig /all" shows IP, subnet mask, gateway, DNS, and DHCP lease info. Linux/macOS: "ip addr" (modern) or "ifconfig" (legacy) shows the same. Look for a missing/incorrect IP (APIPA addresses like 169.254.x.x indicate a failed DHCP request), wrong subnet mask, or missing default gateway/DNS entries as common misconfiguration symptoms.
+@END
+
+@PROGRAM: How do you diagnose a subnet mask misconfiguration causing unreachable hosts?
+Symptoms include a host being unable to reach other devices that are physically on the same segment but were assigned addresses the misconfigured host now considers "remote" (or vice versa), since the subnet mask determines which addresses are treated as local. Verify with "ip addr"/"ipconfig" on both hosts, confirm they share the same network address after applying their masks, and check that the mask matches what the DHCP server or network design specifies.
+@END
+
+@PROGRAM: What are the most useful IPv4 diagnostic commands?
+"ping" for basic reachability, "arp -a" to inspect the local ARP cache and confirm MAC-to-IP resolution, "route print" (Windows) or "ip route" (Linux) to inspect the routing table and default gateway, "nslookup"/"dig" for DNS resolution issues, and "tracert"/"traceroute" to see the hop-by-hop path when a destination is unreachable.
+@END
+
+@PROGRAM: How do you detect a duplicate IP address conflict on the network?
+Symptoms include intermittent connectivity, one or both devices with the duplicate address losing network access randomly, or OS pop-up warnings ("Windows has detected an IP address conflict"). Diagnosis: "arp -a" may show the same IP resolving to two different MAC addresses over time, or a persistent ping to that IP shows replies from inconsistent MAC addresses (visible via packet capture); resolving it means reconfiguring one device to a unique address, often by fixing a static assignment that overlaps the DHCP pool.
+@END

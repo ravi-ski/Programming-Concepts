@@ -1,0 +1,62 @@
+@SECTION: Networking
+@CHAPTER: ICMP
+
+@PROGRAM: What is ICMP and what is its purpose?
+Internet Control Message Protocol (ICMP) is a network-layer protocol used by devices to report errors and exchange diagnostic/control information about IP packet delivery - it's not used to carry application data, but to tell a sender things like "this destination is unreachable," "this packet's TTL expired," or to respond to connectivity tests like ping.
+@END
+
+@PROGRAM: What are some common ICMP message types?
+Key types: Echo Request/Reply (type 8/0, used by ping), Destination Unreachable (type 3, with codes for network/host/port/protocol unreachable), Time Exceeded (type 11, sent when TTL reaches zero, used by traceroute), Redirect (type 5, tells a host a better route exists), and Fragmentation Needed (a Destination Unreachable sub-code used in Path MTU Discovery).
+@END
+
+@PROGRAM: How does ping use ICMP Echo Request/Reply?
+"ping" sends an ICMP Echo Request to a target host; if the host is reachable and permits ICMP, it responds with an ICMP Echo Reply. The tool measures round-trip time for each reply and reports packet loss for any requests that don't receive a reply within the timeout, providing a simple, quick reachability and latency test.
+@END
+
+@PROGRAM: How does traceroute use ICMP Time Exceeded and TTL?
+"traceroute" sends a series of probes with increasing TTL values, starting at 1: the first probe expires at the first-hop router, which replies with an ICMP Time Exceeded message revealing its own address; the next probe (TTL=2) expires at the second hop, and so on, building a hop-by-hop map of the path until the destination is finally reached and responds normally (or with a Destination Unreachable/port-specific message, depending on implementation).
+@END
+
+@PROGRAM: What are ICMP Redirect messages and what are their security implications?
+A router sends an ICMP Redirect to inform a host that a better next-hop exists for a particular destination than the one it used, so the host can update its route accordingly. Because a redirect can silently change a host's forwarding behavior, and can be spoofed by an attacker on the local segment to redirect traffic through a malicious device (a man-in-the-middle vector), redirects are often disabled or filtered in security-conscious environments.
+@END
+
+@PROGRAM: What is ICMPv6 and how is its role expanded compared to ICMPv4?
+ICMPv6 retains the basic error-reporting and echo request/reply functions of ICMPv4, but takes on a much larger role in IPv6: it carries the entire Neighbor Discovery Protocol (Router/Neighbor Solicitation and Advertisement messages), which replaces ARP, handles duplicate address detection, and drives SLAAC autoconfiguration - meaning blocking ICMPv6 too aggressively can break core IPv6 functionality, not just diagnostics.
+@END
+
+@PROGRAM: Design consideration: should you block ICMP entirely or filter it selectively?
+Blocking ICMP entirely is a common but often counterproductive security instinct - it breaks legitimate diagnostics (ping, traceroute) and, more seriously, can silently break Path MTU Discovery (if Fragmentation Needed messages are blocked), causing large packets to be dropped with no visible error. Best practice is selective filtering: allow Echo Request/Reply and Fragmentation Needed/Time Exceeded from trusted or all sources as needed, while restricting less essential types (like Redirects) at the network edge.
+@END
+
+@PROGRAM: What is ICMP rate limiting and why does it matter (e.g. smurf attacks)?
+Because ICMP can be trivially generated and, historically, be amplified (a "smurf attack" spoofs a victim's source address and broadcasts ICMP Echo Requests to a whole subnet, causing every host to reply to the victim simultaneously), most modern routers/hosts rate-limit ICMP responses to prevent this kind of abuse from overwhelming a device or link, while still allowing legitimate, low-volume diagnostic use.
+@END
+
+@PROGRAM: What is Path MTU Discovery and how does it use ICMP?
+Path MTU Discovery lets a sender find the largest packet size that can traverse a path without fragmentation: it sends packets with the "Don't Fragment" flag set, and if a router along the path finds the packet too large for the next link's MTU, it drops it and sends back an ICMP "Fragmentation Needed" message specifying the correct smaller MTU, prompting the sender to reduce its packet size accordingly for that destination.
+@END
+
+@PROGRAM: How does ICMP error reporting differ from TCP/UDP error handling?
+ICMP operates at the network layer and reports problems about IP packet delivery itself (unreachable destinations, TTL expiry, fragmentation issues) regardless of what's inside the packet. TCP has its own transport-layer error handling (retransmissions, RST for refused connections) for issues within an established or attempted connection, while UDP has no built-in error handling at all - applications using UDP often rely on ICMP messages (like port unreachable) as their only signal that something went wrong at the network level.
+@END
+
+@PROGRAM: How do you troubleshoot a "Destination Host Unreachable" error?
+This message specifically means a router along the path has no route to the destination network (or the destination host itself is known to be down on a directly connected segment), as opposed to a timeout (which just means no reply was received in time). Check the routing table at the router generating the message ("show ip route" / "ip route" for that destination), verify the destination network is actually configured/advertised, and confirm there isn't a missing or withdrawn route causing the black hole.
+@END
+
+@PROGRAM: How do you distinguish intermittent ping loss caused by network issues from a firewall blocking ICMP?
+If pings fail 100% of the time with no replies at all despite other protocols (like a web request) working fine to the same host, a firewall selectively blocking ICMP is a likely cause. If pings succeed most of the time but occasionally time out or show high jitter, that's more indicative of a real network issue (congestion, a flaky link, or an overloaded device) - correlating with "mtr" over time and checking for consistent loss at a specific hop helps distinguish the two.
+@END
+
+@PROGRAM: What are useful commands for ICMP-based diagnostics?
+"ping" (Windows/Linux/macOS) for basic reachability and latency; "tracert" (Windows) or "traceroute" (Linux/macOS) for path discovery; "pathping" (Windows) combines traceroute-style path discovery with extended ping-style statistics per hop, giving a more detailed loss/latency breakdown along the path than either tool alone.
+@END
+
+@PROGRAM: What is a common ICMP-related issue involving firewalls and Path MTU Discovery?
+If a firewall blocks all ICMP "to be safe," it can inadvertently block Fragmentation Needed messages too, silently breaking Path MTU Discovery: large packets get dropped by an intermediate router but the sender never receives the notification telling it to reduce packet size, resulting in connections that work for small requests but hang or fail for large transfers - a classic "PMTUD black hole" that's often misdiagnosed as an application bug.
+@END
+
+@PROGRAM: What are common ICMP-based attacks and how are they mitigated?
+Ping flood attacks overwhelm a target with a high volume of ICMP Echo Requests to exhaust its bandwidth or processing capacity; smurf attacks amplify this using spoofed source addresses and broadcast addressing so many hosts reply to one victim simultaneously. Mitigations include ICMP rate limiting, disabling directed broadcast forwarding on routers (which prevents the smurf amplification vector), and using firewalls/IDS to detect and drop abnormally high ICMP volumes from a single source.
+@END

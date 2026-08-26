@@ -1,0 +1,62 @@
+@SECTION: Networking
+@CHAPTER: IPv6
+
+@PROGRAM: Why was IPv6 introduced and how large is its address space?
+IPv6 was introduced primarily to solve IPv4 address exhaustion, using 128-bit addresses instead of IPv4's 32-bit addresses - roughly 3.4 x 10^38 possible addresses, effectively unlimited for the foreseeable future. Beyond address space, it also simplified the header format, built in autoconfiguration, and removed the need for NAT in most designs since every device can have a globally unique address.
+@END
+
+@PROGRAM: What is the IPv6 address format and its abbreviation rules?
+An IPv6 address is 128 bits written as eight groups of four hexadecimal digits separated by colons (e.g. 2001:0db8:0000:0000:0000:ff00:0042:8329). Abbreviation rules: leading zeros in each group can be omitted (0db8 -> db8), and one contiguous run of all-zero groups can be replaced with "::" exactly once per address (e.g. the example becomes 2001:db8::ff00:42:8329).
+@END
+
+@PROGRAM: What are the main IPv6 address types (no broadcast)?
+IPv6 has unicast (one-to-one), multicast (one-to-many, replacing IPv4 broadcast entirely), and anycast (one-to-nearest, where multiple hosts share an address and traffic is routed to the topologically closest one). There is no broadcast address type in IPv6 - functions that used broadcast in IPv4 (like DHCP discovery or ARP) are handled via multicast instead.
+@END
+
+@PROGRAM: What are link-local, unique local, and global unicast addresses in IPv6?
+Link-local addresses (fe80::/10) are automatically assigned to every interface and only valid on the local link, used for neighbor discovery and routing protocol communication - never routed. Unique local addresses (fc00::/7) are the IPv6 equivalent of private IPv4 space, for internal use not intended for global routing. Global unicast addresses (2000::/3) are publicly routable, the IPv6 equivalent of public IPv4 addresses.
+@END
+
+@PROGRAM: What is SLAAC and how does it differ from DHCPv6?
+SLAAC (Stateless Address Autoconfiguration) lets a host generate its own IPv6 address using the network prefix advertised by a router (via Router Advertisement messages) combined with an interface identifier, without needing a central server to track leases. DHCPv6 is the stateful alternative, similar to IPv4 DHCP, where a server explicitly assigns and tracks addresses - some deployments combine both (SLAAC for the address, DHCPv6 for other options like DNS servers).
+@END
+
+@PROGRAM: What is Neighbor Discovery Protocol (NDP) and how does it replace ARP?
+NDP is a suite of ICMPv6 messages (Router Solicitation/Advertisement, Neighbor Solicitation/Advertisement) that IPv6 uses for address autoconfiguration, duplicate address detection, and resolving IPv6 addresses to MAC addresses - replacing IPv4's ARP entirely. Neighbor Solicitation/Advertisement specifically perform the same MAC-address-resolution role ARP did, but using multicast rather than broadcast.
+@END
+
+@PROGRAM: How is the IPv6 header simplified compared to the IPv4 header?
+The IPv6 header is a fixed 40 bytes with fewer fields than IPv4's variable-length header - it drops the header checksum (relying on lower and upper layers for integrity), removes built-in fragmentation fields (fragmentation is handled via an optional extension header, not by routers in transit), and moves rarely-used options into a chain of optional extension headers, making the base header simpler and faster for routers to process.
+@END
+
+@PROGRAM: What is the difference between dual-stack and tunneling for IPv4/IPv6 coexistence?
+Dual-stack runs both IPv4 and IPv6 simultaneously on the same devices/network, letting each connection use whichever protocol is available end-to-end - the most straightforward but requires both protocols to be configured everywhere. Tunneling techniques (like 6to4 or Teredo) encapsulate IPv6 packets inside IPv4 packets (or vice versa) to traverse networks that only support one protocol, useful as a transitional bridge but adding overhead and complexity compared to native dual-stack.
+@END
+
+@PROGRAM: Design consideration: how should you plan an IPv6 addressing scheme for an enterprise?
+Because address space is effectively unlimited, best practice is to allocate generously and hierarchically rather than conserving bits like IPv4: typically a /48 per site, /64 per subnet (required for SLAAC to function), with a documented, consistent numbering convention by function/location (mirroring good IPv4 VLAN design) rather than trying to minimize prefix sizes - the goal shifts from address conservation to logical organization and route summarization.
+@END
+
+@PROGRAM: What are IPv6 extension headers?
+Extension headers are optional headers chained after the fixed IPv6 header to carry additional information only when needed (e.g. Hop-by-Hop Options, Routing, Fragment, Authentication, Encapsulating Security Payload) instead of bloating every packet's base header like IPv4 options did. Routers along the path only need to process headers relevant to them, improving overall forwarding efficiency.
+@END
+
+@PROGRAM: How do you troubleshoot basic IPv6 connectivity?
+"ping6"/"ping -6" tests basic reachability using ICMPv6 Echo Request/Reply, and "traceroute6"/"tracert -6" reveals the hop-by-hop IPv6 path. Since NDP replaces ARP, checking the neighbor cache ("ip -6 neigh" on Linux, "netsh interface ipv6 show neighbors" on Windows) is the IPv6 equivalent of checking an ARP table when local-link resolution seems to be failing.
+@END
+
+@PROGRAM: What are common SLAAC/DHCPv6 misconfiguration symptoms?
+A host with only a link-local address (fe80::...) and no global address suggests it never received a valid Router Advertisement, often due to a misconfigured or missing router or an intermediate switch not forwarding the necessary multicast traffic. Duplicate or unexpected addresses can indicate multiple routers advertising conflicting prefixes, or a rogue router advertisement being sent on the network (a known IPv6 security concern).
+@END
+
+@PROGRAM: What are useful commands for inspecting and testing IPv6?
+Linux: "ip -6 addr" (interface addresses), "ip -6 route" (routing table), "ip -6 neigh" (neighbor/NDP cache). Windows: "ipconfig /all" (shows IPv6 alongside IPv4), "netsh interface ipv6 show ..." subcommands. Network devices commonly use "show ipv6 interface" and "show ipv6 route" (Cisco-style) to inspect IPv6 configuration and routing state.
+@END
+
+@PROGRAM: What are important IPv6 security considerations?
+Because IPv6 removes NAT as a default, every device can be globally reachable, making host-level firewalling more important than relying on NAT for implicit protection. Extension header chains can be abused to evade simple packet filters that don't fully parse them, and rogue Router Advertisements (an attacker impersonating a router via NDP) can hijack traffic or cause denial of service - mitigated by RA Guard and similar switch-level protections.
+@END
+
+@PROGRAM: How does IPv6 multicast usage differ from IPv4 broadcast use cases?
+Where IPv4 relied on broadcast for things like DHCP discovery, ARP, and some routing protocol traffic (flooding every host on the segment), IPv6 uses specific, purpose-built multicast groups instead (e.g. ff02::1 for all nodes, ff02::2 for all routers), so only interested hosts process the traffic rather than every device on the link having to inspect and discard irrelevant broadcast frames.
+@END

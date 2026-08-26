@@ -1,0 +1,62 @@
+@SECTION: Networking
+@CHAPTER: 802.1X (DOT1X)
+
+@PROGRAM: What is 802.1X and what problem does it solve?
+IEEE 802.1X is a standard for port-based network access control: a switch port (or wireless association) stays effectively closed to normal traffic until the connecting device successfully authenticates, preventing unauthorized devices from simply plugging in (or associating) and getting network access. It's the foundation of modern "zero trust at the edge" wired/wireless access designs.
+@END
+
+@PROGRAM: What are the three roles in 802.1X?
+The Supplicant is the client device requesting network access (or its 802.1X client software). The Authenticator is the network device controlling the port - typically a switch or wireless access point - which blocks/allows traffic based on authentication outcome but doesn't make the authentication decision itself. The Authentication Server (almost always RADIUS) actually verifies credentials and tells the authenticator whether to allow the port to open.
+@END
+
+@PROGRAM: What is EAP and what are common EAP methods used with 802.1X?
+EAP (Extensible Authentication Protocol) is a flexible authentication framework carried inside 802.1X (as "EAP over LAN"/EAPOL between supplicant and authenticator) and inside RADIUS (between authenticator and authentication server) - it isn't itself an authentication method but a container for various methods. Common methods: EAP-TLS (certificate-based, strongest, requires client certificates), PEAP (wraps a second authentication method, often MS-CHAPv2, inside a TLS tunnel using just a server certificate), and EAP-TTLS (similar to PEAP with more flexible inner methods).
+@END
+
+@PROGRAM: Describe the overall 802.1X authentication process flow.
+When a device connects, the authenticator sends an EAP-Request/Identity; the supplicant responds with its identity; the authenticator forwards this (via RADIUS Access-Request) to the authentication server; the server and supplicant then exchange further EAP challenge/response messages (relayed through the authenticator) according to the chosen EAP method, until the server sends a final RADIUS Access-Accept or Access-Reject, which the authenticator uses to open or keep closed the port.
+@END
+
+@PROGRAM: What role does a RADIUS server play in 802.1X?
+RADIUS (Remote Authentication Dial-In User Service) acts as the Authentication Server: it validates the supplicant's credentials or certificate (often against an identity store like Active Directory), applies policy (e.g. which VLAN or access level this user/device should get), and returns an Access-Accept or Access-Reject to the authenticator, along with any additional attributes like a VLAN assignment.
+@END
+
+@PROGRAM: How does dynamic VLAN assignment work with 802.1X?
+On successful authentication, the RADIUS server can return specific attributes (such as Tunnel-Private-Group-ID) in its Access-Accept response instructing the switch to place that port into a particular VLAN based on the authenticated user or device's identity/group - meaning a laptop plugged into any port on the network can automatically land on the correct VLAN (e.g. corporate, guest, or a departmental VLAN) without manual per-port VLAN configuration.
+@END
+
+@PROGRAM: Design consideration: monitor mode vs enforcement mode for an 802.1X rollout?
+Monitor mode ("open authentication" combined with 802.1X running in the background) allows all traffic while still performing authentication and logging the results, letting administrators validate that supplicants, RADIUS policy, and device compatibility all work correctly across the real production network before impacting anyone. Only after confirming a clean monitor-mode rollout should enforcement mode (actually blocking unauthenticated devices) be enabled, avoiding a "big bang" cutover that locks out unprepared or misconfigured devices.
+@END
+
+@PROGRAM: What is MAB (MAC Authentication Bypass) and when is it used?
+Not all devices support 802.1X (printers, IP cameras, some IoT devices), so MAB allows the switch to authenticate a device by its MAC address alone as a fallback when no 802.1X response is received within a timeout, checking that MAC against a RADIUS-authorized list. It's inherently weaker than certificate/credential-based 802.1X (MAC addresses can be spoofed) but is a practical necessity for supporting legacy or non-802.1X-capable devices in an otherwise enforced environment.
+@END
+
+@PROGRAM: What are guest VLAN and auth-fail VLAN, and how do they differ?
+A Guest VLAN is assigned to a port when no supplicant responds at all to 802.1X (e.g. a device with no 802.1X client installed), routing it to a restricted/Internet-only segment. An Auth-Fail VLAN is assigned when a supplicant does respond but authentication explicitly fails (e.g. wrong credentials), which can be configured to place the device in a remediation or restricted-access VLAN rather than fully denying the port.
+@END
+
+@PROGRAM: How does 802.1X differ between wired and wireless networks?
+On wired ports, 802.1X directly controls whether the physical switch port forwards traffic. On wireless, 802.1X is layered into the WPA2/WPA3-Enterprise authentication process itself - the access point acts as the authenticator during the 802.11 association process, and successful EAP authentication is what allows the 4-way handshake (deriving encryption keys) to complete, tying network access control directly to the encryption key derivation.
+@END
+
+@PROGRAM: How do you troubleshoot a device stuck in an unauthorized/unauthenticated state?
+Check the switch port's authentication session state ("show authentication sessions" / "show dot1x interface" on Cisco-style gear) to see whether the supplicant is even sending EAPOL frames; if not, the device's 802.1X client may be disabled or misconfigured. If EAPOL frames are seen but authentication fails, check RADIUS server logs for the specific rejection reason (bad credentials, certificate trust failure, policy denial) rather than assuming it's purely a switch-side problem.
+@END
+
+@PROGRAM: How do you troubleshoot 802.1X failures caused by an unreachable RADIUS server?
+If the RADIUS server is unreachable, authenticators typically fail closed (deny access) unless a fallback policy is configured; check RADIUS server reachability from the switch/AP ("test aaa" commands on Cisco gear, or simple UDP reachability tests to port 1812/1813), review switch logs for "RADIUS server not responding" style messages, and confirm the shared secret matches on both the switch and RADIUS server, since a mismatched secret can silently cause every request to be rejected or ignored.
+@END
+
+@PROGRAM: What commands help inspect 802.1X/authentication session state on network equipment?
+Cisco-style commands: "show dot1x all" summarizes 802.1X status across interfaces; "show authentication sessions" (used for the more modern unified authentication framework, covering 802.1X, MAB, and web-auth together) lists each session's method, state, and assigned VLAN; "show authentication sessions interface <if>" narrows this to one specific port for focused troubleshooting.
+@END
+
+@PROGRAM: What causes certificate trust failures in EAP-TLS deployments?
+EAP-TLS requires both sides to trust each other's certificates: common failure causes include the supplicant not trusting the RADIUS server's certificate chain (missing root/intermediate CA in its trust store), an expired client or server certificate, a certificate issued to the wrong subject name/SAN not matching what's expected, or clock skew between devices causing certificate validity period checks to fail - all of which typically show up as an EAP-TLS handshake failure in RADIUS logs even though the certificates themselves may be otherwise valid.
+@END
+
+@PROGRAM: What are the security benefits of 802.1X compared to open network access?
+802.1X ensures only authenticated, authorized devices/users can send traffic on a given port or wireless network at all, rather than relying solely on downstream controls (firewalls, ACLs) after a device is already on the network. Combined with dynamic VLAN assignment, it also enables automatic, identity-based network segmentation, and (on wireless) ties directly into per-session encryption key derivation, meaning unauthorized devices can't simply eavesdrop on an open or shared-key network.
+@END

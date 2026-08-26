@@ -1,0 +1,62 @@
+@SECTION: Networking
+@CHAPTER: TCP/IP
+
+@PROGRAM: What is the TCP/IP model and its four layers?
+The TCP/IP model is the practical, four-layer networking model the Internet is built on: Network Access (Link) layer (physical/MAC addressing, e.g. Ethernet), Internet layer (logical addressing and routing, IP/ICMP/ARP), Transport layer (end-to-end delivery, TCP/UDP), and Application layer (user-facing protocols like HTTP, DNS, SSH). Each layer only needs to know how to talk to the layer directly above/below it, which is what allows independent evolution of protocols at each layer.
+@END
+
+@PROGRAM: What is the difference between the OSI model and the TCP/IP model?
+The OSI model is a 7-layer conceptual reference model (Physical, Data Link, Network, Transport, Session, Presentation, Application) used mainly for teaching and troubleshooting terminology. TCP/IP is a simpler 4-layer model that reflects how protocols are actually implemented in practice, merging OSI's Session/Presentation/Application layers into one Application layer and combining Physical/Data Link into a single Network Access layer.
+@END
+
+@PROGRAM: Explain the TCP three-way handshake.
+TCP establishes a connection with three segments: the client sends a SYN (synchronize) with an initial sequence number, the server responds with SYN-ACK (acknowledging the client's sequence number and sending its own), and the client replies with an ACK confirming the server's sequence number. Only after this handshake completes do both sides consider the connection established and begin exchanging data reliably.
+@END
+
+@PROGRAM: Explain TCP connection termination (the four-way close).
+Either side can initiate termination: the closing side sends a FIN, the other side ACKs it (and may continue sending its own remaining data), then when that side is also done it sends its own FIN, which the original closer ACKs. This is typically four segments (FIN, ACK, FIN, ACK) because TCP is full-duplex and each direction is closed independently, though the middle ACK+FIN can sometimes be combined.
+@END
+
+@PROGRAM: What is the core difference between TCP and UDP?
+TCP is connection-oriented, providing reliable, ordered, flow-controlled, and congestion-controlled delivery via handshakes, acknowledgments, and retransmissions - at the cost of overhead and latency. UDP is connectionless and unreliable (no handshake, no retransmission, no ordering guarantee), trading reliability for lower latency and overhead, making it suitable for real-time applications like VoIP, video streaming, and DNS queries.
+@END
+
+@PROGRAM: What is TCP flow control and how does the sliding window work?
+Flow control prevents a fast sender from overwhelming a slow receiver's buffer. Each TCP segment's ACK includes a "window size" advertising how much more data the receiver can currently buffer; the sender is only allowed to have that many unacknowledged bytes in flight at once, and the window shrinks/grows dynamically as the receiver's buffer fills or drains.
+@END
+
+@PROGRAM: What is TCP congestion control (slow start and congestion avoidance)?
+Congestion control prevents the sender from overwhelming the network itself (as opposed to the receiver). Slow start begins with a small congestion window that doubles each round-trip until a threshold or packet loss is detected; after that, congestion avoidance increases the window more conservatively (roughly linearly), and on packet loss the window is reduced sharply (e.g. halved) to relieve congestion, then the cycle repeats.
+@END
+
+@PROGRAM: What is TCP retransmission and the Retransmission Timeout (RTO)?
+If a sender doesn't receive an ACK for a segment within its Retransmission Timeout, it assumes the segment (or its ACK) was lost and retransmits it. RTO is calculated dynamically from measured round-trip times (smoothed RTT and RTT variance) so it adapts to changing network conditions - too short an RTO causes unnecessary retransmissions, too long delays recovery from real loss.
+@END
+
+@PROGRAM: What are well-known ports and some common examples?
+Well-known ports (0-1023) are reserved for standard services by IANA, so clients know which port to connect to without prior negotiation. Common examples: 20/21 FTP, 22 SSH, 23 Telnet, 25 SMTP, 53 DNS, 80 HTTP, 443 HTTPS, 110/143 POP3/IMAP - registered ports (1024-49151) and dynamic/private ports (49152-65535) are used for other services and ephemeral client connections respectively.
+@END
+
+@PROGRAM: Design consideration: when should you choose TCP vs UDP for an application?
+Choose TCP when correctness and completeness matter more than latency - file transfer, web pages, database connections, anything where a missing or reordered byte would corrupt the result. Choose UDP when low latency and tolerance for occasional loss matter more - live video/audio, gaming, DNS lookups - especially if the application can implement its own lightweight reliability (e.g. QUIC) tailored to its specific needs rather than paying for TCP's general-purpose guarantees.
+@END
+
+@PROGRAM: What is MTU and how does fragmentation relate to TCP/IP?
+The Maximum Transmission Unit (MTU) is the largest packet size a link can carry without fragmentation, typically 1500 bytes for Ethernet. If a packet exceeds the MTU of a link along its path, IPv4 routers may fragment it (unless the Don't Fragment flag is set, which triggers an ICMP "Fragmentation Needed" message instead) - fragmentation adds overhead and failure points, so protocols like TCP use Path MTU Discovery to avoid it by sizing segments appropriately.
+@END
+
+@PROGRAM: What is TCP window scaling and why does it matter for high-latency links?
+The original TCP header only allows a 16-bit window size field (max 65,535 bytes), which severely limits throughput on high-bandwidth, high-latency ("long fat") networks like satellite or transcontinental links. The window scaling option (negotiated during the handshake) multiplies the advertised window by a scale factor, allowing effective windows in the megabytes so the sender can keep enough data in flight to fully utilize available bandwidth despite the round-trip delay.
+@END
+
+@PROGRAM: How do you troubleshoot TCP connection states using netstat/ss?
+"ss -tan" or "netstat -tan" lists TCP sockets with their state (LISTEN, ESTABLISHED, TIME_WAIT, CLOSE_WAIT, SYN_SENT, etc.). A large number of CLOSE_WAIT sockets often indicates the application isn't closing connections properly; many SYN_SENT with no corresponding ESTABLISHED suggests the remote host or a firewall is dropping the handshake; excessive TIME_WAIT under high connection churn may require tuning (e.g. SO_REUSEADDR, reducing TIME_WAIT duration).
+@END
+
+@PROGRAM: How do you troubleshoot packet loss and latency using ping, traceroute, and mtr?
+"ping" establishes basic reachability and round-trip time, and consistent packet loss or high jitter points to a network problem. "traceroute"/"tracert" (using increasing TTL values) reveals the path and per-hop latency, helping identify which hop introduces delay or loss. "mtr" combines both, continuously probing every hop to reveal exactly where intermittent loss is occurring rather than a single snapshot.
+@END
+
+@PROGRAM: What are the most useful command-line tools for TCP/IP diagnostics?
+Key tools: "netstat"/"ss" for socket and connection state inspection; "tcpdump"/Wireshark for packet-level capture and analysis; "curl"/"wget" for testing HTTP(S) endpoints directly; "telnet <host> <port>" or "nc -zv <host> <port>" for quick TCP port reachability checks; "ping"/"traceroute"/"mtr" for reachability and path diagnostics; and "ip route"/"route -n" for routing table inspection when connectivity issues are routing-related.
+@END
