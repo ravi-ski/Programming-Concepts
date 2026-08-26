@@ -1822,6 +1822,211 @@ const CATALOG = [
           }
         ],
         "path": "CPP/stl_containers.cpp"
+      },
+      {
+        "chapter": "TYPE CASTING AND RTTI",
+        "folder": "CPP",
+        "programs": [
+          {
+            "name": "C-style cast basics",
+            "input": "(int)3.9",
+            "output": "3",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    double value = 3.9;\n    int result = (int)value; /* old-style cast: works but hides intent/safety */\n    cout << result << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "static_cast for numeric conversion",
+            "input": "static_cast<int>(3.9)",
+            "output": "3",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    double value = 3.9;\n    int result = static_cast<int>(value); /* checked at compile time, clearer intent */\n    cout << result << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "static_cast for pointer upcast (derived to base)",
+            "input": "Dog* upcast to Animal*",
+            "output": "Upcast succeeded, calling through base pointer",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Animal\n{\npublic:\n    virtual ~Animal() {}\n};\n\nclass Dog : public Animal\n{\n};\n\nint main()\n{\n    Dog dog;\n    Animal *animal = static_cast<Animal *>(&dog); /* always safe: derived -> base */\n    cout << \"Upcast succeeded, calling through base pointer\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "static_cast for pointer downcast (base to derived, unchecked)",
+            "input": "Animal* known to actually point to a Dog",
+            "output": "Downcast performed (no runtime check - programmer must be certain)",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Animal\n{\npublic:\n    virtual ~Animal() {}\n};\n\nclass Dog : public Animal\n{\npublic:\n    void bark() { cout << \"Downcast performed (no runtime check - programmer must be certain)\" << endl; }\n};\n\nint main()\n{\n    Animal *animal = new Dog();\n    Dog *dog = static_cast<Dog *>(animal); /* no runtime type check, unlike dynamic_cast */\n    dog->bark();\n    delete animal;\n    return 0;\n}"
+          },
+          {
+            "name": "dynamic_cast for safe downcasting with polymorphic classes",
+            "input": "Animal* actually pointing to a Dog",
+            "output": "Downcast succeeded: Woof!",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Animal\n{\npublic:\n    virtual ~Animal() {}\n};\n\nclass Dog : public Animal\n{\npublic:\n    void bark() { cout << \"Downcast succeeded: Woof!\" << endl; }\n};\n\nint main()\n{\n    Animal *animal = new Dog();\n    Dog *dog = dynamic_cast<Dog *>(animal); /* checked at runtime via RTTI */\n\n    if (dog != nullptr)\n        dog->bark();\n\n    delete animal;\n    return 0;\n}"
+          },
+          {
+            "name": "dynamic_cast returning nullptr on a failed pointer cast",
+            "input": "Animal* actually pointing to a Cat, cast attempted to Dog*",
+            "output": "Cast failed: pointer is not actually a Dog",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Animal\n{\npublic:\n    virtual ~Animal() {}\n};\n\nclass Dog : public Animal\n{\n};\n\nclass Cat : public Animal\n{\n};\n\nint main()\n{\n    Animal *animal = new Cat();\n    Dog *dog = dynamic_cast<Dog *>(animal);\n\n    if (dog == nullptr)\n        cout << \"Cast failed: pointer is not actually a Dog\" << endl;\n\n    delete animal;\n    return 0;\n}"
+          },
+          {
+            "name": "dynamic_cast with references throwing std::bad_cast on failure",
+            "input": "Animal& actually referring to a Cat, cast attempted to Dog&",
+            "output": "Caught std::bad_cast: reference cast failed",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Animal\n{\npublic:\n    virtual ~Animal() {}\n};\n\nclass Dog : public Animal\n{\n};\n\nclass Cat : public Animal\n{\n};\n\nint main()\n{\n    Cat cat;\n    Animal &animalRef = cat;\n\n    try\n    {\n        Dog &dogRef = dynamic_cast<Dog &>(animalRef); /* throws bad_cast, unlike the pointer form */\n        (void)dogRef;\n    }\n    catch (const bad_cast &)\n    {\n        cout << \"Caught std::bad_cast: reference cast failed\" << endl;\n    }\n    return 0;\n}"
+          },
+          {
+            "name": "const_cast to remove constness",
+            "input": "a const int reference passed to a legacy non-const function",
+            "output": "Value after modification through const_cast: 20",
+            "code": "#include <iostream>\nusing namespace std;\n\nvoid legacyModify(int &value) { value = 20; }\n\nint main()\n{\n    const int value = 10;\n    legacyModify(const_cast<int &>(value)); /* removes const so legacy API compiles */\n    cout << \"Value after modification through const_cast: \" << value << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "const_cast to add constness",
+            "input": "a non-const pointer treated as const",
+            "output": "Value seen through const pointer: 5",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    int value = 5;\n    int *ptr = &value;\n    const int *constPtr = const_cast<const int *>(ptr); /* adding const is always safe */\n\n    cout << \"Value seen through const pointer: \" << *constPtr << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "reinterpret_cast between unrelated pointer types",
+            "input": "int* reinterpreted as char*",
+            "output": "First byte of the int, viewed as a raw char",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    int value = 65; /* 'A' in ASCII, on a little-endian system */\n    char *bytePtr = reinterpret_cast<char *>(&value);\n\n    cout << \"First byte of the int, viewed as a raw char: \" << bytePtr[0] << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "reinterpret_cast between a pointer and an integer",
+            "input": "convert a pointer to its numeric address and back",
+            "output": "Round-tripped pointer matches the original",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    int value = 42;\n    int *ptr = &value;\n\n    uintptr_t address = reinterpret_cast<uintptr_t>(ptr);\n    int *restoredPtr = reinterpret_cast<int *>(address);\n\n    cout << ((restoredPtr == ptr) ? \"Round-tripped pointer matches the original\" : \"Mismatch\") << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "typeid operator basics",
+            "input": "typeid(int), typeid of a class instance",
+            "output": "Type name printed for both a primitive and a class instance",
+            "code": "#include <iostream>\n#include <typeinfo>\nusing namespace std;\n\nclass Widget\n{\n};\n\nint main()\n{\n    int number = 5;\n    Widget widget;\n\n    cout << \"int type: \" << typeid(number).name() << endl;\n    cout << \"Widget type: \" << typeid(widget).name() << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Comparing types using typeid",
+            "input": "compare typeid of two different objects",
+            "output": "Types are different",
+            "code": "#include <iostream>\n#include <typeinfo>\nusing namespace std;\n\nclass Dog\n{\n};\nclass Cat\n{\n};\n\nint main()\n{\n    Dog dog;\n    Cat cat;\n\n    cout << ((typeid(dog) == typeid(cat)) ? \"Types are the same\" : \"Types are different\") << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "RTTI: combining dynamic_cast and typeid to identify runtime type",
+            "input": "Animal* pointing to a Dog",
+            "output": "Runtime type identified as a Dog via typeid, confirmed by dynamic_cast",
+            "code": "#include <iostream>\n#include <typeinfo>\nusing namespace std;\n\nclass Animal\n{\npublic:\n    virtual ~Animal() {}\n};\n\nclass Dog : public Animal\n{\n};\n\nint main()\n{\n    Animal *animal = new Dog();\n\n    if (typeid(*animal) == typeid(Dog))\n        cout << \"Runtime type identified as a Dog via typeid, confirmed by dynamic_cast\" << endl;\n\n    delete animal;\n    return 0;\n}"
+          },
+          {
+            "name": "static_cast vs dynamic_cast - safety and cost comparison",
+            "input": "(none)",
+            "output": "static_cast has zero runtime cost but no safety check; dynamic_cast checks at runtime",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    /* static_cast: resolved entirely at compile time, no RTTI lookup, but\n     * an incorrect downcast is undefined behavior if the assumption is wrong.\n     * dynamic_cast: performs a runtime check using RTTI, safely returning\n     * nullptr (or throwing for references) on failure, at some runtime cost. */\n    cout << \"static_cast has zero runtime cost but no safety check; dynamic_cast checks at runtime\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "static_cast between an enum and an int",
+            "input": "Color::Green cast to int and back",
+            "output": "1, Green",
+            "code": "#include <iostream>\nusing namespace std;\n\nenum class Color\n{\n    Red,\n    Green,\n    Blue\n};\n\nint main()\n{\n    Color c = Color::Green;\n    int value = static_cast<int>(c);\n    cout << value << endl;\n\n    Color restored = static_cast<Color>(value);\n    cout << (restored == Color::Green ? \"Green\" : \"Other\") << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "static_cast from void* back to a typed pointer",
+            "input": "int* stored as void*",
+            "output": "99",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    int value = 99;\n    void *generic = &value;\n\n    int *typed = static_cast<int *>(generic); /* void* -> T* requires an explicit cast */\n    cout << *typed << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Explicit conversion operator overloading",
+            "input": "static_cast<int>(Meters(5))",
+            "output": "5",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Meters\n{\n    int value;\n\npublic:\n    Meters(int v) : value(v) {}\n    explicit operator int() const { return value; } /* requires an explicit cast to use */\n};\n\nint main()\n{\n    Meters m(5);\n    int value = static_cast<int>(m);\n    cout << value << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Implicit conversion via a converting constructor",
+            "input": "Fraction f = 5; (int implicitly converted to Fraction)",
+            "output": "5/1",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Fraction\n{\n    int numerator, denominator;\n\npublic:\n    Fraction(int n, int d = 1) : numerator(n), denominator(d) {} /* not explicit: allows implicit conversion */\n    void show() { cout << numerator << \"/\" << denominator << endl; }\n};\n\nint main()\n{\n    Fraction f = 5; /* implicitly calls Fraction(5, 1) */\n    f.show();\n    return 0;\n}"
+          },
+          {
+            "name": "The explicit keyword preventing implicit conversion",
+            "input": "Fraction(5) requires an explicit constructor call",
+            "output": "Explicit constructor used, implicit conversion is not allowed",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Fraction\n{\n    int numerator;\n\npublic:\n    explicit Fraction(int n) : numerator(n) {} /* blocks \"Fraction f = 5;\" from compiling */\n    void show() { cout << \"Explicit constructor used, implicit conversion is not allowed\" << endl; }\n};\n\nint main()\n{\n    Fraction f(5); /* must be called explicitly */\n    f.show();\n    return 0;\n}"
+          },
+          {
+            "name": "Casting away const with const_cast to call a legacy non-const API",
+            "input": "a const char* passed to an old C-style function expecting char*",
+            "output": "Legacy function received: hello",
+            "code": "#include <iostream>\n#include <cstring>\nusing namespace std;\n\nvoid legacyPrint(char *text) { cout << \"Legacy function received: \" << text << endl; }\n\nint main()\n{\n    const char *text = \"hello\";\n    legacyPrint(const_cast<char *>(text)); /* safe here only because legacyPrint doesn't modify it */\n    return 0;\n}"
+          },
+          {
+            "name": "dynamic_cast in a class hierarchy with multiple derived classes",
+            "input": "Shape* pointing to a Circle, Square, or Triangle",
+            "output": "Identified shape type: Circle",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Shape\n{\npublic:\n    virtual ~Shape() {}\n};\n\nclass Circle : public Shape\n{\n};\nclass Square : public Shape\n{\n};\nclass Triangle : public Shape\n{\n};\n\nint main()\n{\n    Shape *shape = new Circle();\n\n    if (dynamic_cast<Circle *>(shape))\n        cout << \"Identified shape type: Circle\" << endl;\n    else if (dynamic_cast<Square *>(shape))\n        cout << \"Identified shape type: Square\" << endl;\n    else if (dynamic_cast<Triangle *>(shape))\n        cout << \"Identified shape type: Triangle\" << endl;\n\n    delete shape;\n    return 0;\n}"
+          },
+          {
+            "name": "Using dynamic_cast to check an object's type before performing an operation",
+            "input": "process a list of Animal* only if they are actually Dog*",
+            "output": "Processed a Dog, Skipped a non-Dog animal",
+            "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nclass Animal\n{\npublic:\n    virtual ~Animal() {}\n};\n\nclass Dog : public Animal\n{\n};\nclass Cat : public Animal\n{\n};\n\nint main()\n{\n    vector<Animal *> animals = {new Dog(), new Cat()};\n\n    for (Animal *animal : animals)\n    {\n        if (dynamic_cast<Dog *>(animal))\n            cout << \"Processed a Dog\" << endl;\n        else\n            cout << \"Skipped a non-Dog animal\" << endl;\n    }\n\n    for (Animal *animal : animals)\n        delete animal;\n    return 0;\n}"
+          },
+          {
+            "name": "static_cast with a user-defined conversion between custom types",
+            "input": "static_cast<Fahrenheit>(Celsius(100))",
+            "output": "212",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Fahrenheit\n{\npublic:\n    double value;\n    Fahrenheit(double v) : value(v) {}\n};\n\nclass Celsius\n{\n    double value;\n\npublic:\n    Celsius(double v) : value(v) {}\n    operator Fahrenheit() const { return Fahrenheit(value * 9.0 / 5.0 + 32); }\n};\n\nint main()\n{\n    Celsius c(100);\n    Fahrenheit f = static_cast<Fahrenheit>(c); /* invokes the user-defined conversion operator */\n    cout << f.value << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "reinterpret_cast for type punning (use with caution)",
+            "input": "view the bytes of a float as an unsigned int",
+            "output": "Raw bit pattern of the float printed as an unsigned integer",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    float value = 1.5f;\n    unsigned int *bits = reinterpret_cast<unsigned int *>(&value); /* technically UB per strict aliasing, illustrative only */\n\n    cout << \"Raw bit pattern of the float printed as an unsigned integer: \" << *bits << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Cast from int to a scoped enum using static_cast",
+            "input": "static_cast<Direction>(2)",
+            "output": "East",
+            "code": "#include <iostream>\nusing namespace std;\n\nenum class Direction\n{\n    North,\n    South,\n    East,\n    West\n};\n\nint main()\n{\n    int value = 2;\n    Direction dir = static_cast<Direction>(value); /* required explicitly for enum class */\n\n    cout << (dir == Direction::East ? \"East\" : \"Other\") << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Difference between static_cast and a C-style cast in safety",
+            "input": "attempting an invalid cast at compile time",
+            "output": "static_cast fails to compile for unrelated types, C-style cast may silently misbehave",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Unrelated\n{\n};\n\nint main()\n{\n    /* static_cast<Unrelated*>(somePointerOfADifferentType) would fail to compile\n     * if the types are truly unrelated, catching mistakes early. A C-style cast\n     * \"(Unrelated*)somePointer\" would often compile anyway, silently misbehaving. */\n    cout << \"static_cast fails to compile for unrelated types, C-style cast may silently misbehave\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Cross-cast between sibling classes using dynamic_cast and a common virtual base",
+            "input": "cast from one interface pointer to a sibling interface implemented by the same object",
+            "output": "Cross-cast succeeded between sibling interfaces",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Printable\n{\npublic:\n    virtual ~Printable() {}\n};\n\nclass Serializable\n{\npublic:\n    virtual ~Serializable() {}\n};\n\nclass Document : public Printable, public Serializable\n{\n};\n\nint main()\n{\n    Document doc;\n    Printable *printable = &doc;\n\n    Serializable *serializable = dynamic_cast<Serializable *>(printable); /* cross-cast via RTTI */\n\n    cout << (serializable != nullptr ? \"Cross-cast succeeded between sibling interfaces\" : \"Failed\") << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "dynamic_cast requires a polymorphic base class (at least one virtual function)",
+            "input": "a base class with a virtual destructor enabling dynamic_cast",
+            "output": "dynamic_cast works because Base has a virtual function (the destructor)",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Base\n{\npublic:\n    virtual ~Base() {} /* required: without any virtual function, dynamic_cast won't compile */\n};\n\nclass Derived : public Base\n{\n};\n\nint main()\n{\n    Base *base = new Derived();\n    Derived *derived = dynamic_cast<Derived *>(base);\n\n    cout << (derived != nullptr ? \"dynamic_cast works because Base has a virtual function (the destructor)\" : \"Failed\") << endl;\n\n    delete base;\n    return 0;\n}"
+          },
+          {
+            "name": "Printing the actual runtime type name using typeid(*ptr).name()",
+            "input": "Base* actually pointing to a Derived object",
+            "output": "Runtime type name printed (compiler-mangled, but distinct from \"Base\")",
+            "code": "#include <iostream>\n#include <typeinfo>\nusing namespace std;\n\nclass Base\n{\npublic:\n    virtual ~Base() {}\n};\n\nclass Derived : public Base\n{\n};\n\nint main()\n{\n    Base *base = new Derived();\n    cout << \"Runtime type name: \" << typeid(*base).name() << endl; /* resolves to Derived, not Base */\n\n    delete base;\n    return 0;\n}"
+          },
+          {
+            "name": "Narrowing conversion made explicit using static_cast",
+            "input": "static_cast<short>(70000)",
+            "output": "Explicit narrowing cast performed (value may overflow, done intentionally)",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    int large = 70000;\n    short narrowed = static_cast<short>(large); /* explicit: signals the overflow is intentional */\n\n    cout << \"Explicit narrowing cast performed (value may overflow, done intentionally): \" << narrowed << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Using const_cast together with static_cast in a safe accessor pattern",
+            "input": "a const member function reusing a non-const helper via const_cast",
+            "output": "Reused non-const logic safely from a const context",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Data\n{\n    mutable int cachedValue = -1;\n\npublic:\n    int computeExpensiveValue() { return 42; }\n\n    int getValue() const\n    {\n        if (cachedValue == -1)\n            cachedValue = const_cast<Data *>(this)->computeExpensiveValue();\n        return cachedValue;\n    }\n};\n\nint main()\n{\n    const Data d;\n    cout << \"Reused non-const logic safely from a const context: \" << d.getValue() << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Choosing the right cast - a quick summary program",
+            "input": "(none)",
+            "output": "static_cast: related types; dynamic_cast: polymorphic downcast; const_cast: constness; reinterpret_cast: unrelated types",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    cout << \"static_cast: related types; \"\n         << \"dynamic_cast: polymorphic downcast; \"\n         << \"const_cast: constness; \"\n         << \"reinterpret_cast: unrelated types\" << endl;\n    return 0;\n}"
+          }
+        ],
+        "path": "CPP/typecasting.cpp"
       }
     ]
   },
