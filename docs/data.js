@@ -3586,6 +3586,43 @@ const CATALOG = [
         "path": "Networking/linux_commands.txt"
       },
       {
+        "chapter": "SELECT, POLL, ASYNC IO AND SYNCHRONIZATION",
+        "folder": "Networking",
+        "programs": [
+          {
+            "name": "I/O multiplexing with select() on a TCP server",
+            "input": "multiple clients connecting to port 8080",
+            "output": "Client connected: <fd>, echoes back whatever each client sends",
+            "code": "#include <iostream>\n#include <cstring>\n#include <unistd.h>\n#include <arpa/inet.h>\n#include <sys/select.h>\nusing namespace std;\n\nint main()\n{\n    int serverSocket = socket(AF_INET, SOCK_STREAM, 0);\n\n    sockaddr_in address{};\n    address.sin_family = AF_INET;\n    address.sin_addr.s_addr = INADDR_ANY;\n    address.sin_port = htons(8080);\n\n    int option = 1;\n    setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));\n    bind(serverSocket, reinterpret_cast<sockaddr *>(&address), sizeof(address));\n    listen(serverSocket, 5);\n\n    fd_set masterSet;\n    FD_ZERO(&masterSet);\n    FD_SET(serverSocket, &masterSet);\n    int maxSocket = serverSocket;\n\n    cout << \"select() server running on port 8080\\n\";\n\n    while (true)\n    {\n        fd_set readySet = masterSet;\n        int readyCount = select(maxSocket + 1, &readySet, nullptr, nullptr, nullptr);\n\n        if (readyCount < 0)\n        {\n            perror(\"select\");\n            break;\n        }\n\n        for (int socketFd = 0; socketFd <= maxSocket; ++socketFd)\n        {\n            if (!FD_ISSET(socketFd, &readySet))\n                continue;\n\n            if (socketFd == serverSocket)\n            {\n                int clientSocket = accept(serverSocket, nullptr, nullptr);\n                FD_SET(clientSocket, &masterSet);\n                maxSocket = max(maxSocket, clientSocket);\n                cout << \"Client connected: \" << clientSocket << '\\n';\n            }\n            else\n            {\n                char buffer[1024];\n                int bytes = recv(socketFd, buffer, sizeof(buffer), 0);\n\n                if (bytes <= 0)\n                {\n                    cout << \"Client disconnected: \" << socketFd << '\\n';\n                    close(socketFd);\n                    FD_CLR(socketFd, &masterSet);\n                }\n                else\n                {\n                    send(socketFd, buffer, bytes, 0);\n                }\n            }\n        }\n    }\n\n    close(serverSocket);\n    return 0;\n}"
+          },
+          {
+            "name": "I/O multiplexing with poll() on a TCP server",
+            "input": "multiple clients connecting to port 8081",
+            "output": "Client connected: <fd>, echoes back whatever each client sends",
+            "code": "#include <iostream>\n#include <vector>\n#include <cstring>\n#include <unistd.h>\n#include <arpa/inet.h>\n#include <poll.h>\nusing namespace std;\n\nint main()\n{\n    int serverSocket = socket(AF_INET, SOCK_STREAM, 0);\n\n    sockaddr_in address{};\n    address.sin_family = AF_INET;\n    address.sin_addr.s_addr = INADDR_ANY;\n    address.sin_port = htons(8081);\n\n    int option = 1;\n    setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));\n    bind(serverSocket, reinterpret_cast<sockaddr *>(&address), sizeof(address));\n    listen(serverSocket, 5);\n\n    vector<pollfd> fds;\n    fds.push_back({serverSocket, POLLIN, 0}); /* poll() avoids select()'s FD_SETSIZE limit */\n\n    cout << \"poll() server running on port 8081\\n\";\n\n    while (true)\n    {\n        int readyCount = poll(fds.data(), fds.size(), -1);\n        if (readyCount < 0)\n        {\n            perror(\"poll\");\n            break;\n        }\n\n        for (size_t i = 0; i < fds.size(); i++)\n        {\n            if (!(fds[i].revents & POLLIN))\n                continue;\n\n            if (fds[i].fd == serverSocket)\n            {\n                int clientSocket = accept(serverSocket, nullptr, nullptr);\n                fds.push_back({clientSocket, POLLIN, 0});\n                cout << \"Client connected: \" << clientSocket << '\\n';\n            }\n            else\n            {\n                char buffer[1024];\n                int bytes = recv(fds[i].fd, buffer, sizeof(buffer), 0);\n\n                if (bytes <= 0)\n                {\n                    cout << \"Client disconnected: \" << fds[i].fd << '\\n';\n                    close(fds[i].fd);\n                    fds.erase(fds.begin() + i);\n                    i--;\n                }\n                else\n                {\n                    send(fds[i].fd, buffer, bytes, 0);\n                }\n            }\n        }\n    }\n\n    close(serverSocket);\n    return 0;\n}"
+          },
+          {
+            "name": "Asynchronous (non-blocking) socket I/O using O_NONBLOCK",
+            "input": "a client socket configured for non-blocking connect/recv",
+            "output": "recv() returns immediately with EWOULDBLOCK instead of blocking",
+            "code": "#include <iostream>\n#include <cstring>\n#include <cerrno>\n#include <fcntl.h>\n#include <unistd.h>\n#include <arpa/inet.h>\nusing namespace std;\n\nint main()\n{\n    int sock = socket(AF_INET, SOCK_STREAM, 0);\n\n    int flags = fcntl(sock, F_GETFL, 0);\n    fcntl(sock, F_SETFL, flags | O_NONBLOCK); /* makes connect()/recv()/send() non-blocking */\n\n    char buffer[1024];\n    int bytes = recv(sock, buffer, sizeof(buffer), 0);\n\n    if (bytes == -1 && (errno == EWOULDBLOCK || errno == EAGAIN))\n        cout << \"recv() returned immediately with EWOULDBLOCK instead of blocking\" << endl;\n\n    close(sock);\n    return 0;\n}"
+          },
+          {
+            "name": "Mutex protecting a shared active-connection counter across client threads",
+            "input": "3 simulated client-handler threads incrementing/decrementing a counter",
+            "output": "Final active connection count: 0 (correctly balanced, no race condition)",
+            "code": "#include <iostream>\n#include <thread>\n#include <mutex>\n#include <vector>\nusing namespace std;\n\nint activeConnections = 0;\nmutex connectionMutex;\n\nvoid handleClient()\n{\n    {\n        lock_guard<mutex> lock(connectionMutex);\n        activeConnections++;\n    }\n    /* ... simulate handling client I/O here ... */\n    {\n        lock_guard<mutex> lock(connectionMutex);\n        activeConnections--;\n    }\n}\n\nint main()\n{\n    vector<thread> clientHandlers;\n    for (int i = 0; i < 3; i++)\n        clientHandlers.emplace_back(handleClient);\n\n    for (auto &t : clientHandlers)\n        t.join();\n\n    cout << \"Final active connection count: \" << activeConnections << \" (correctly balanced, no race condition)\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Condition variable notifying a worker thread when a new connection arrives",
+            "input": "main thread simulates an incoming connection and notifies the worker",
+            "output": "Worker woke up and processed the new connection",
+            "code": "#include <iostream>\n#include <thread>\n#include <mutex>\n#include <condition_variable>\n#include <queue>\nusing namespace std;\n\nqueue<int> connectionQueue;\nmutex queueMutex;\ncondition_variable queueCondition;\n\nvoid connectionWorker()\n{\n    unique_lock<mutex> lock(queueMutex);\n    queueCondition.wait(lock, []\n                        { return !connectionQueue.empty(); });\n\n    int clientSocket = connectionQueue.front();\n    connectionQueue.pop();\n    cout << \"Worker woke up and processed the new connection: \" << clientSocket << endl;\n}\n\nint main()\n{\n    thread worker(connectionWorker);\n\n    {\n        lock_guard<mutex> lock(queueMutex);\n        connectionQueue.push(42); /* simulated new client socket fd */\n    }\n    queueCondition.notify_one();\n\n    worker.join();\n    return 0;\n}"
+          }
+        ],
+        "path": "Networking/select_poll.cpp"
+      },
+      {
         "chapter": "VLAN",
         "folder": "Networking",
         "programs": [
