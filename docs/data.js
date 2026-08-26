@@ -1824,6 +1824,193 @@ const CATALOG = [
         "path": "CPP/stl_containers.cpp"
       },
       {
+        "chapter": "STRING PROGRAMS",
+        "folder": "CPP",
+        "programs": [
+          {
+            "name": "Reverse a string using std::reverse",
+            "input": "hello",
+            "output": "olleh",
+            "code": "#include <iostream>\n#include <algorithm>\nusing namespace std;\n\nint main()\n{\n    string s = \"hello\";\n    reverse(s.begin(), s.end());\n    cout << s << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Check if a string is a palindrome",
+            "input": "madam",
+            "output": "madam is a palindrome",
+            "code": "#include <iostream>\n#include <algorithm>\nusing namespace std;\n\nbool isPalindrome(const string &s)\n{\n    string reversed = s;\n    reverse(reversed.begin(), reversed.end());\n    return s == reversed;\n}\n\nint main()\n{\n    string s = \"madam\";\n    cout << s << (isPalindrome(s) ? \" is a palindrome\" : \" is not a palindrome\") << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Convert a string to uppercase and lowercase using std::transform",
+            "input": "Hello World",
+            "output": "HELLO WORLD, hello world",
+            "code": "#include <iostream>\n#include <algorithm>\nusing namespace std;\n\nint main()\n{\n    string s = \"Hello World\";\n    string upper = s, lower = s;\n\n    transform(upper.begin(), upper.end(), upper.begin(), ::toupper);\n    transform(lower.begin(), lower.end(), lower.begin(), ::tolower);\n\n    cout << upper << \", \" << lower << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Split a string by a delimiter using stringstream",
+            "input": "\"apple,banana,cherry\"",
+            "output": "apple | banana | cherry",
+            "code": "#include <iostream>\n#include <sstream>\n#include <vector>\nusing namespace std;\n\nint main()\n{\n    string s = \"apple,banana,cherry\";\n    stringstream ss(s);\n    string token;\n    vector<string> parts;\n\n    while (getline(ss, token, ','))\n        parts.push_back(token);\n\n    for (size_t i = 0; i < parts.size(); i++)\n        cout << parts[i] << (i + 1 < parts.size() ? \" | \" : \"\\n\");\n\n    return 0;\n}"
+          },
+          {
+            "name": "Join strings with a delimiter",
+            "input": "{\"apple\", \"banana\", \"cherry\"}",
+            "output": "apple, banana, cherry",
+            "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nstring join(const vector<string> &parts, const string &delimiter)\n{\n    string result;\n    for (size_t i = 0; i < parts.size(); i++)\n    {\n        result += parts[i];\n        if (i + 1 < parts.size())\n            result += delimiter;\n    }\n    return result;\n}\n\nint main()\n{\n    vector<string> fruits = {\"apple\", \"banana\", \"cherry\"};\n    cout << join(fruits, \", \") << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Trim leading and trailing whitespace",
+            "input": "\"   hello world   \"",
+            "output": "\"hello world\"",
+            "code": "#include <iostream>\nusing namespace std;\n\nstring trim(const string &s)\n{\n    size_t start = s.find_first_not_of(\" \\t\\n\");\n    size_t end = s.find_last_not_of(\" \\t\\n\");\n    return (start == string::npos) ? \"\" : s.substr(start, end - start + 1);\n}\n\nint main()\n{\n    string s = \"   hello world   \";\n    cout << \"\\\"\" << trim(s) << \"\\\"\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Count occurrences of a substring",
+            "input": "\"ababab\", sub = \"ab\"",
+            "output": "Occurrences: 3",
+            "code": "#include <iostream>\nusing namespace std;\n\nint countOccurrences(const string &s, const string &sub)\n{\n    int count = 0;\n    size_t pos = 0;\n\n    while ((pos = s.find(sub, pos)) != string::npos)\n    {\n        count++;\n        pos += sub.length();\n    }\n    return count;\n}\n\nint main()\n{\n    cout << \"Occurrences: \" << countOccurrences(\"ababab\", \"ab\") << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Replace all occurrences of a substring",
+            "input": "\"foo bar foo\", replace \"foo\" with \"baz\"",
+            "output": "baz bar baz",
+            "code": "#include <iostream>\nusing namespace std;\n\nstring replaceAll(string s, const string &from, const string &to)\n{\n    size_t pos = 0;\n    while ((pos = s.find(from, pos)) != string::npos)\n    {\n        s.replace(pos, from.length(), to);\n        pos += to.length();\n    }\n    return s;\n}\n\nint main()\n{\n    cout << replaceAll(\"foo bar foo\", \"foo\", \"baz\") << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Check if a string starts with or ends with a given prefix/suffix",
+            "input": "\"hello_world.txt\"",
+            "output": "Starts with \"hello\": true, Ends with \".txt\": true",
+            "code": "#include <iostream>\nusing namespace std;\n\nbool startsWith(const string &s, const string &prefix)\n{\n    return s.size() >= prefix.size() && s.compare(0, prefix.size(), prefix) == 0;\n}\n\nbool endsWith(const string &s, const string &suffix)\n{\n    return s.size() >= suffix.size() && s.compare(s.size() - suffix.size(), suffix.size(), suffix) == 0;\n}\n\nint main()\n{\n    string s = \"hello_world.txt\";\n    cout << boolalpha;\n    cout << \"Starts with \\\"hello\\\": \" << startsWith(s, \"hello\") << endl;\n    cout << \"Ends with \\\".txt\\\": \" << endsWith(s, \".txt\") << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Convert a string to a number using stoi/stod",
+            "input": "\"42\", \"3.14\"",
+            "output": "int: 42, double: 3.14",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    int i = stoi(\"42\");\n    double d = stod(\"3.14\");\n    cout << \"int: \" << i << \", double: \" << d << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Convert a number to a string using std::to_string",
+            "input": "42, 3.14",
+            "output": "42, 3.140000",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    string a = to_string(42);\n    string b = to_string(3.14);\n    cout << a << \", \" << b << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Compare strings using ==, <, and compare()",
+            "input": "\"apple\" vs \"banana\"",
+            "output": "Not equal, apple < banana, compare() returns a negative value",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    string a = \"apple\", b = \"banana\";\n\n    cout << ((a == b) ? \"Equal\" : \"Not equal\") << endl;\n    cout << ((a < b) ? \"apple < banana\" : \"apple >= banana\") << endl;\n    cout << \"compare() returns a \" << (a.compare(b) < 0 ? \"negative value\" : \"non-negative value\") << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Concatenate strings using + and append()",
+            "input": "\"Hello\" + \" \" + \"World\"",
+            "output": "Hello World",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    string result = \"Hello\";\n    result += \" \";\n    result.append(\"World\");\n    cout << result << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Find and erase a substring",
+            "input": "\"Hello, World!\", erase \"World\"",
+            "output": "Hello, !",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    string s = \"Hello, World!\";\n    size_t pos = s.find(\"World\");\n\n    if (pos != string::npos)\n        s.erase(pos, string(\"World\").length());\n\n    cout << s << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Insert text into a string at a specific position",
+            "input": "\"Hello World\", insert \"Beautiful \" at position 6",
+            "output": "Hello Beautiful World",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    string s = \"Hello World\";\n    s.insert(6, \"Beautiful \");\n    cout << s << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Substring extraction using substr()",
+            "input": "\"Hello World\", substr(6, 5)",
+            "output": "World",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    string s = \"Hello World\";\n    cout << s.substr(6, 5) << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Check if a string contains only digits using std::all_of",
+            "input": "\"12345\"",
+            "output": "Numeric",
+            "code": "#include <iostream>\n#include <algorithm>\n#include <cctype>\nusing namespace std;\n\nint main()\n{\n    string s = \"12345\";\n    bool isNumeric = all_of(s.begin(), s.end(), ::isdigit);\n    cout << (isNumeric ? \"Numeric\" : \"Not numeric\") << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Remove all whitespace from a string",
+            "input": "\"H e l l o\"",
+            "output": "Hello",
+            "code": "#include <iostream>\n#include <algorithm>\nusing namespace std;\n\nint main()\n{\n    string s = \"H e l l o\";\n    s.erase(remove(s.begin(), s.end(), ' '), s.end());\n    cout << s << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Count vowels and consonants using std::count_if",
+            "input": "\"hello world\"",
+            "output": "Vowels: 3, Consonants: 7",
+            "code": "#include <iostream>\n#include <algorithm>\n#include <cctype>\nusing namespace std;\n\nbool isVowel(char c)\n{\n    c = tolower(c);\n    return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u';\n}\n\nint main()\n{\n    string s = \"hello world\";\n    int vowels = count_if(s.begin(), s.end(), isVowel);\n    int consonants = count_if(s.begin(), s.end(), [](char c)\n                              { return isalpha(c) && !isVowel(c); });\n\n    cout << \"Vowels: \" << vowels << \", Consonants: \" << consonants << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Find the first non-repeating character using a map",
+            "input": "\"swiss\"",
+            "output": "w",
+            "code": "#include <iostream>\n#include <unordered_map>\nusing namespace std;\n\nint main()\n{\n    string s = \"swiss\";\n    unordered_map<char, int> counts;\n\n    for (char c : s)\n        counts[c]++;\n\n    for (char c : s)\n    {\n        if (counts[c] == 1)\n        {\n            cout << c << endl;\n            break;\n        }\n    }\n    return 0;\n}"
+          },
+          {
+            "name": "Anagram check using sorted strings",
+            "input": "\"listen\", \"silent\"",
+            "output": "Anagrams",
+            "code": "#include <iostream>\n#include <algorithm>\nusing namespace std;\n\nint main()\n{\n    string a = \"listen\", b = \"silent\";\n    string sortedA = a, sortedB = b;\n\n    sort(sortedA.begin(), sortedA.end());\n    sort(sortedB.begin(), sortedB.end());\n\n    cout << ((sortedA == sortedB) ? \"Anagrams\" : \"Not anagrams\") << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Longest common prefix among a vector of strings",
+            "input": "{\"flower\", \"flow\", \"flight\"}",
+            "output": "fl",
+            "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nstring longestCommonPrefix(const vector<string> &words)\n{\n    if (words.empty())\n        return \"\";\n\n    string prefix = words[0];\n    for (const auto &word : words)\n    {\n        while (word.find(prefix) != 0)\n            prefix = prefix.substr(0, prefix.size() - 1);\n    }\n    return prefix;\n}\n\nint main()\n{\n    vector<string> words = {\"flower\", \"flow\", \"flight\"};\n    cout << longestCommonPrefix(words) << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Tokenize a sentence into words",
+            "input": "\"The quick brown fox\"",
+            "output": "The | quick | brown | fox",
+            "code": "#include <iostream>\n#include <sstream>\nusing namespace std;\n\nint main()\n{\n    string sentence = \"The quick brown fox\";\n    stringstream ss(sentence);\n    string word;\n    bool first = true;\n\n    while (ss >> word)\n    {\n        if (!first)\n            cout << \" | \";\n        cout << word;\n        first = false;\n    }\n    cout << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Reverse the words in a sentence",
+            "input": "\"Hello World From CPP\"",
+            "output": "CPP From World Hello",
+            "code": "#include <iostream>\n#include <sstream>\n#include <vector>\nusing namespace std;\n\nint main()\n{\n    string sentence = \"Hello World From CPP\";\n    stringstream ss(sentence);\n    vector<string> words;\n    string word;\n\n    while (ss >> word)\n        words.push_back(word);\n\n    for (auto it = words.rbegin(); it != words.rend(); ++it)\n        cout << *it << (next(it) != words.rend() ? \" \" : \"\\n\");\n\n    return 0;\n}"
+          },
+          {
+            "name": "Check if a string is a rotation of another",
+            "input": "\"waterbottle\", \"erbottlewat\"",
+            "output": "Rotations",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    string a = \"waterbottle\", b = \"erbottlewat\";\n    string combined = a + a;\n\n    cout << ((a.size() == b.size() && combined.find(b) != string::npos) ? \"Rotations\" : \"Not rotations\") << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Convert std::string to a C-style string and back",
+            "input": "\"Hello\"",
+            "output": "C-string: Hello, back to std::string: Hello",
+            "code": "#include <iostream>\n#include <cstring>\nusing namespace std;\n\nint main()\n{\n    string s = \"Hello\";\n    const char *cstr = s.c_str();\n    cout << \"C-string: \" << cstr << endl;\n\n    string back(cstr);\n    cout << \"back to std::string: \" << back << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::string_view basics (avoids copying the underlying string)",
+            "input": "\"Hello World\"",
+            "output": "World",
+            "code": "#include <iostream>\n#include <string_view>\nusing namespace std;\n\nint main()\n{\n    string s = \"Hello World\";\n    string_view view(s);\n    string_view sub = view.substr(6, 5); /* no allocation, just a view into \"s\" */\n\n    cout << sub << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Use std::regex to validate a simple email pattern",
+            "input": "\"user@example.com\"",
+            "output": "Valid email format",
+            "code": "#include <iostream>\n#include <regex>\nusing namespace std;\n\nint main()\n{\n    string email = \"user@example.com\";\n    regex pattern(R\"(^[\\w.+-]+@[\\w-]+\\.[a-zA-Z]{2,}$)\");\n\n    cout << (regex_match(email, pattern) ? \"Valid email format\" : \"Invalid email format\") << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Use std::regex to find and replace matches",
+            "input": "\"The rain in Spain\", replace vowels with '*'",
+            "output": "Th* r**n *n Sp**n",
+            "code": "#include <iostream>\n#include <regex>\nusing namespace std;\n\nint main()\n{\n    string s = \"The rain in Spain\";\n    regex vowels(\"[aeiouAEIOU]\");\n\n    cout << regex_replace(s, vowels, \"*\") << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Build a string incrementally using std::ostringstream",
+            "input": "name=\"Alice\", age=30",
+            "output": "Name: Alice, Age: 30",
+            "code": "#include <iostream>\n#include <sstream>\nusing namespace std;\n\nint main()\n{\n    ostringstream oss;\n    oss << \"Name: \" << \"Alice\" << \", Age: \" << 30;\n\n    cout << oss.str() << endl;\n    return 0;\n}"
+          }
+        ],
+        "path": "CPP/string_programs.cpp"
+      },
+      {
         "chapter": "TYPE CASTING AND RTTI",
         "folder": "CPP",
         "programs": [
