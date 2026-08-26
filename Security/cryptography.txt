@@ -1,0 +1,122 @@
+@SECTION: Security
+@CHAPTER: CRYPTOGRAPHY AND ENCRYPTION CONCEPTS
+
+@PROGRAM: What is symmetric encryption and how does it work?
+Symmetric encryption uses the same secret key for both encrypting and decrypting data (e.g. AES, ChaCha20). It's fast and efficient for bulk data, but requires both parties to already share the secret key through some secure channel beforehand, which is the core challenge symmetric encryption alone doesn't solve - securely getting that key to the other party in the first place.
+@END
+
+@PROGRAM: What is asymmetric (public-key) encryption?
+Asymmetric encryption uses a mathematically related key pair: a public key (freely shared) that anyone can use to encrypt data or verify a signature, and a private key (kept secret by its owner) used to decrypt that data or create signatures. This solves the key-distribution problem of symmetric encryption since the public key never needs to be kept secret, at the cost of being computationally much slower than symmetric algorithms.
+@END
+
+@PROGRAM: What is the core difference between symmetric and asymmetric encryption?
+Symmetric encryption uses one shared secret key for both directions and is fast but has a key-distribution problem. Asymmetric encryption uses a public/private key pair, solving key distribution and additionally enabling digital signatures, but is orders of magnitude slower - which is why real-world systems (TLS, PGP) use asymmetric crypto only to securely exchange a symmetric session key, then use that fast symmetric key for the actual bulk data (hybrid encryption).
+@END
+
+@PROGRAM: What is RSA and how does it work at a high level?
+RSA is an asymmetric algorithm whose security relies on the difficulty of factoring the product of two large prime numbers. A message encrypted with someone's public key can only be feasibly decrypted with the corresponding private key (and vice versa for signing), because deriving the private key from the public key would require factoring an enormous number, which is computationally infeasible with current classical computers for sufficiently large key sizes.
+@END
+
+@PROGRAM: How is an RSA key pair generated (p, q, n, phi, e, d)?
+Choose two large distinct primes p and q, compute the modulus n = p * q and Euler's totient phi(n) = (p-1)(q-1). Choose a public exponent e that is coprime with phi(n) (commonly 65537); compute the private exponent d as the modular multiplicative inverse of e mod phi(n). The public key is (n, e); the private key is (n, d) - and critically, p, q, and phi(n) must be discarded/kept secret since knowing them lets an attacker derive d.
+@END
+
+@PROGRAM: How does RSA encryption and decryption actually work mathematically?
+To encrypt a message m (represented as a number less than n) with the public key (n, e): ciphertext c = m^e mod n. To decrypt with the private key (n, d): m = c^d mod n. This works due to modular arithmetic properties (Euler's theorem) guaranteeing that raising to the power e then d (or vice versa) returns the original value modulo n, without ever needing to reverse-engineer d from e without also knowing phi(n).
+@END
+
+@PROGRAM: Why is RSA considered slow for large data, and how is this typically handled?
+RSA operations involve modular exponentiation with very large numbers (2048+ bits), which is computationally expensive per block and doesn't scale well to encrypting megabytes of data directly. Real systems use hybrid encryption: RSA (or another asymmetric algorithm) is used only to securely encrypt/exchange a random symmetric session key, and the fast symmetric cipher (like AES) then encrypts the actual bulk data using that session key.
+@END
+
+@PROGRAM: What is a digital signature and how does RSA signing work?
+A digital signature proves that a specific private key holder authored or approved a message, and that the message hasn't been altered since. With RSA, the signer typically hashes the message, then encrypts (signs) that hash with their private key; anyone with the corresponding public key can decrypt the signature to recover the hash and compare it against their own hash of the received message - a match proves authenticity and integrity.
+@END
+
+@PROGRAM: What is Elliptic Curve Cryptography (ECC) and why is it often preferred over RSA?
+ECC is asymmetric cryptography based on the algebraic structure of elliptic curves over finite fields, whose security relies on the difficulty of the elliptic curve discrete logarithm problem. For an equivalent security level, ECC keys are dramatically smaller than RSA keys (a 256-bit ECC key is roughly as strong as a 3072-bit RSA key), making ECC faster and less resource-intensive - especially valuable on mobile devices, IoT, and TLS handshakes.
+@END
+
+@PROGRAM: What is ECDSA and how does it work?
+ECDSA (Elliptic Curve Digital Signature Algorithm) is the elliptic-curve analog of DSA used for creating and verifying digital signatures. The signer generates a signature using their private key, a per-signature random nonce, and the message hash, producing a signature pair (r, s); the verifier uses the signer's public key, the message hash, and (r, s) to mathematically confirm the signature is valid without ever seeing the private key.
+@END
+
+@PROGRAM: What is the difference between RSA signatures and ECDSA signatures?
+Both prove authenticity via a private/public key pair, but RSA signing is essentially "encrypt the hash with the private key" using modular exponentiation, while ECDSA uses elliptic curve point arithmetic and a randomly generated per-signature nonce. ECDSA signatures are much smaller and faster to generate for equivalent security, but ECDSA is more sensitive to implementation flaws - notably, if the same random nonce is ever reused across two signatures, an attacker can mathematically recover the private key (a well-known real-world vulnerability class).
+@END
+
+@PROGRAM: What is ECDH (Elliptic Curve Diffie-Hellman) key exchange?
+ECDH lets two parties, each with their own elliptic-curve key pair, independently compute the same shared secret by combining their own private key with the other party's public key - without ever transmitting the shared secret itself over the network. This shared secret is then typically fed into a key derivation function to produce a symmetric session key, forming the basis of ephemeral key exchange in modern TLS (ECDHE).
+@END
+
+@PROGRAM: What is key wrapping and unwrapping?
+Key wrapping encrypts one cryptographic key (the "key encryption key" protecting a "content encryption key" or similar) using another key, so the sensitive key material itself never appears in plaintext outside of secure storage/processing - "wrapping" is essentially specialized encryption designed specifically for protecting keys, and "unwrapping" is the corresponding decryption to recover the original key for use.
+@END
+
+@PROGRAM: Why use key wrapping instead of directly encrypting data with an asymmetric key?
+Wrapping a symmetric key (which is small, fixed-size) with an asymmetric public key is fast, since asymmetric operations only need to process a small amount of data (the key itself) rather than the full payload. This is the core of hybrid encryption: wrap a random AES key with RSA/ECC, then use the fast, unwrapped AES key to encrypt/decrypt the actual (potentially large) data - getting both the security benefits of asymmetric crypto and the performance of symmetric crypto.
+@END
+
+@PROGRAM: What is the AES Key Wrap algorithm (RFC 3394) at a high level?
+AES Key Wrap is a specific symmetric algorithm designed to encrypt (wrap) other symmetric keys using AES, adding integrity protection so that any tampering or corruption of the wrapped key is detectable upon unwrapping (unlike naively encrypting a key with plain AES-CBC, which offers no built-in integrity check). It's commonly used in key management systems and HSMs to securely export/import or archive keys.
+@END
+
+@PROGRAM: How does key wrapping differ from general symmetric encryption modes?
+General symmetric modes (CBC, CTR, GCM) are designed to encrypt arbitrary-length data efficiently, often requiring an IV/nonce and sometimes padding. Key wrapping algorithms are purpose-built for encrypting keys specifically - they typically operate on fixed-size key material, don't require a random IV in the same way, and bake in integrity verification by design, since silently corrupting even a single bit of a cryptographic key must be detectable rather than producing a subtly wrong key.
+@END
+
+@PROGRAM: What is hybrid encryption and why is it the standard approach in real systems?
+Hybrid encryption combines symmetric and asymmetric cryptography: a random symmetric key is generated for a session/message, the actual data is encrypted with that fast symmetric key, and only the (small) symmetric key itself is encrypted (wrapped) using the recipient's asymmetric public key. This gives the security/key-distribution benefits of asymmetric cryptography with the performance of symmetric cryptography for bulk data - exactly how TLS, PGP, and most secure messaging systems operate.
+@END
+
+@PROGRAM: What are symmetric cipher modes (ECB, CBC, GCM) and why does the choice of mode matter?
+A block cipher like AES encrypts fixed-size blocks, so a "mode of operation" defines how to apply it across data larger than one block. ECB (Electronic Codebook) encrypts each block independently and is insecure for most data since identical plaintext blocks produce identical ciphertext blocks, leaking patterns. CBC (Cipher Block Chaining) XORs each block with the previous ciphertext block, hiding patterns but requiring careful IV handling and offering no built-in integrity. GCM (Galois/Counter Mode) provides both encryption and built-in authentication (integrity/tamper detection) in one efficient, parallelizable mode, which is why it's now the recommended default for most new designs.
+@END
+
+@PROGRAM: What is AES-GCM and why is it popular for authenticated encryption?
+AES-GCM combines AES in counter mode (for encryption) with a Galois field-based authentication mechanism, producing both ciphertext and an authentication tag in a single pass. This "authenticated encryption with associated data" (AEAD) design means a single algorithm provides confidentiality and integrity/tamper detection together, is fast (parallelizable, hardware-accelerated on modern CPUs), and avoids the common historical mistake of pairing encryption with a separately implemented (and easy to get wrong) MAC.
+@END
+
+@PROGRAM: What is a MAC (Message Authentication Code) and what is HMAC?
+A MAC is a small tag computed from a message and a shared secret key, letting a receiver verify both that the message wasn't tampered with and that it came from someone who knows the shared key - unlike a plain hash, which anyone can compute (a MAC requires the secret key to reproduce). HMAC (Hash-based MAC) is a standard, well-analyzed construction for building a MAC out of any secure cryptographic hash function (e.g. HMAC-SHA256) by combining the key and message through the hash function in a specific nested pattern.
+@END
+
+@PROGRAM: What is the difference between encryption and hashing?
+Encryption is reversible (given the correct key, ciphertext can be decrypted back to the original plaintext) and is used to protect confidentiality. Hashing is a one-way transformation - a good cryptographic hash function (like SHA-256) is designed so it's computationally infeasible to reverse a hash back to its input or find two different inputs that produce the same hash - used for integrity checks, password storage (with proper salting), and digital signatures, not for protecting data you need to later recover.
+@END
+
+@PROGRAM: What is a digital certificate and how does PKI (Public Key Infrastructure) work?
+A digital certificate binds a public key to an identity (e.g. a domain name or organization), digitally signed by a trusted Certificate Authority so that anyone who trusts that CA can trust the binding without directly verifying the identity themselves. PKI is the overall system of CAs, certificates, revocation mechanisms (CRLs/OCSP), and trust stores that lets parties who've never met establish trust in each other's public keys - the foundation of HTTPS/TLS.
+@END
+
+@PROGRAM: What is a Certificate Authority (CA) and what is a chain of trust?
+A Certificate Authority is a trusted entity that verifies an identity (e.g. that a server truly controls a given domain) and then signs a certificate binding that identity to a public key. A chain of trust links a leaf certificate up through one or more intermediate CA certificates to a root CA certificate that is inherently trusted (pre-installed in an OS/browser's trust store) - if every link in that chain validates correctly, the leaf certificate is trusted transitively.
+@END
+
+@PROGRAM: What is Perfect Forward Secrecy (PFS) and why does it matter?
+Perfect Forward Secrecy means that even if a server's long-term private key is later compromised, previously captured encrypted sessions cannot be decrypted, because each session used a unique, ephemeral key (typically derived via ECDHE/DHE) that was never derived solely from the long-term key and is discarded afterward. This matters because it limits the damage of a future key compromise to future traffic only, not years of previously recorded encrypted communications.
+@END
+
+@PROGRAM: What is a nonce/IV and why must it never be reused with the same key?
+A nonce (number used once) or Initialization Vector (IV) is a value combined with a key to ensure that encrypting the same plaintext twice doesn't produce identical ciphertext, and to randomize/vary the cipher's internal state. Reusing a nonce with the same key in modes like CTR or GCM catastrophically breaks security - in GCM specifically, nonce reuse can allow an attacker to recover the authentication key and forge messages, which is why unique nonce generation (or strict counters) is critical.
+@END
+
+@PROGRAM: What are common RSA padding schemes and why does padding matter?
+Raw ("textbook") RSA without padding is insecure and malleable - PKCS#1 v1.5 padding was the original standard, adding structured random padding before encryption, but it's vulnerable to padding oracle attacks (like the Bleichenbacher attack) if implementations leak information about padding validity. OAEP (Optimal Asymmetric Encryption Padding) is the modern recommended scheme, using randomized padding with stronger security proofs and resistance to those oracle-style attacks - modern systems should prefer OAEP (for encryption) and PSS (for signatures) over legacy PKCS#1 v1.5.
+@END
+
+@PROGRAM: What is a Key Derivation Function (KDF) and why shouldn't you use a raw password as an encryption key?
+A KDF (like PBKDF2, scrypt, Argon2, or HKDF) transforms input keying material (such as a low-entropy human password, or a shared secret from a key exchange) into one or more cryptographically strong keys of the required length. Passwords are low-entropy and guessable, so using one directly as an AES key would be weak against brute force; a KDF with deliberate computational cost (like PBKDF2/Argon2) makes each guess expensive, and HKDF is commonly used to expand a raw shared secret (e.g. from ECDH) into multiple properly-sized session keys.
+@END
+
+@PROGRAM: What are some common attacks on weak cryptographic implementations?
+A padding oracle attack exploits systems that reveal (even indirectly, e.g. via timing or distinct error messages) whether decrypted padding was valid, letting an attacker incrementally decrypt ciphertext without the key. A replay attack captures a valid, previously-sent encrypted/signed message and resends it later to fraudulently repeat an action (mitigated with nonces, timestamps, or sequence numbers). Nonce/IV reuse, weak random number generation, and using deprecated algorithms (like MD5, SHA-1 for signatures, or ECB mode) are also frequent root causes of real-world cryptographic breaks.
+@END
+
+@PROGRAM: What is Diffie-Hellman key exchange (the classic, non-elliptic version)?
+Diffie-Hellman lets two parties agree on a shared secret over an insecure channel using modular exponentiation over a large prime field: each side generates a private random value, computes a public value from it, exchanges public values, and then combines their own private value with the other party's public value to arrive at the same shared secret - all without ever transmitting the shared secret or either private value directly, relying on the difficulty of the discrete logarithm problem.
+@END
+
+@PROGRAM: Design consideration: how do you choose between RSA and ECC (ECDSA/ECDH) in a system design?
+Prefer ECC for new designs where possible: smaller keys mean faster operations, less bandwidth (important for TLS handshakes and constrained devices), and lower storage/CPU cost - use ECDHE for key exchange (for forward secrecy) and ECDSA/EdDSA for signatures. RSA remains relevant for compatibility with legacy systems that don't support ECC, or where organizational/compliance requirements specifically mandate it; when RSA is required, use at least 2048-bit (preferably 3072/4096-bit) keys with OAEP/PSS padding rather than legacy PKCS#1 v1.5.
+@END
