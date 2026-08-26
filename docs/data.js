@@ -321,6 +321,1507 @@ const CATALOG = [
           }
         ],
         "path": "C/strings.c"
+      },
+      {
+        "chapter": "LINKED LIST (DSA)",
+        "folder": "DSA",
+        "programs": [
+          {
+            "name": "Create a node and a simple singly linked list",
+            "input": "10 -> 20 -> 30",
+            "output": "10 -> 20 -> 30 -> NULL",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic struct Node *createNode(int data)\n{\n\tstruct Node *node = malloc(sizeof(struct Node));\n\tnode->data = data;\n\tnode->next = NULL;\n\treturn node;\n}\n\nint main(void)\n{\n\tstruct Node *head = createNode(10);\n\thead->next = createNode(20);\n\thead->next->next = createNode(30);\n\n\tfor (struct Node *cur = head; cur != NULL; cur = cur->next)\n\t\tprintf(\"%d -> \", cur->data);\n\tprintf(\"NULL\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Insert a node at the beginning of a linked list",
+            "input": "list = 20 -> 30, insert 10",
+            "output": "10 -> 20 -> 30 -> NULL",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic struct Node *insertAtBeginning(struct Node *head, int data)\n{\n\tstruct Node *node = malloc(sizeof(struct Node));\n\tnode->data = data;\n\tnode->next = head;\n\treturn node;\n}\n\nint main(void)\n{\n\tstruct Node *head = malloc(sizeof(struct Node));\n\thead->data = 20;\n\thead->next = malloc(sizeof(struct Node));\n\thead->next->data = 30;\n\thead->next->next = NULL;\n\n\thead = insertAtBeginning(head, 10);\n\n\tfor (struct Node *cur = head; cur != NULL; cur = cur->next)\n\t\tprintf(\"%d -> \", cur->data);\n\tprintf(\"NULL\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Insert a node at the end of a linked list",
+            "input": "list = 10 -> 20, insert 30",
+            "output": "10 -> 20 -> 30 -> NULL",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic struct Node *insertAtEnd(struct Node *head, int data)\n{\n\tstruct Node *node = malloc(sizeof(struct Node));\n\tnode->data = data;\n\tnode->next = NULL;\n\n\tif (head == NULL)\n\t\treturn node;\n\n\tstruct Node *cur = head;\n\twhile (cur->next != NULL)\n\t\tcur = cur->next;\n\tcur->next = node;\n\n\treturn head;\n}\n\nint main(void)\n{\n\tstruct Node *head = malloc(sizeof(struct Node));\n\thead->data = 10;\n\thead->next = malloc(sizeof(struct Node));\n\thead->next->data = 20;\n\thead->next->next = NULL;\n\n\thead = insertAtEnd(head, 30);\n\n\tfor (struct Node *cur = head; cur != NULL; cur = cur->next)\n\t\tprintf(\"%d -> \", cur->data);\n\tprintf(\"NULL\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Insert a node at a given position",
+            "input": "list = 10 -> 20 -> 40, insert 30 at position 2 (0-indexed)",
+            "output": "10 -> 20 -> 30 -> 40 -> NULL",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic struct Node *insertAtPosition(struct Node *head, int data, int position)\n{\n\tstruct Node *node = malloc(sizeof(struct Node));\n\tnode->data = data;\n\n\tif (position == 0)\n\t{\n\t\tnode->next = head;\n\t\treturn node;\n\t}\n\n\tstruct Node *cur = head;\n\tfor (int i = 0; i < position - 1 && cur != NULL; i++)\n\t\tcur = cur->next;\n\n\tnode->next = cur->next;\n\tcur->next = node;\n\treturn head;\n}\n\nint main(void)\n{\n\tstruct Node *head = malloc(sizeof(struct Node));\n\thead->data = 10;\n\thead->next = malloc(sizeof(struct Node));\n\thead->next->data = 20;\n\thead->next->next = malloc(sizeof(struct Node));\n\thead->next->next->data = 40;\n\thead->next->next->next = NULL;\n\n\thead = insertAtPosition(head, 30, 2);\n\n\tfor (struct Node *cur = head; cur != NULL; cur = cur->next)\n\t\tprintf(\"%d -> \", cur->data);\n\tprintf(\"NULL\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Delete the first node of a linked list",
+            "input": "list = 10 -> 20 -> 30",
+            "output": "20 -> 30 -> NULL",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic struct Node *deleteFromBeginning(struct Node *head)\n{\n\tif (head == NULL)\n\t\treturn NULL;\n\n\tstruct Node *newHead = head->next;\n\tfree(head);\n\treturn newHead;\n}\n\nint main(void)\n{\n\tstruct Node *head = malloc(sizeof(struct Node));\n\thead->data = 10;\n\thead->next = malloc(sizeof(struct Node));\n\thead->next->data = 20;\n\thead->next->next = malloc(sizeof(struct Node));\n\thead->next->next->data = 30;\n\thead->next->next->next = NULL;\n\n\thead = deleteFromBeginning(head);\n\n\tfor (struct Node *cur = head; cur != NULL; cur = cur->next)\n\t\tprintf(\"%d -> \", cur->data);\n\tprintf(\"NULL\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Delete the last node of a linked list",
+            "input": "list = 10 -> 20 -> 30",
+            "output": "10 -> 20 -> NULL",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic struct Node *deleteFromEnd(struct Node *head)\n{\n\tif (head == NULL || head->next == NULL)\n\t{\n\t\tfree(head);\n\t\treturn NULL;\n\t}\n\n\tstruct Node *cur = head;\n\twhile (cur->next->next != NULL)\n\t\tcur = cur->next;\n\n\tfree(cur->next);\n\tcur->next = NULL;\n\treturn head;\n}\n\nint main(void)\n{\n\tstruct Node *head = malloc(sizeof(struct Node));\n\thead->data = 10;\n\thead->next = malloc(sizeof(struct Node));\n\thead->next->data = 20;\n\thead->next->next = malloc(sizeof(struct Node));\n\thead->next->next->data = 30;\n\thead->next->next->next = NULL;\n\n\thead = deleteFromEnd(head);\n\n\tfor (struct Node *cur = head; cur != NULL; cur = cur->next)\n\t\tprintf(\"%d -> \", cur->data);\n\tprintf(\"NULL\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Delete a node by value",
+            "input": "list = 10 -> 20 -> 30, delete 20",
+            "output": "10 -> 30 -> NULL",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic struct Node *deleteByValue(struct Node *head, int value)\n{\n\tif (head == NULL)\n\t\treturn NULL;\n\n\tif (head->data == value)\n\t{\n\t\tstruct Node *newHead = head->next;\n\t\tfree(head);\n\t\treturn newHead;\n\t}\n\n\tstruct Node *cur = head;\n\twhile (cur->next != NULL && cur->next->data != value)\n\t\tcur = cur->next;\n\n\tif (cur->next != NULL)\n\t{\n\t\tstruct Node *toDelete = cur->next;\n\t\tcur->next = toDelete->next;\n\t\tfree(toDelete);\n\t}\n\n\treturn head;\n}\n\nint main(void)\n{\n\tstruct Node *head = malloc(sizeof(struct Node));\n\thead->data = 10;\n\thead->next = malloc(sizeof(struct Node));\n\thead->next->data = 20;\n\thead->next->next = malloc(sizeof(struct Node));\n\thead->next->next->data = 30;\n\thead->next->next->next = NULL;\n\n\thead = deleteByValue(head, 20);\n\n\tfor (struct Node *cur = head; cur != NULL; cur = cur->next)\n\t\tprintf(\"%d -> \", cur->data);\n\tprintf(\"NULL\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Search for a value in a linked list",
+            "input": "list = 10 -> 20 -> 30, search 20",
+            "output": "Found 20 in the list",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic int search(struct Node *head, int value)\n{\n\tfor (struct Node *cur = head; cur != NULL; cur = cur->next)\n\t\tif (cur->data == value)\n\t\t\treturn 1;\n\treturn 0;\n}\n\nint main(void)\n{\n\tstruct Node *head = malloc(sizeof(struct Node));\n\thead->data = 10;\n\thead->next = malloc(sizeof(struct Node));\n\thead->next->data = 20;\n\thead->next->next = malloc(sizeof(struct Node));\n\thead->next->next->data = 30;\n\thead->next->next->next = NULL;\n\n\tif (search(head, 20))\n\t\tprintf(\"Found 20 in the list\\n\");\n\telse\n\t\tprintf(\"20 not found\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Find the length of a linked list",
+            "input": "list = 10 -> 20 -> 30",
+            "output": "Length: 3",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic int length(struct Node *head)\n{\n\tint count = 0;\n\tfor (struct Node *cur = head; cur != NULL; cur = cur->next)\n\t\tcount++;\n\treturn count;\n}\n\nint main(void)\n{\n\tstruct Node *head = malloc(sizeof(struct Node));\n\thead->data = 10;\n\thead->next = malloc(sizeof(struct Node));\n\thead->next->data = 20;\n\thead->next->next = malloc(sizeof(struct Node));\n\thead->next->next->data = 30;\n\thead->next->next->next = NULL;\n\n\tprintf(\"Length: %d\\n\", length(head));\n\treturn 0;\n}"
+          },
+          {
+            "name": "Reverse a linked list (iterative)",
+            "input": "list = 10 -> 20 -> 30",
+            "output": "30 -> 20 -> 10 -> NULL",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic struct Node *reverseIterative(struct Node *head)\n{\n\tstruct Node *prev = NULL;\n\tstruct Node *cur = head;\n\n\twhile (cur != NULL)\n\t{\n\t\tstruct Node *next = cur->next;\n\t\tcur->next = prev;\n\t\tprev = cur;\n\t\tcur = next;\n\t}\n\n\treturn prev;\n}\n\nint main(void)\n{\n\tstruct Node *head = malloc(sizeof(struct Node));\n\thead->data = 10;\n\thead->next = malloc(sizeof(struct Node));\n\thead->next->data = 20;\n\thead->next->next = malloc(sizeof(struct Node));\n\thead->next->next->data = 30;\n\thead->next->next->next = NULL;\n\n\thead = reverseIterative(head);\n\n\tfor (struct Node *cur = head; cur != NULL; cur = cur->next)\n\t\tprintf(\"%d -> \", cur->data);\n\tprintf(\"NULL\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Reverse a linked list (recursive)",
+            "input": "list = 10 -> 20 -> 30",
+            "output": "30 -> 20 -> 10 -> NULL",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic struct Node *reverseRecursive(struct Node *head)\n{\n\tif (head == NULL || head->next == NULL)\n\t\treturn head;\n\n\tstruct Node *newHead = reverseRecursive(head->next);\n\thead->next->next = head;\n\thead->next = NULL;\n\n\treturn newHead;\n}\n\nint main(void)\n{\n\tstruct Node *head = malloc(sizeof(struct Node));\n\thead->data = 10;\n\thead->next = malloc(sizeof(struct Node));\n\thead->next->data = 20;\n\thead->next->next = malloc(sizeof(struct Node));\n\thead->next->next->data = 30;\n\thead->next->next->next = NULL;\n\n\thead = reverseRecursive(head);\n\n\tfor (struct Node *cur = head; cur != NULL; cur = cur->next)\n\t\tprintf(\"%d -> \", cur->data);\n\tprintf(\"NULL\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Detect a cycle in a linked list (Floyd's cycle detection)",
+            "input": "list with the last node pointing back into the middle",
+            "output": "Cycle detected",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic int hasCycle(struct Node *head)\n{\n\tstruct Node *slow = head, *fast = head;\n\n\twhile (fast != NULL && fast->next != NULL)\n\t{\n\t\tslow = slow->next;\n\t\tfast = fast->next->next;\n\t\tif (slow == fast)\n\t\t\treturn 1;\n\t}\n\treturn 0;\n}\n\nint main(void)\n{\n\tstruct Node *head = malloc(sizeof(struct Node));\n\thead->data = 10;\n\thead->next = malloc(sizeof(struct Node));\n\thead->next->data = 20;\n\thead->next->next = malloc(sizeof(struct Node));\n\thead->next->next->data = 30;\n\thead->next->next->next = head->next; /* create a cycle back into the list */\n\n\tprintf(\"%s\\n\", hasCycle(head) ? \"Cycle detected\" : \"No cycle\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Find the middle of a linked list (slow/fast pointer)",
+            "input": "list = 10 -> 20 -> 30 -> 40 -> 50",
+            "output": "Middle element: 30",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic struct Node *findMiddle(struct Node *head)\n{\n\tstruct Node *slow = head, *fast = head;\n\n\twhile (fast != NULL && fast->next != NULL)\n\t{\n\t\tslow = slow->next;\n\t\tfast = fast->next->next;\n\t}\n\treturn slow;\n}\n\nint main(void)\n{\n\tstruct Node *head = NULL, *tail = NULL;\n\n\tfor (int i = 1; i <= 5; i++)\n\t{\n\t\tstruct Node *node = malloc(sizeof(struct Node));\n\t\tnode->data = i * 10;\n\t\tnode->next = NULL;\n\t\tif (head == NULL)\n\t\t\thead = tail = node;\n\t\telse\n\t\t{\n\t\t\ttail->next = node;\n\t\t\ttail = node;\n\t\t}\n\t}\n\n\tprintf(\"Middle element: %d\\n\", findMiddle(head)->data);\n\treturn 0;\n}"
+          },
+          {
+            "name": "Remove duplicates from a sorted linked list",
+            "input": "list = 10 -> 10 -> 20 -> 30 -> 30",
+            "output": "10 -> 20 -> 30 -> NULL",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic void removeDuplicatesSorted(struct Node *head)\n{\n\tstruct Node *cur = head;\n\n\twhile (cur != NULL && cur->next != NULL)\n\t{\n\t\tif (cur->data == cur->next->data)\n\t\t{\n\t\t\tstruct Node *duplicate = cur->next;\n\t\t\tcur->next = cur->next->next;\n\t\t\tfree(duplicate);\n\t\t}\n\t\telse\n\t\t\tcur = cur->next;\n\t}\n}\n\nint main(void)\n{\n\tint values[] = {10, 10, 20, 30, 30};\n\tstruct Node *head = NULL, *tail = NULL;\n\n\tfor (int i = 0; i < 5; i++)\n\t{\n\t\tstruct Node *node = malloc(sizeof(struct Node));\n\t\tnode->data = values[i];\n\t\tnode->next = NULL;\n\t\tif (head == NULL)\n\t\t\thead = tail = node;\n\t\telse\n\t\t{\n\t\t\ttail->next = node;\n\t\t\ttail = node;\n\t\t}\n\t}\n\n\tremoveDuplicatesSorted(head);\n\n\tfor (struct Node *cur = head; cur != NULL; cur = cur->next)\n\t\tprintf(\"%d -> \", cur->data);\n\tprintf(\"NULL\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Remove duplicates from an unsorted linked list",
+            "input": "list = 10 -> 20 -> 10 -> 30 -> 20",
+            "output": "10 -> 20 -> 30 -> NULL",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic void removeDuplicatesUnsorted(struct Node *head)\n{\n\tint seen[1000] = {0};\n\tstruct Node *cur = head;\n\n\tseen[cur->data] = 1;\n\n\twhile (cur->next != NULL)\n\t{\n\t\tif (seen[cur->next->data])\n\t\t{\n\t\t\tstruct Node *duplicate = cur->next;\n\t\t\tcur->next = cur->next->next;\n\t\t\tfree(duplicate);\n\t\t}\n\t\telse\n\t\t{\n\t\t\tseen[cur->next->data] = 1;\n\t\t\tcur = cur->next;\n\t\t}\n\t}\n}\n\nint main(void)\n{\n\tint values[] = {10, 20, 10, 30, 20};\n\tstruct Node *head = NULL, *tail = NULL;\n\n\tfor (int i = 0; i < 5; i++)\n\t{\n\t\tstruct Node *node = malloc(sizeof(struct Node));\n\t\tnode->data = values[i];\n\t\tnode->next = NULL;\n\t\tif (head == NULL)\n\t\t\thead = tail = node;\n\t\telse\n\t\t{\n\t\t\ttail->next = node;\n\t\t\ttail = node;\n\t\t}\n\t}\n\n\tremoveDuplicatesUnsorted(head);\n\n\tfor (struct Node *cur = head; cur != NULL; cur = cur->next)\n\t\tprintf(\"%d -> \", cur->data);\n\tprintf(\"NULL\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Merge two sorted linked lists",
+            "input": "list1 = 10 -> 30 -> 50, list2 = 20 -> 40 -> 60",
+            "output": "10 -> 20 -> 30 -> 40 -> 50 -> 60 -> NULL",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic struct Node *mergeSorted(struct Node *a, struct Node *b)\n{\n\tstruct Node dummy;\n\tstruct Node *tail = &dummy;\n\tdummy.next = NULL;\n\n\twhile (a != NULL && b != NULL)\n\t{\n\t\tif (a->data <= b->data)\n\t\t{\n\t\t\ttail->next = a;\n\t\t\ta = a->next;\n\t\t}\n\t\telse\n\t\t{\n\t\t\ttail->next = b;\n\t\t\tb = b->next;\n\t\t}\n\t\ttail = tail->next;\n\t}\n\n\ttail->next = (a != NULL) ? a : b;\n\treturn dummy.next;\n}\n\nstatic struct Node *buildList(int values[], int n)\n{\n\tstruct Node *head = NULL, *tail = NULL;\n\tfor (int i = 0; i < n; i++)\n\t{\n\t\tstruct Node *node = malloc(sizeof(struct Node));\n\t\tnode->data = values[i];\n\t\tnode->next = NULL;\n\t\tif (head == NULL)\n\t\t\thead = tail = node;\n\t\telse\n\t\t{\n\t\t\ttail->next = node;\n\t\t\ttail = node;\n\t\t}\n\t}\n\treturn head;\n}\n\nint main(void)\n{\n\tint values1[] = {10, 30, 50};\n\tint values2[] = {20, 40, 60};\n\n\tstruct Node *list1 = buildList(values1, 3);\n\tstruct Node *list2 = buildList(values2, 3);\n\tstruct Node *merged = mergeSorted(list1, list2);\n\n\tfor (struct Node *cur = merged; cur != NULL; cur = cur->next)\n\t\tprintf(\"%d -> \", cur->data);\n\tprintf(\"NULL\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Find the Nth node from the end of a linked list",
+            "input": "list = 10 -> 20 -> 30 -> 40 -> 50, N = 2",
+            "output": "2nd node from end: 40",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic struct Node *nthFromEnd(struct Node *head, int n)\n{\n\tstruct Node *first = head, *second = head;\n\n\tfor (int i = 0; i < n; i++)\n\t\tfirst = first->next;\n\n\twhile (first != NULL)\n\t{\n\t\tfirst = first->next;\n\t\tsecond = second->next;\n\t}\n\n\treturn second;\n}\n\nint main(void)\n{\n\tstruct Node *head = NULL, *tail = NULL;\n\n\tfor (int i = 1; i <= 5; i++)\n\t{\n\t\tstruct Node *node = malloc(sizeof(struct Node));\n\t\tnode->data = i * 10;\n\t\tnode->next = NULL;\n\t\tif (head == NULL)\n\t\t\thead = tail = node;\n\t\telse\n\t\t{\n\t\t\ttail->next = node;\n\t\t\ttail = node;\n\t\t}\n\t}\n\n\tprintf(\"2nd node from end: %d\\n\", nthFromEnd(head, 2)->data);\n\treturn 0;\n}"
+          },
+          {
+            "name": "Check if a linked list is a palindrome",
+            "input": "list = 1 -> 2 -> 3 -> 2 -> 1",
+            "output": "The list is a palindrome",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic int isPalindrome(struct Node *head)\n{\n\tint values[1000], count = 0;\n\n\tfor (struct Node *cur = head; cur != NULL; cur = cur->next)\n\t\tvalues[count++] = cur->data;\n\n\tfor (int i = 0, j = count - 1; i < j; i++, j--)\n\t\tif (values[i] != values[j])\n\t\t\treturn 0;\n\n\treturn 1;\n}\n\nint main(void)\n{\n\tint data[] = {1, 2, 3, 2, 1};\n\tstruct Node *head = NULL, *tail = NULL;\n\n\tfor (int i = 0; i < 5; i++)\n\t{\n\t\tstruct Node *node = malloc(sizeof(struct Node));\n\t\tnode->data = data[i];\n\t\tnode->next = NULL;\n\t\tif (head == NULL)\n\t\t\thead = tail = node;\n\t\telse\n\t\t{\n\t\t\ttail->next = node;\n\t\t\ttail = node;\n\t\t}\n\t}\n\n\tprintf(\"%s\\n\", isPalindrome(head) ? \"The list is a palindrome\" : \"Not a palindrome\");\n\treturn 0;\n}"
+          },
+          {
+            "name": "Sort a linked list using merge sort",
+            "input": "list = 40 -> 10 -> 30 -> 20",
+            "output": "10 -> 20 -> 30 -> 40 -> NULL",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic struct Node *merge(struct Node *a, struct Node *b)\n{\n\tif (a == NULL)\n\t\treturn b;\n\tif (b == NULL)\n\t\treturn a;\n\n\tif (a->data <= b->data)\n\t{\n\t\ta->next = merge(a->next, b);\n\t\treturn a;\n\t}\n\tb->next = merge(a, b->next);\n\treturn b;\n}\n\nstatic struct Node *split(struct Node *head)\n{\n\tstruct Node *slow = head, *fast = head->next;\n\n\twhile (fast != NULL && fast->next != NULL)\n\t{\n\t\tslow = slow->next;\n\t\tfast = fast->next->next;\n\t}\n\n\tstruct Node *second = slow->next;\n\tslow->next = NULL;\n\treturn second;\n}\n\nstatic struct Node *mergeSort(struct Node *head)\n{\n\tif (head == NULL || head->next == NULL)\n\t\treturn head;\n\n\tstruct Node *second = split(head);\n\thead = mergeSort(head);\n\tsecond = mergeSort(second);\n\n\treturn merge(head, second);\n}\n\nint main(void)\n{\n\tint values[] = {40, 10, 30, 20};\n\tstruct Node *head = NULL, *tail = NULL;\n\n\tfor (int i = 0; i < 4; i++)\n\t{\n\t\tstruct Node *node = malloc(sizeof(struct Node));\n\t\tnode->data = values[i];\n\t\tnode->next = NULL;\n\t\tif (head == NULL)\n\t\t\thead = tail = node;\n\t\telse\n\t\t{\n\t\t\ttail->next = node;\n\t\t\ttail = node;\n\t\t}\n\t}\n\n\thead = mergeSort(head);\n\n\tfor (struct Node *cur = head; cur != NULL; cur = cur->next)\n\t\tprintf(\"%d -> \", cur->data);\n\tprintf(\"NULL\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Swap nodes in pairs",
+            "input": "list = 10 -> 20 -> 30 -> 40",
+            "output": "20 -> 10 -> 40 -> 30 -> NULL",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic struct Node *swapPairs(struct Node *head)\n{\n\tif (head == NULL || head->next == NULL)\n\t\treturn head;\n\n\tstruct Node *newHead = head->next;\n\thead->next = swapPairs(newHead->next);\n\tnewHead->next = head;\n\n\treturn newHead;\n}\n\nint main(void)\n{\n\tstruct Node *head = NULL, *tail = NULL;\n\n\tfor (int i = 1; i <= 4; i++)\n\t{\n\t\tstruct Node *node = malloc(sizeof(struct Node));\n\t\tnode->data = i * 10;\n\t\tnode->next = NULL;\n\t\tif (head == NULL)\n\t\t\thead = tail = node;\n\t\telse\n\t\t{\n\t\t\ttail->next = node;\n\t\t\ttail = node;\n\t\t}\n\t}\n\n\thead = swapPairs(head);\n\n\tfor (struct Node *cur = head; cur != NULL; cur = cur->next)\n\t\tprintf(\"%d -> \", cur->data);\n\tprintf(\"NULL\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Rotate a linked list by k places",
+            "input": "list = 10 -> 20 -> 30 -> 40 -> 50, k = 2",
+            "output": "30 -> 40 -> 50 -> 10 -> 20 -> NULL",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic struct Node *rotate(struct Node *head, int k)\n{\n\tif (head == NULL)\n\t\treturn NULL;\n\n\tint length = 1;\n\tstruct Node *tail = head;\n\twhile (tail->next != NULL)\n\t{\n\t\ttail = tail->next;\n\t\tlength++;\n\t}\n\n\tk = k % length;\n\tif (k == 0)\n\t\treturn head;\n\n\tstruct Node *newTail = head;\n\tfor (int i = 0; i < length - k - 1; i++)\n\t\tnewTail = newTail->next;\n\n\tstruct Node *newHead = newTail->next;\n\tnewTail->next = NULL;\n\ttail->next = head;\n\n\treturn newHead;\n}\n\nint main(void)\n{\n\tstruct Node *head = NULL, *tail = NULL;\n\n\tfor (int i = 1; i <= 5; i++)\n\t{\n\t\tstruct Node *node = malloc(sizeof(struct Node));\n\t\tnode->data = i * 10;\n\t\tnode->next = NULL;\n\t\tif (head == NULL)\n\t\t\thead = tail = node;\n\t\telse\n\t\t{\n\t\t\ttail->next = node;\n\t\t\ttail = node;\n\t\t}\n\t}\n\n\thead = rotate(head, 2);\n\n\tfor (struct Node *cur = head; cur != NULL; cur = cur->next)\n\t\tprintf(\"%d -> \", cur->data);\n\tprintf(\"NULL\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Find the intersection point of two linked lists",
+            "input": "two lists that merge into a shared tail",
+            "output": "Intersection at node with value: 30",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic int listLength(struct Node *head)\n{\n\tint len = 0;\n\tfor (struct Node *cur = head; cur != NULL; cur = cur->next)\n\t\tlen++;\n\treturn len;\n}\n\nstatic struct Node *findIntersection(struct Node *a, struct Node *b)\n{\n\tint lenA = listLength(a), lenB = listLength(b);\n\n\twhile (lenA > lenB)\n\t{\n\t\ta = a->next;\n\t\tlenA--;\n\t}\n\twhile (lenB > lenA)\n\t{\n\t\tb = b->next;\n\t\tlenB--;\n\t}\n\n\twhile (a != b)\n\t{\n\t\ta = a->next;\n\t\tb = b->next;\n\t}\n\n\treturn a;\n}\n\nint main(void)\n{\n\tstruct Node *shared = malloc(sizeof(struct Node));\n\tshared->data = 30;\n\tshared->next = malloc(sizeof(struct Node));\n\tshared->next->data = 40;\n\tshared->next->next = NULL;\n\n\tstruct Node *listA = malloc(sizeof(struct Node));\n\tlistA->data = 10;\n\tlistA->next = shared;\n\n\tstruct Node *listB = malloc(sizeof(struct Node));\n\tlistB->data = 20;\n\tlistB->next = malloc(sizeof(struct Node));\n\tlistB->next->data = 25;\n\tlistB->next->next = shared;\n\n\tstruct Node *intersection = findIntersection(listA, listB);\n\tprintf(\"Intersection at node with value: %d\\n\", intersection->data);\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Delete a linked list completely (free all memory)",
+            "input": "list = 10 -> 20 -> 30",
+            "output": "List fully freed, head is now NULL",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic struct Node *deleteList(struct Node *head)\n{\n\twhile (head != NULL)\n\t{\n\t\tstruct Node *next = head->next;\n\t\tfree(head);\n\t\thead = next;\n\t}\n\treturn NULL;\n}\n\nint main(void)\n{\n\tstruct Node *head = malloc(sizeof(struct Node));\n\thead->data = 10;\n\thead->next = malloc(sizeof(struct Node));\n\thead->next->data = 20;\n\thead->next->next = malloc(sizeof(struct Node));\n\thead->next->next->data = 30;\n\thead->next->next->next = NULL;\n\n\thead = deleteList(head);\n\tprintf(\"List fully freed, head is now %s\\n\", head == NULL ? \"NULL\" : \"not NULL\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Copy/clone a linked list",
+            "input": "list = 10 -> 20 -> 30",
+            "output": "Cloned list: 10 -> 20 -> 30 -> NULL",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic struct Node *cloneList(struct Node *head)\n{\n\tif (head == NULL)\n\t\treturn NULL;\n\n\tstruct Node *newHead = malloc(sizeof(struct Node));\n\tnewHead->data = head->data;\n\tnewHead->next = cloneList(head->next);\n\n\treturn newHead;\n}\n\nint main(void)\n{\n\tstruct Node *head = malloc(sizeof(struct Node));\n\thead->data = 10;\n\thead->next = malloc(sizeof(struct Node));\n\thead->next->data = 20;\n\thead->next->next = malloc(sizeof(struct Node));\n\thead->next->next->data = 30;\n\thead->next->next->next = NULL;\n\n\tstruct Node *clone = cloneList(head);\n\n\tprintf(\"Cloned list: \");\n\tfor (struct Node *cur = clone; cur != NULL; cur = cur->next)\n\t\tprintf(\"%d -> \", cur->data);\n\tprintf(\"NULL\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Convert a linked list to an array",
+            "input": "list = 10 -> 20 -> 30",
+            "output": "Array: [10, 20, 30]",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic int listToArray(struct Node *head, int arr[])\n{\n\tint count = 0;\n\tfor (struct Node *cur = head; cur != NULL; cur = cur->next)\n\t\tarr[count++] = cur->data;\n\treturn count;\n}\n\nint main(void)\n{\n\tstruct Node *head = malloc(sizeof(struct Node));\n\thead->data = 10;\n\thead->next = malloc(sizeof(struct Node));\n\thead->next->data = 20;\n\thead->next->next = malloc(sizeof(struct Node));\n\thead->next->next->data = 30;\n\thead->next->next->next = NULL;\n\n\tint arr[10];\n\tint count = listToArray(head, arr);\n\n\tprintf(\"Array: [\");\n\tfor (int i = 0; i < count; i++)\n\t\tprintf(\"%d%s\", arr[i], (i < count - 1) ? \", \" : \"\");\n\tprintf(\"]\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Add two numbers represented as linked lists (digits in reverse order)",
+            "input": "342 (2->4->3) + 465 (5->6->4)",
+            "output": "807 (7->0->8)",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic struct Node *addLists(struct Node *a, struct Node *b)\n{\n\tstruct Node dummy;\n\tstruct Node *tail = &dummy;\n\tint carry = 0;\n\tdummy.next = NULL;\n\n\twhile (a != NULL || b != NULL || carry != 0)\n\t{\n\t\tint sum = carry;\n\t\tif (a != NULL)\n\t\t{\n\t\t\tsum += a->data;\n\t\t\ta = a->next;\n\t\t}\n\t\tif (b != NULL)\n\t\t{\n\t\t\tsum += b->data;\n\t\t\tb = b->next;\n\t\t}\n\n\t\tcarry = sum / 10;\n\t\ttail->next = malloc(sizeof(struct Node));\n\t\ttail->next->data = sum % 10;\n\t\ttail->next->next = NULL;\n\t\ttail = tail->next;\n\t}\n\n\treturn dummy.next;\n}\n\nstatic struct Node *buildList(int values[], int n)\n{\n\tstruct Node *head = NULL, *tail = NULL;\n\tfor (int i = 0; i < n; i++)\n\t{\n\t\tstruct Node *node = malloc(sizeof(struct Node));\n\t\tnode->data = values[i];\n\t\tnode->next = NULL;\n\t\tif (head == NULL)\n\t\t\thead = tail = node;\n\t\telse\n\t\t{\n\t\t\ttail->next = node;\n\t\t\ttail = node;\n\t\t}\n\t}\n\treturn head;\n}\n\nint main(void)\n{\n\tint digitsA[] = {2, 4, 3}; /* represents 342 */\n\tint digitsB[] = {5, 6, 4}; /* represents 465 */\n\n\tstruct Node *a = buildList(digitsA, 3);\n\tstruct Node *b = buildList(digitsB, 3);\n\tstruct Node *result = addLists(a, b);\n\n\tprintf(\"Result (reversed digits): \");\n\tfor (struct Node *cur = result; cur != NULL; cur = cur->next)\n\t\tprintf(\"%d \", cur->data); /* prints 7 0 8, representing 807 */\n\tprintf(\"\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Doubly linked list - insert and traverse",
+            "input": "insert 10, 20, 30 at the end",
+            "output": "Forward: 10 20 30, Backward: 30 20 10",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct DNode\n{\n\tint data;\n\tstruct DNode *prev;\n\tstruct DNode *next;\n};\n\nstatic struct DNode *insertEnd(struct DNode *head, int data)\n{\n\tstruct DNode *node = malloc(sizeof(struct DNode));\n\tnode->data = data;\n\tnode->next = NULL;\n\n\tif (head == NULL)\n\t{\n\t\tnode->prev = NULL;\n\t\treturn node;\n\t}\n\n\tstruct DNode *cur = head;\n\twhile (cur->next != NULL)\n\t\tcur = cur->next;\n\n\tcur->next = node;\n\tnode->prev = cur;\n\treturn head;\n}\n\nint main(void)\n{\n\tstruct DNode *head = NULL;\n\n\thead = insertEnd(head, 10);\n\thead = insertEnd(head, 20);\n\thead = insertEnd(head, 30);\n\n\tprintf(\"Forward: \");\n\tstruct DNode *tail = head;\n\tfor (struct DNode *cur = head; cur != NULL; cur = cur->next)\n\t{\n\t\tprintf(\"%d \", cur->data);\n\t\ttail = cur;\n\t}\n\n\tprintf(\"\\nBackward: \");\n\tfor (struct DNode *cur = tail; cur != NULL; cur = cur->prev)\n\t\tprintf(\"%d \", cur->data);\n\tprintf(\"\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Doubly linked list - delete a node",
+            "input": "list = 10 <-> 20 <-> 30, delete 20",
+            "output": "10 <-> 30",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct DNode\n{\n\tint data;\n\tstruct DNode *prev;\n\tstruct DNode *next;\n};\n\nstatic struct DNode *deleteNode(struct DNode *head, int value)\n{\n\tstruct DNode *cur = head;\n\n\twhile (cur != NULL && cur->data != value)\n\t\tcur = cur->next;\n\n\tif (cur == NULL)\n\t\treturn head;\n\n\tif (cur->prev != NULL)\n\t\tcur->prev->next = cur->next;\n\telse\n\t\thead = cur->next;\n\n\tif (cur->next != NULL)\n\t\tcur->next->prev = cur->prev;\n\n\tfree(cur);\n\treturn head;\n}\n\nint main(void)\n{\n\tstruct DNode *head = malloc(sizeof(struct DNode));\n\thead->data = 10;\n\thead->prev = NULL;\n\thead->next = malloc(sizeof(struct DNode));\n\thead->next->data = 20;\n\thead->next->prev = head;\n\thead->next->next = malloc(sizeof(struct DNode));\n\thead->next->next->data = 30;\n\thead->next->next->prev = head->next;\n\thead->next->next->next = NULL;\n\n\thead = deleteNode(head, 20);\n\n\tfor (struct DNode *cur = head; cur != NULL; cur = cur->next)\n\t\tprintf(\"%d \", cur->data);\n\tprintf(\"\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Circular linked list - insert and traverse",
+            "input": "insert 10, 20, 30",
+            "output": "10 -> 20 -> 30 -> (back to 10)",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic struct Node *insertCircular(struct Node *last, int data)\n{\n\tstruct Node *node = malloc(sizeof(struct Node));\n\tnode->data = data;\n\n\tif (last == NULL)\n\t{\n\t\tnode->next = node;\n\t\treturn node;\n\t}\n\n\tnode->next = last->next;\n\tlast->next = node;\n\treturn node;\n}\n\nint main(void)\n{\n\tstruct Node *last = NULL;\n\n\tlast = insertCircular(last, 10);\n\tlast = insertCircular(last, 20);\n\tlast = insertCircular(last, 30);\n\n\tstruct Node *head = last->next;\n\tstruct Node *cur = head;\n\n\tdo\n\t{\n\t\tprintf(\"%d -> \", cur->data);\n\t\tcur = cur->next;\n\t} while (cur != head);\n\tprintf(\"(back to %d)\\n\", head->data);\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Circular linked list - detect the cycle and break it back to a simple list",
+            "input": "circular list 10 -> 20 -> 30 -> (back to 10)",
+            "output": "Cycle broken: 10 -> 20 -> 30 -> NULL",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n\nstruct Node\n{\n\tint data;\n\tstruct Node *next;\n};\n\nstatic void breakCycle(struct Node *head)\n{\n\tstruct Node *slow = head, *fast = head;\n\n\twhile (fast != NULL && fast->next != NULL)\n\t{\n\t\tslow = slow->next;\n\t\tfast = fast->next->next;\n\t\tif (slow == fast)\n\t\t\tbreak;\n\t}\n\n\tif (fast == NULL || fast->next == NULL)\n\t\treturn; /* no cycle found */\n\n\tslow = head;\n\tif (slow == fast)\n\t{\n\t\twhile (fast->next != slow)\n\t\t\tfast = fast->next;\n\t}\n\telse\n\t{\n\t\twhile (slow->next != fast->next)\n\t\t{\n\t\t\tslow = slow->next;\n\t\t\tfast = fast->next;\n\t\t}\n\t}\n\n\tfast->next = NULL; /* cut the link that closed the loop */\n}\n\nint main(void)\n{\n\tstruct Node *n1 = malloc(sizeof(struct Node));\n\tstruct Node *n2 = malloc(sizeof(struct Node));\n\tstruct Node *n3 = malloc(sizeof(struct Node));\n\n\tn1->data = 10;\n\tn2->data = 20;\n\tn3->data = 30;\n\tn1->next = n2;\n\tn2->next = n3;\n\tn3->next = n1; /* circular */\n\n\tbreakCycle(n1);\n\n\tprintf(\"Cycle broken: \");\n\tfor (struct Node *cur = n1; cur != NULL; cur = cur->next)\n\t\tprintf(\"%d -> \", cur->data);\n\tprintf(\"NULL\\n\");\n\n\treturn 0;\n}"
+          }
+        ],
+        "path": "DSA/linkedlist.c"
+      }
+    ]
+  },
+  {
+    "section": "C++ Programming",
+    "chapters": [
+      {
+        "chapter": "DESIGN PATTERNS",
+        "folder": "CPP",
+        "programs": [
+          {
+            "name": "Singleton pattern",
+            "input": "(none)",
+            "output": "Both references point to the same instance",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Singleton\n{\n    static Singleton *instance;\n    Singleton() {}\n\npublic:\n    static Singleton *getInstance()\n    {\n        if (instance == nullptr)\n            instance = new Singleton();\n        return instance;\n    }\n};\n\nSingleton *Singleton::instance = nullptr;\n\nint main()\n{\n    Singleton *a = Singleton::getInstance();\n    Singleton *b = Singleton::getInstance();\n    cout << ((a == b) ? \"Both references point to the same instance\" : \"Different instances\") << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Factory Method pattern",
+            "input": "create a Circle or Square via a factory",
+            "output": "Drawing a Circle, Drawing a Square",
+            "code": "#include <iostream>\n#include <memory>\nusing namespace std;\n\nclass Shape\n{\npublic:\n    virtual void draw() = 0;\n    virtual ~Shape() {}\n};\n\nclass Circle : public Shape\n{\npublic:\n    void draw() override { cout << \"Drawing a Circle\" << endl; }\n};\n\nclass Square : public Shape\n{\npublic:\n    void draw() override { cout << \"Drawing a Square\" << endl; }\n};\n\nunique_ptr<Shape> createShape(const string &type)\n{\n    if (type == \"circle\")\n        return make_unique<Circle>();\n    return make_unique<Square>();\n}\n\nint main()\n{\n    createShape(\"circle\")->draw();\n    createShape(\"square\")->draw();\n    return 0;\n}"
+          },
+          {
+            "name": "Abstract Factory pattern",
+            "input": "create a matching Button and Checkbox for a UI theme",
+            "output": "Rendering a Dark Button, Rendering a Dark Checkbox",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Button\n{\npublic:\n    virtual void render() = 0;\n    virtual ~Button() {}\n};\n\nclass Checkbox\n{\npublic:\n    virtual void render() = 0;\n    virtual ~Checkbox() {}\n};\n\nclass DarkButton : public Button\n{\npublic:\n    void render() override { cout << \"Rendering a Dark Button\" << endl; }\n};\n\nclass DarkCheckbox : public Checkbox\n{\npublic:\n    void render() override { cout << \"Rendering a Dark Checkbox\" << endl; }\n};\n\nclass UIFactory\n{\npublic:\n    virtual Button *createButton() = 0;\n    virtual Checkbox *createCheckbox() = 0;\n    virtual ~UIFactory() {}\n};\n\nclass DarkThemeFactory : public UIFactory\n{\npublic:\n    Button *createButton() override { return new DarkButton(); }\n    Checkbox *createCheckbox() override { return new DarkCheckbox(); }\n};\n\nint main()\n{\n    DarkThemeFactory factory;\n    factory.createButton()->render();\n    factory.createCheckbox()->render();\n    return 0;\n}"
+          },
+          {
+            "name": "Builder pattern",
+            "input": "build a Burger step by step",
+            "output": "Burger: Bun + Patty + Cheese + Lettuce",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Burger\n{\npublic:\n    string description;\n};\n\nclass BurgerBuilder\n{\n    Burger burger;\n\npublic:\n    BurgerBuilder &addBun()\n    {\n        burger.description += \"Bun + \";\n        return *this;\n    }\n    BurgerBuilder &addPatty()\n    {\n        burger.description += \"Patty + \";\n        return *this;\n    }\n    BurgerBuilder &addCheese()\n    {\n        burger.description += \"Cheese + \";\n        return *this;\n    }\n    BurgerBuilder &addLettuce()\n    {\n        burger.description += \"Lettuce\";\n        return *this;\n    }\n    Burger build() { return burger; }\n};\n\nint main()\n{\n    Burger b = BurgerBuilder().addBun().addPatty().addCheese().addLettuce().build();\n    cout << \"Burger: \" << b.description << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Prototype pattern",
+            "input": "clone an existing object instead of constructing a new one",
+            "output": "Cloned shape with radius: 5",
+            "code": "#include <iostream>\n#include <memory>\nusing namespace std;\n\nclass Shape\n{\npublic:\n    int radius;\n    virtual unique_ptr<Shape> clone() = 0;\n    virtual ~Shape() {}\n};\n\nclass Circle : public Shape\n{\npublic:\n    Circle(int r) { radius = r; }\n    unique_ptr<Shape> clone() override { return make_unique<Circle>(*this); }\n};\n\nint main()\n{\n    Circle original(5);\n    unique_ptr<Shape> copy = original.clone();\n    cout << \"Cloned shape with radius: \" << copy->radius << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Adapter pattern",
+            "input": "adapt an old interface to a new one expected by client code",
+            "output": "Adapted call: Legacy printer printing \"Hello\"",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass LegacyPrinter\n{\npublic:\n    void oldPrint(const string &text) { cout << \"Legacy printer printing \\\"\" << text << \"\\\"\" << endl; }\n};\n\nclass ModernPrinter\n{\npublic:\n    virtual void print(const string &text) = 0;\n    virtual ~ModernPrinter() {}\n};\n\nclass PrinterAdapter : public ModernPrinter\n{\n    LegacyPrinter legacy;\n\npublic:\n    void print(const string &text) override\n    {\n        cout << \"Adapted call: \";\n        legacy.oldPrint(text);\n    }\n};\n\nint main()\n{\n    PrinterAdapter adapter;\n    adapter.print(\"Hello\");\n    return 0;\n}"
+          },
+          {
+            "name": "Bridge pattern",
+            "input": "decouple an abstraction (Remote) from its implementation (Device)",
+            "output": "TV: turning on",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Device\n{\npublic:\n    virtual void turnOn() = 0;\n    virtual ~Device() {}\n};\n\nclass TV : public Device\n{\npublic:\n    void turnOn() override { cout << \"TV: turning on\" << endl; }\n};\n\nclass Remote\n{\nprotected:\n    Device *device;\n\npublic:\n    Remote(Device *d) : device(d) {}\n    virtual void pressPower() { device->turnOn(); }\n};\n\nint main()\n{\n    TV tv;\n    Remote remote(&tv);\n    remote.pressPower();\n    return 0;\n}"
+          },
+          {
+            "name": "Composite pattern",
+            "input": "a tree of files and folders",
+            "output": "File: a.txt, Folder contains: File: b.txt, File: c.txt",
+            "code": "#include <iostream>\n#include <vector>\n#include <memory>\nusing namespace std;\n\nclass FileSystemItem\n{\npublic:\n    virtual void show() = 0;\n    virtual ~FileSystemItem() {}\n};\n\nclass File : public FileSystemItem\n{\n    string name;\n\npublic:\n    File(string n) : name(n) {}\n    void show() override { cout << \"File: \" << name << endl; }\n};\n\nclass Folder : public FileSystemItem\n{\n    vector<shared_ptr<FileSystemItem>> children;\n\npublic:\n    void add(shared_ptr<FileSystemItem> item) { children.push_back(item); }\n    void show() override\n    {\n        cout << \"Folder contains:\" << endl;\n        for (auto &child : children)\n            child->show();\n    }\n};\n\nint main()\n{\n    auto file1 = make_shared<File>(\"a.txt\");\n    file1->show();\n\n    Folder folder;\n    folder.add(make_shared<File>(\"b.txt\"));\n    folder.add(make_shared<File>(\"c.txt\"));\n    folder.show();\n\n    return 0;\n}"
+          },
+          {
+            "name": "Decorator pattern",
+            "input": "wrap a base Coffee with a Milk decorator",
+            "output": "Coffee with Milk costs 7",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Coffee\n{\npublic:\n    virtual int cost() = 0;\n    virtual string description() = 0;\n    virtual ~Coffee() {}\n};\n\nclass PlainCoffee : public Coffee\n{\npublic:\n    int cost() override { return 5; }\n    string description() override { return \"Coffee\"; }\n};\n\nclass MilkDecorator : public Coffee\n{\n    Coffee *base;\n\npublic:\n    MilkDecorator(Coffee *c) : base(c) {}\n    int cost() override { return base->cost() + 2; }\n    string description() override { return base->description() + \" with Milk\"; }\n};\n\nint main()\n{\n    PlainCoffee plain;\n    MilkDecorator withMilk(&plain);\n    cout << withMilk.description() << \" costs \" << withMilk.cost() << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Facade pattern",
+            "input": "a single simplified interface hiding subsystem complexity",
+            "output": "CPU started, Memory loaded, Disk read, Computer booted",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass CPU\n{\npublic:\n    void start() { cout << \"CPU started\" << endl; }\n};\n\nclass Memory\n{\npublic:\n    void load() { cout << \"Memory loaded\" << endl; }\n};\n\nclass Disk\n{\npublic:\n    void read() { cout << \"Disk read\" << endl; }\n};\n\nclass ComputerFacade\n{\n    CPU cpu;\n    Memory memory;\n    Disk disk;\n\npublic:\n    void boot()\n    {\n        cpu.start();\n        memory.load();\n        disk.read();\n        cout << \"Computer booted\" << endl;\n    }\n};\n\nint main()\n{\n    ComputerFacade computer;\n    computer.boot();\n    return 0;\n}"
+          },
+          {
+            "name": "Flyweight pattern",
+            "input": "reuse shared character formatting objects",
+            "output": "Reused 1 shared \"Bold\" style object for 3 characters",
+            "code": "#include <iostream>\n#include <map>\n#include <memory>\nusing namespace std;\n\nclass CharacterStyle\n{\npublic:\n    string styleName;\n    CharacterStyle(string s) : styleName(s) {}\n};\n\nclass StyleFactory\n{\n    map<string, shared_ptr<CharacterStyle>> styles;\n\npublic:\n    shared_ptr<CharacterStyle> getStyle(const string &name)\n    {\n        if (styles.find(name) == styles.end())\n            styles[name] = make_shared<CharacterStyle>(name);\n        return styles[name]; /* shared/reused instead of duplicated per character */\n    }\n};\n\nint main()\n{\n    StyleFactory factory;\n    auto s1 = factory.getStyle(\"Bold\");\n    auto s2 = factory.getStyle(\"Bold\");\n    auto s3 = factory.getStyle(\"Bold\");\n\n    cout << \"Reused 1 shared \\\"Bold\\\" style object for 3 characters\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Proxy pattern",
+            "input": "access a real object through a proxy that adds access control",
+            "output": "Access granted, Loading real resource, Resource used",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Resource\n{\npublic:\n    virtual void use() = 0;\n    virtual ~Resource() {}\n};\n\nclass RealResource : public Resource\n{\npublic:\n    RealResource() { cout << \"Loading real resource\" << endl; }\n    void use() override { cout << \"Resource used\" << endl; }\n};\n\nclass ResourceProxy : public Resource\n{\n    RealResource *real = nullptr;\n\npublic:\n    void use() override\n    {\n        cout << \"Access granted\" << endl;\n        if (real == nullptr)\n            real = new RealResource(); /* lazy-loaded through the proxy */\n        real->use();\n    }\n};\n\nint main()\n{\n    ResourceProxy proxy;\n    proxy.use();\n    return 0;\n}"
+          },
+          {
+            "name": "Observer pattern",
+            "input": "notify all subscribers when a subject changes",
+            "output": "Observer 1 notified: value=10, Observer 2 notified: value=10",
+            "code": "#include <iostream>\n#include <vector>\n#include <functional>\nusing namespace std;\n\nclass Subject\n{\n    vector<function<void(int)>> observers;\n\npublic:\n    void subscribe(function<void(int)> observer) { observers.push_back(observer); }\n    void setValue(int value)\n    {\n        for (auto &observer : observers)\n            observer(value);\n    }\n};\n\nint main()\n{\n    Subject subject;\n    subject.subscribe([](int v)\n                      { cout << \"Observer 1 notified: value=\" << v << endl; });\n    subject.subscribe([](int v)\n                      { cout << \"Observer 2 notified: value=\" << v << endl; });\n\n    subject.setValue(10);\n    return 0;\n}"
+          },
+          {
+            "name": "Strategy pattern",
+            "input": "switch sorting strategy at runtime",
+            "output": "Sorted ascending: 1 2 3, Sorted descending: 3 2 1",
+            "code": "#include <iostream>\n#include <vector>\n#include <algorithm>\n#include <functional>\nusing namespace std;\n\nclass Sorter\n{\n    function<void(vector<int> &)> strategy;\n\npublic:\n    void setStrategy(function<void(vector<int> &)> s) { strategy = s; }\n    void sortData(vector<int> &data) { strategy(data); }\n};\n\nint main()\n{\n    vector<int> data = {3, 1, 2};\n    Sorter sorter;\n\n    sorter.setStrategy([](vector<int> &v)\n                       { sort(v.begin(), v.end()); });\n    sorter.sortData(data);\n    cout << \"Sorted ascending: \";\n    for (int x : data)\n        cout << x << \" \";\n    cout << endl;\n\n    sorter.setStrategy([](vector<int> &v)\n                       { sort(v.begin(), v.end(), greater<int>()); });\n    sorter.sortData(data);\n    cout << \"Sorted descending: \";\n    for (int x : data)\n        cout << x << \" \";\n    cout << endl;\n\n    return 0;\n}"
+          },
+          {
+            "name": "Command pattern",
+            "input": "encapsulate a light-switch action as a command object",
+            "output": "Light turned ON",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Command\n{\npublic:\n    virtual void execute() = 0;\n    virtual ~Command() {}\n};\n\nclass Light\n{\npublic:\n    void turnOn() { cout << \"Light turned ON\" << endl; }\n};\n\nclass LightOnCommand : public Command\n{\n    Light &light;\n\npublic:\n    LightOnCommand(Light &l) : light(l) {}\n    void execute() override { light.turnOn(); }\n};\n\nint main()\n{\n    Light light;\n    LightOnCommand command(light);\n    command.execute();\n    return 0;\n}"
+          },
+          {
+            "name": "Iterator pattern",
+            "input": "custom collection with its own iterator",
+            "output": "10 20 30",
+            "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nclass Collection\n{\n    vector<int> items = {10, 20, 30};\n\npublic:\n    auto begin() { return items.begin(); }\n    auto end() { return items.end(); }\n};\n\nint main()\n{\n    Collection collection;\n    for (int x : collection) /* works because begin()/end() are defined */\n        cout << x << \" \";\n    cout << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Template Method pattern",
+            "input": "a fixed algorithm skeleton with customizable steps",
+            "output": "Prepare base, Add specific topping, Serve",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Recipe\n{\npublic:\n    void make()\n    {\n        prepareBase();\n        addTopping();\n        serve();\n    }\n    void prepareBase() { cout << \"Prepare base\" << endl; }\n    virtual void addTopping() = 0; /* customizable step */\n    void serve() { cout << \"Serve\" << endl; }\n    virtual ~Recipe() {}\n};\n\nclass PizzaRecipe : public Recipe\n{\npublic:\n    void addTopping() override { cout << \"Add specific topping\" << endl; }\n};\n\nint main()\n{\n    PizzaRecipe pizza;\n    pizza.make();\n    return 0;\n}"
+          },
+          {
+            "name": "State pattern",
+            "input": "a traffic light cycling through states",
+            "output": "Red -> Green -> Yellow -> Red",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass State\n{\npublic:\n    virtual string name() = 0;\n    virtual State *next() = 0;\n    virtual ~State() {}\n};\n\nclass RedState;\nclass GreenState;\nclass YellowState;\n\nclass RedState : public State\n{\npublic:\n    string name() override { return \"Red\"; }\n    State *next() override;\n};\n\nclass GreenState : public State\n{\npublic:\n    string name() override { return \"Green\"; }\n    State *next() override;\n};\n\nclass YellowState : public State\n{\npublic:\n    string name() override { return \"Yellow\"; }\n    State *next() override { return new RedState(); }\n};\n\nState *RedState::next() { return new GreenState(); }\nState *GreenState::next() { return new YellowState(); }\n\nint main()\n{\n    State *state = new RedState();\n    for (int i = 0; i < 3; i++)\n    {\n        cout << state->name() << \" -> \";\n        state = state->next();\n    }\n    cout << state->name() << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Chain of Responsibility pattern",
+            "input": "a support ticket escalated through handler levels",
+            "output": "Level 2 handled the request",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Handler\n{\nprotected:\n    Handler *next = nullptr;\n\npublic:\n    void setNext(Handler *h) { next = h; }\n    virtual void handle(int level)\n    {\n        if (next != nullptr)\n            next->handle(level);\n    }\n    virtual ~Handler() {}\n};\n\nclass Level1Handler : public Handler\n{\npublic:\n    void handle(int level) override\n    {\n        if (level == 1)\n            cout << \"Level 1 handled the request\" << endl;\n        else\n            Handler::handle(level);\n    }\n};\n\nclass Level2Handler : public Handler\n{\npublic:\n    void handle(int level) override\n    {\n        if (level == 2)\n            cout << \"Level 2 handled the request\" << endl;\n        else\n            Handler::handle(level);\n    }\n};\n\nint main()\n{\n    Level1Handler l1;\n    Level2Handler l2;\n    l1.setNext(&l2);\n\n    l1.handle(2);\n    return 0;\n}"
+          },
+          {
+            "name": "Mediator pattern",
+            "input": "two chat users communicating through a mediator",
+            "output": "User2 received: Hello from User1",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass ChatMediator\n{\npublic:\n    virtual void sendMessage(const string &msg, const string &from) = 0;\n    virtual ~ChatMediator() {}\n};\n\nclass ChatRoom : public ChatMediator\n{\npublic:\n    void sendMessage(const string &msg, const string &from) override\n    {\n        cout << \"User2 received: \" << msg << \" from \" << from << endl;\n    }\n};\n\nint main()\n{\n    ChatRoom room;\n    room.sendMessage(\"Hello\", \"User1\");\n    return 0;\n}"
+          },
+          {
+            "name": "Memento pattern",
+            "input": "save and restore an editor's text state",
+            "output": "Restored text: Hello",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Memento\n{\npublic:\n    string state;\n    Memento(string s) : state(s) {}\n};\n\nclass Editor\n{\n    string text;\n\npublic:\n    void setText(string t) { text = t; }\n    Memento save() { return Memento(text); }\n    void restore(const Memento &m) { text = m.state; }\n    string getText() { return text; }\n};\n\nint main()\n{\n    Editor editor;\n    editor.setText(\"Hello\");\n    Memento saved = editor.save();\n\n    editor.setText(\"Changed\");\n    editor.restore(saved);\n\n    cout << \"Restored text: \" << editor.getText() << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Visitor pattern",
+            "input": "a visitor operating on different shape types",
+            "output": "Visiting a Circle, Visiting a Square",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Circle;\nclass Square;\n\nclass Visitor\n{\npublic:\n    virtual void visit(Circle &c) = 0;\n    virtual void visit(Square &s) = 0;\n    virtual ~Visitor() {}\n};\n\nclass Shape\n{\npublic:\n    virtual void accept(Visitor &v) = 0;\n    virtual ~Shape() {}\n};\n\nclass Circle : public Shape\n{\npublic:\n    void accept(Visitor &v) override { v.visit(*this); }\n};\n\nclass Square : public Shape\n{\npublic:\n    void accept(Visitor &v) override { v.visit(*this); }\n};\n\nclass PrintVisitor : public Visitor\n{\npublic:\n    void visit(Circle &c) override { cout << \"Visiting a Circle\" << endl; }\n    void visit(Square &s) override { cout << \"Visiting a Square\" << endl; }\n};\n\nint main()\n{\n    PrintVisitor visitor;\n    Circle circle;\n    Square square;\n\n    circle.accept(visitor);\n    square.accept(visitor);\n    return 0;\n}"
+          },
+          {
+            "name": "Interpreter pattern (simple expression evaluator)",
+            "input": "evaluate \"3 + 4\"",
+            "output": "Result: 7",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Expression\n{\npublic:\n    virtual int interpret() = 0;\n    virtual ~Expression() {}\n};\n\nclass Number : public Expression\n{\n    int value;\n\npublic:\n    Number(int v) : value(v) {}\n    int interpret() override { return value; }\n};\n\nclass Add : public Expression\n{\n    Expression *left, *right;\n\npublic:\n    Add(Expression *l, Expression *r) : left(l), right(r) {}\n    int interpret() override { return left->interpret() + right->interpret(); }\n};\n\nint main()\n{\n    Number three(3), four(4);\n    Add expression(&three, &four);\n\n    cout << \"Result: \" << expression.interpret() << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Null Object pattern",
+            "input": "use a NullLogger instead of checking for a null pointer everywhere",
+            "output": "(silently does nothing, no null-pointer checks needed)",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Logger\n{\npublic:\n    virtual void log(const string &msg) = 0;\n    virtual ~Logger() {}\n};\n\nclass ConsoleLogger : public Logger\n{\npublic:\n    void log(const string &msg) override { cout << msg << endl; }\n};\n\nclass NullLogger : public Logger\n{\npublic:\n    void log(const string &msg) override { /* intentionally does nothing */ }\n};\n\nvoid process(Logger &logger)\n{\n    logger.log(\"Processing started\");\n}\n\nint main()\n{\n    NullLogger nullLogger;\n    process(nullLogger); /* safe to call, no crash, no output */\n\n    ConsoleLogger consoleLogger;\n    process(consoleLogger);\n    return 0;\n}"
+          },
+          {
+            "name": "Dependency Injection concept demo",
+            "input": "inject a Logger dependency into a Service instead of creating it internally",
+            "output": "Service using injected logger: Task completed",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Logger\n{\npublic:\n    void log(const string &msg) { cout << \"Service using injected logger: \" << msg << endl; }\n};\n\nclass Service\n{\n    Logger &logger;\n\npublic:\n    Service(Logger &l) : logger(l) {} /* dependency injected via constructor */\n    void doWork() { logger.log(\"Task completed\"); }\n};\n\nint main()\n{\n    Logger logger;\n    Service service(logger);\n    service.doWork();\n    return 0;\n}"
+          },
+          {
+            "name": "RAII as a resource-management pattern",
+            "input": "a lock guard released automatically at scope end",
+            "output": "Resource acquired, Resource released",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass ScopedResource\n{\npublic:\n    ScopedResource() { cout << \"Resource acquired\" << endl; }\n    ~ScopedResource() { cout << \"Resource released\" << endl; }\n};\n\nint main()\n{\n    ScopedResource resource; /* released deterministically when it goes out of scope */\n    return 0;\n}"
+          },
+          {
+            "name": "Pimpl idiom (pointer to implementation)",
+            "input": "hide implementation details behind an opaque pointer",
+            "output": "Widget processed value: 10",
+            "code": "#include <iostream>\n#include <memory>\nusing namespace std;\n\nclass Widget\n{\n    class Impl; /* forward-declared, defined below - hides internals from callers */\n    unique_ptr<Impl> impl;\n\npublic:\n    Widget();\n    ~Widget();\n    void process(int value);\n};\n\nclass Widget::Impl\n{\npublic:\n    void process(int value) { cout << \"Widget processed value: \" << value << endl; }\n};\n\nWidget::Widget() : impl(make_unique<Impl>()) {}\nWidget::~Widget() = default;\nvoid Widget::process(int value) { impl->process(value); }\n\nint main()\n{\n    Widget w;\n    w.process(10);\n    return 0;\n}"
+          },
+          {
+            "name": "CRTP (Curiously Recurring Template Pattern)",
+            "input": "static polymorphism without virtual function overhead",
+            "output": "Derived::implementation() called via CRTP",
+            "code": "#include <iostream>\nusing namespace std;\n\ntemplate <typename Derived>\nclass Base\n{\npublic:\n    void interface() { static_cast<Derived *>(this)->implementation(); }\n};\n\nclass Derived : public Base<Derived>\n{\npublic:\n    void implementation() { cout << \"Derived::implementation() called via CRTP\" << endl; }\n};\n\nint main()\n{\n    Derived d;\n    d.interface(); /* resolved at compile time, no vtable lookup needed */\n    return 0;\n}"
+          },
+          {
+            "name": "Object Pool pattern",
+            "input": "reuse objects from a pool instead of constructing new ones each time",
+            "output": "Reused object from pool, Reused object from pool",
+            "code": "#include <iostream>\n#include <vector>\n#include <memory>\nusing namespace std;\n\nclass Connection\n{\npublic:\n    void use() { cout << \"Reused object from pool\" << endl; }\n};\n\nclass ConnectionPool\n{\n    vector<unique_ptr<Connection>> pool;\n\npublic:\n    ConnectionPool() { pool.push_back(make_unique<Connection>()); }\n    Connection *acquire() { return pool.front().get(); } /* simplified: always reuses the same one */\n};\n\nint main()\n{\n    ConnectionPool pool;\n    pool.acquire()->use();\n    pool.acquire()->use();\n    return 0;\n}"
+          },
+          {
+            "name": "Simplified MVC (Model-View-Controller) pattern",
+            "input": "controller updates the model, view renders it",
+            "output": "Displaying student: Alice, Grade: A",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass StudentModel\n{\npublic:\n    string name;\n    string grade;\n};\n\nclass StudentView\n{\npublic:\n    void display(const StudentModel &model)\n    {\n        cout << \"Displaying student: \" << model.name << \", Grade: \" << model.grade << endl;\n    }\n};\n\nclass StudentController\n{\n    StudentModel &model;\n    StudentView &view;\n\npublic:\n    StudentController(StudentModel &m, StudentView &v) : model(m), view(v) {}\n    void updateGrade(const string &grade) { model.grade = grade; }\n    void render() { view.display(model); }\n};\n\nint main()\n{\n    StudentModel model;\n    model.name = \"Alice\";\n\n    StudentView view;\n    StudentController controller(model, view);\n\n    controller.updateGrade(\"A\");\n    controller.render();\n    return 0;\n}"
+          }
+        ],
+        "path": "CPP/design_patterns.cpp"
+      },
+      {
+        "chapter": "EXCEPTION HANDLING AND FILE I/O",
+        "folder": "CPP",
+        "programs": [
+          {
+            "name": "Basic try/catch block",
+            "input": "divide by zero",
+            "output": "Caught exception: Division by zero",
+            "code": "#include <iostream>\n#include <stdexcept>\nusing namespace std;\n\nint main()\n{\n    try\n    {\n        throw runtime_error(\"Division by zero\");\n    }\n    catch (const exception &e)\n    {\n        cout << \"Caught exception: \" << e.what() << endl;\n    }\n    return 0;\n}"
+          },
+          {
+            "name": "Throwing and catching a custom exception",
+            "input": "throw InvalidAge()",
+            "output": "Caught: Age cannot be negative",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass InvalidAge\n{\npublic:\n    string message = \"Age cannot be negative\";\n};\n\nint main()\n{\n    try\n    {\n        throw InvalidAge();\n    }\n    catch (const InvalidAge &e)\n    {\n        cout << \"Caught: \" << e.message << endl;\n    }\n    return 0;\n}"
+          },
+          {
+            "name": "Catching multiple exception types",
+            "input": "throw an int, then a string",
+            "output": "Caught an int exception, Caught a string exception",
+            "code": "#include <iostream>\nusing namespace std;\n\nvoid testCatch(bool throwInt)\n{\n    try\n    {\n        if (throwInt)\n            throw 42;\n        else\n            throw string(\"error\");\n    }\n    catch (int e)\n    {\n        cout << \"Caught an int exception\" << endl;\n    }\n    catch (const string &e)\n    {\n        cout << \"Caught a string exception\" << endl;\n    }\n}\n\nint main()\n{\n    testCatch(true);\n    testCatch(false);\n    return 0;\n}"
+          },
+          {
+            "name": "Catch-all handler using catch(...)",
+            "input": "throw an unexpected type",
+            "output": "Caught an unknown exception type",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    try\n    {\n        throw 3.14; /* not specifically handled below */\n    }\n    catch (int e)\n    {\n        cout << \"Caught int\" << endl;\n    }\n    catch (...)\n    {\n        cout << \"Caught an unknown exception type\" << endl;\n    }\n    return 0;\n}"
+          },
+          {
+            "name": "Rethrowing an exception",
+            "input": "catch, log, then rethrow",
+            "output": "Logged in inner handler, Handled in outer handler",
+            "code": "#include <iostream>\n#include <stdexcept>\nusing namespace std;\n\nvoid innerFunction()\n{\n    try\n    {\n        throw runtime_error(\"original error\");\n    }\n    catch (...)\n    {\n        cout << \"Logged in inner handler\" << endl;\n        throw; /* rethrow the same exception */\n    }\n}\n\nint main()\n{\n    try\n    {\n        innerFunction();\n    }\n    catch (const exception &e)\n    {\n        cout << \"Handled in outer handler\" << endl;\n    }\n    return 0;\n}"
+          },
+          {
+            "name": "Custom exception class deriving from std::exception",
+            "input": "throw MyException",
+            "output": "Custom exception occurred: Something went wrong",
+            "code": "#include <iostream>\n#include <exception>\nusing namespace std;\n\nclass MyException : public exception\n{\npublic:\n    const char *what() const noexcept override { return \"Something went wrong\"; }\n};\n\nint main()\n{\n    try\n    {\n        throw MyException();\n    }\n    catch (const exception &e)\n    {\n        cout << \"Custom exception occurred: \" << e.what() << endl;\n    }\n    return 0;\n}"
+          },
+          {
+            "name": "Using the what() message from a standard exception",
+            "input": "std::out_of_range(\"index too large\")",
+            "output": "index too large",
+            "code": "#include <iostream>\n#include <stdexcept>\nusing namespace std;\n\nint main()\n{\n    try\n    {\n        throw out_of_range(\"index too large\");\n    }\n    catch (const exception &e)\n    {\n        cout << e.what() << endl;\n    }\n    return 0;\n}"
+          },
+          {
+            "name": "Stack unwinding demonstration",
+            "input": "nested function calls with local objects",
+            "output": "Destructor called during stack unwinding, Exception caught in main",
+            "code": "#include <iostream>\n#include <stdexcept>\nusing namespace std;\n\nclass Tracker\n{\npublic:\n    ~Tracker() { cout << \"Destructor called during stack unwinding\" << endl; }\n};\n\nvoid risky()\n{\n    Tracker t;\n    throw runtime_error(\"failure\");\n}\n\nint main()\n{\n    try\n    {\n        risky();\n    }\n    catch (...)\n    {\n        cout << \"Exception caught in main\" << endl;\n    }\n    return 0;\n}"
+          },
+          {
+            "name": "The noexcept specifier",
+            "input": "(none)",
+            "output": "This function promises not to throw",
+            "code": "#include <iostream>\nusing namespace std;\n\nvoid safeFunction() noexcept\n{\n    cout << \"This function promises not to throw\" << endl;\n}\n\nint main()\n{\n    safeFunction();\n    return 0;\n}"
+          },
+          {
+            "name": "Exception safety using RAII",
+            "input": "exception thrown while a resource is held",
+            "output": "Resource acquired, Resource released automatically, Exception handled",
+            "code": "#include <iostream>\n#include <stdexcept>\nusing namespace std;\n\nclass Resource\n{\npublic:\n    Resource() { cout << \"Resource acquired\" << endl; }\n    ~Resource() { cout << \"Resource released automatically\" << endl; }\n};\n\nint main()\n{\n    try\n    {\n        Resource r; /* released via destructor even if an exception is thrown */\n        throw runtime_error(\"failure\");\n    }\n    catch (...)\n    {\n        cout << \"Exception handled\" << endl;\n    }\n    return 0;\n}"
+          },
+          {
+            "name": "std::out_of_range exception from vector::at()",
+            "input": "vector of size 3, access index 10",
+            "output": "Caught: vector::_M_range_check ... (out_of_range message)",
+            "code": "#include <iostream>\n#include <vector>\n#include <stdexcept>\nusing namespace std;\n\nint main()\n{\n    vector<int> v = {1, 2, 3};\n\n    try\n    {\n        cout << v.at(10) << endl; /* throws std::out_of_range, unlike v[10] */\n    }\n    catch (const out_of_range &e)\n    {\n        cout << \"Caught: \" << e.what() << endl;\n    }\n    return 0;\n}"
+          },
+          {
+            "name": "std::invalid_argument and std::runtime_error usage",
+            "input": "negative value passed to a function expecting non-negative",
+            "output": "Caught: Value must be non-negative",
+            "code": "#include <iostream>\n#include <stdexcept>\nusing namespace std;\n\nvoid validate(int value)\n{\n    if (value < 0)\n        throw invalid_argument(\"Value must be non-negative\");\n}\n\nint main()\n{\n    try\n    {\n        validate(-5);\n    }\n    catch (const invalid_argument &e)\n    {\n        cout << \"Caught: \" << e.what() << endl;\n    }\n    return 0;\n}"
+          },
+          {
+            "name": "Nested try/catch blocks",
+            "input": "inner exception handled separately from outer",
+            "output": "Inner catch handled it, Outer code continues normally",
+            "code": "#include <iostream>\n#include <stdexcept>\nusing namespace std;\n\nint main()\n{\n    try\n    {\n        try\n        {\n            throw runtime_error(\"inner failure\");\n        }\n        catch (const exception &e)\n        {\n            cout << \"Inner catch handled it\" << endl;\n        }\n        cout << \"Outer code continues normally\" << endl;\n    }\n    catch (...)\n    {\n        cout << \"This won't run\" << endl;\n    }\n    return 0;\n}"
+          },
+          {
+            "name": "Exception thrown from a constructor",
+            "input": "construct an object with an invalid value",
+            "output": "Caught: Invalid initial value",
+            "code": "#include <iostream>\n#include <stdexcept>\nusing namespace std;\n\nclass Positive\n{\npublic:\n    Positive(int value)\n    {\n        if (value <= 0)\n            throw invalid_argument(\"Invalid initial value\");\n    }\n};\n\nint main()\n{\n    try\n    {\n        Positive p(-1);\n    }\n    catch (const exception &e)\n    {\n        cout << \"Caught: \" << e.what() << endl;\n    }\n    return 0;\n}"
+          },
+          {
+            "name": "Function-try-block (catching exceptions from constructor init list)",
+            "input": "base class constructor throws",
+            "output": "Caught in function-try-block: base failed",
+            "code": "#include <iostream>\n#include <stdexcept>\nusing namespace std;\n\nclass Base\n{\npublic:\n    Base() { throw runtime_error(\"base failed\"); }\n};\n\nclass Derived : public Base\n{\npublic:\n    Derived()\n    try : Base()\n    {\n    }\n    catch (const exception &e)\n    {\n        cout << \"Caught in function-try-block: \" << e.what() << endl;\n    }\n};\n\nint main()\n{\n    try\n    {\n        Derived d;\n    }\n    catch (...)\n    {\n        cout << \"Exception propagated after function-try-block\" << endl;\n    }\n    return 0;\n}"
+          },
+          {
+            "name": "Writing to a file using ofstream",
+            "input": "\"Hello, File!\"",
+            "output": "File written successfully",
+            "code": "#include <iostream>\n#include <fstream>\nusing namespace std;\n\nint main()\n{\n    ofstream out(\"output.txt\");\n    out << \"Hello, File!\" << endl;\n    out.close();\n    cout << \"File written successfully\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Reading from a file using ifstream",
+            "input": "output.txt containing \"Hello, File!\"",
+            "output": "Hello, File!",
+            "code": "#include <iostream>\n#include <fstream>\nusing namespace std;\n\nint main()\n{\n    ifstream in(\"output.txt\");\n    string line;\n\n    if (getline(in, line))\n        cout << line << endl;\n\n    return 0;\n}"
+          },
+          {
+            "name": "Appending to a file",
+            "input": "append \"Another line\" to output.txt",
+            "output": "Line appended successfully",
+            "code": "#include <iostream>\n#include <fstream>\nusing namespace std;\n\nint main()\n{\n    ofstream out(\"output.txt\", ios::app);\n    out << \"Another line\" << endl;\n    out.close();\n    cout << \"Line appended successfully\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Reading a file line by line",
+            "input": "a multi-line text file",
+            "output": "Each line printed with its line number",
+            "code": "#include <iostream>\n#include <fstream>\nusing namespace std;\n\nint main()\n{\n    ifstream in(\"output.txt\");\n    string line;\n    int lineNumber = 1;\n\n    while (getline(in, line))\n        cout << lineNumber++ << \": \" << line << endl;\n\n    return 0;\n}"
+          },
+          {
+            "name": "Checking if a file exists/opened successfully",
+            "input": "\"missing.txt\" (does not exist)",
+            "output": "Failed to open file",
+            "code": "#include <iostream>\n#include <fstream>\nusing namespace std;\n\nint main()\n{\n    ifstream in(\"missing.txt\");\n\n    if (!in.is_open())\n        cout << \"Failed to open file\" << endl;\n    else\n        cout << \"File opened successfully\" << endl;\n\n    return 0;\n}"
+          },
+          {
+            "name": "Binary file read/write",
+            "input": "write an int in binary, then read it back",
+            "output": "Read back value: 12345",
+            "code": "#include <iostream>\n#include <fstream>\nusing namespace std;\n\nint main()\n{\n    int value = 12345;\n\n    ofstream out(\"data.bin\", ios::binary);\n    out.write(reinterpret_cast<char *>(&value), sizeof(value));\n    out.close();\n\n    int readValue;\n    ifstream in(\"data.bin\", ios::binary);\n    in.read(reinterpret_cast<char *>(&readValue), sizeof(readValue));\n\n    cout << \"Read back value: \" << readValue << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Reading formatted numeric data from a file",
+            "input": "file containing \"10 20 30\"",
+            "output": "Sum: 60",
+            "code": "#include <iostream>\n#include <fstream>\nusing namespace std;\n\nint main()\n{\n    ofstream out(\"numbers.txt\");\n    out << \"10 20 30\";\n    out.close();\n\n    ifstream in(\"numbers.txt\");\n    int a, b, c;\n    in >> a >> b >> c;\n\n    cout << \"Sum: \" << (a + b + c) << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Using fstream to both read and write the same file",
+            "input": "write then read back without reopening",
+            "output": "Value read back: 99",
+            "code": "#include <iostream>\n#include <fstream>\nusing namespace std;\n\nint main()\n{\n    fstream file(\"shared.txt\", ios::in | ios::out | ios::trunc);\n    file << 99;\n    file.seekg(0); /* rewind before reading */\n\n    int value;\n    file >> value;\n    cout << \"Value read back: \" << value << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Copying file contents using streams",
+            "input": "copy output.txt to copy.txt",
+            "output": "File copied successfully",
+            "code": "#include <iostream>\n#include <fstream>\nusing namespace std;\n\nint main()\n{\n    ifstream src(\"output.txt\");\n    ofstream dst(\"copy.txt\");\n\n    dst << src.rdbuf(); /* stream the whole buffer across */\n    cout << \"File copied successfully\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Counting lines and words in a file",
+            "input": "a text file with several lines",
+            "output": "Lines: 3, Words: 8",
+            "code": "#include <iostream>\n#include <fstream>\n#include <sstream>\nusing namespace std;\n\nint main()\n{\n    ofstream out(\"count.txt\");\n    out << \"hello world\\nfoo bar baz\\none two three\";\n    out.close();\n\n    ifstream in(\"count.txt\");\n    string line;\n    int lines = 0, words = 0;\n\n    while (getline(in, line))\n    {\n        lines++;\n        istringstream iss(line);\n        string word;\n        while (iss >> word)\n            words++;\n    }\n\n    cout << \"Lines: \" << lines << \", Words: \" << words << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Using std::stringstream to parse a string",
+            "input": "\"42 3.14 hello\"",
+            "output": "int=42, double=3.14, word=hello",
+            "code": "#include <iostream>\n#include <sstream>\nusing namespace std;\n\nint main()\n{\n    stringstream ss(\"42 3.14 hello\");\n    int i;\n    double d;\n    string word;\n\n    ss >> i >> d >> word;\n    cout << \"int=\" << i << \", double=\" << d << \", word=\" << word << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Writing structured (CSV-like) data to a file",
+            "input": "name,age rows",
+            "output": "CSV file written with header and two rows",
+            "code": "#include <iostream>\n#include <fstream>\nusing namespace std;\n\nint main()\n{\n    ofstream out(\"people.csv\");\n    out << \"name,age\\n\";\n    out << \"Alice,30\\n\";\n    out << \"Bob,25\\n\";\n    out.close();\n\n    cout << \"CSV file written with header and two rows\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Combining exception handling with file I/O",
+            "input": "attempt to open a non-existent file and throw if it fails",
+            "output": "Caught: Could not open file",
+            "code": "#include <iostream>\n#include <fstream>\n#include <stdexcept>\nusing namespace std;\n\nvoid readRequiredFile(const string &path)\n{\n    ifstream in(path);\n    if (!in.is_open())\n        throw runtime_error(\"Could not open file\");\n}\n\nint main()\n{\n    try\n    {\n        readRequiredFile(\"does_not_exist.txt\");\n    }\n    catch (const exception &e)\n    {\n        cout << \"Caught: \" << e.what() << endl;\n    }\n    return 0;\n}"
+          },
+          {
+            "name": "Custom exception hierarchy (base + derived exceptions)",
+            "input": "throw a NetworkException (derived from AppException)",
+            "output": "Caught as base type: Network failure",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass AppException\n{\npublic:\n    virtual string message() const { return \"Generic application error\"; }\n    virtual ~AppException() {}\n};\n\nclass NetworkException : public AppException\n{\npublic:\n    string message() const override { return \"Network failure\"; }\n};\n\nint main()\n{\n    try\n    {\n        throw NetworkException();\n    }\n    catch (const AppException &e) /* caught via the common base type */\n    {\n        cout << \"Caught as base type: \" << e.message() << endl;\n    }\n    return 0;\n}"
+          },
+          {
+            "name": "Using std::set_terminate for uncaught exceptions",
+            "input": "an exception escapes all try/catch blocks",
+            "output": "Custom terminate handler invoked",
+            "code": "#include <iostream>\n#include <cstdlib>\nusing namespace std;\n\nvoid customTerminate()\n{\n    cout << \"Custom terminate handler invoked\" << endl;\n    abort();\n}\n\nint main()\n{\n    set_terminate(customTerminate);\n    /* In a real scenario, an uncaught throw here would invoke customTerminate(). */\n    cout << \"Terminate handler registered (not triggered in this safe demo)\" << endl;\n    return 0;\n}"
+          }
+        ],
+        "path": "CPP/exception_file_io.cpp"
+      },
+      {
+        "chapter": "MULTITHREADING AND SYNCHRONIZATION",
+        "folder": "CPP",
+        "programs": [
+          {
+            "name": "std::thread basics",
+            "input": "(none)",
+            "output": "Hello from a std::thread!",
+            "code": "#include <iostream>\n#include <thread>\nusing namespace std;\n\nvoid run()\n{\n    cout << \"Hello from a std::thread!\" << endl;\n}\n\nint main()\n{\n    thread t(run);\n    t.join();\n    return 0;\n}"
+          },
+          {
+            "name": "Passing arguments to a thread",
+            "input": "42",
+            "output": "Thread received: 42",
+            "code": "#include <iostream>\n#include <thread>\nusing namespace std;\n\nvoid run(int value)\n{\n    cout << \"Thread received: \" << value << endl;\n}\n\nint main()\n{\n    thread t(run, 42);\n    t.join();\n    return 0;\n}"
+          },
+          {
+            "name": "Joining a thread",
+            "input": "(none)",
+            "output": "Main waits until the thread finishes",
+            "code": "#include <iostream>\n#include <thread>\nusing namespace std;\n\nint main()\n{\n    thread t([]\n             { cout << \"Worker thread running\" << endl; });\n\n    t.join(); /* blocks until the thread completes */\n    cout << \"Main waits until the thread finishes\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Detaching a thread",
+            "input": "(none)",
+            "output": "Detached thread runs independently in the background",
+            "code": "#include <iostream>\n#include <thread>\n#include <chrono>\nusing namespace std;\n\nint main()\n{\n    thread t([]\n             { cout << \"Detached thread runs independently in the background\" << endl; });\n\n    t.detach();\n    this_thread::sleep_for(chrono::milliseconds(100)); /* let it finish for this demo */\n    return 0;\n}"
+          },
+          {
+            "name": "std::mutex basics (lock/unlock)",
+            "input": "(none)",
+            "output": "Critical section entered and exited safely",
+            "code": "#include <iostream>\n#include <mutex>\nusing namespace std;\n\nint main()\n{\n    mutex m;\n\n    m.lock();\n    cout << \"Critical section entered and exited safely\" << endl;\n    m.unlock();\n    return 0;\n}"
+          },
+          {
+            "name": "std::lock_guard (RAII-style locking)",
+            "input": "2 threads incrementing a shared counter",
+            "output": "Final counter value: 200000",
+            "code": "#include <iostream>\n#include <thread>\n#include <mutex>\nusing namespace std;\n\nint counter = 0;\nmutex m;\n\nvoid increment()\n{\n    for (int i = 0; i < 100000; i++)\n    {\n        lock_guard<mutex> lock(m); /* automatically unlocks when it goes out of scope */\n        counter++;\n    }\n}\n\nint main()\n{\n    thread t1(increment), t2(increment);\n    t1.join();\n    t2.join();\n\n    cout << \"Final counter value: \" << counter << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::unique_lock (more flexible than lock_guard)",
+            "input": "(none)",
+            "output": "Locked, temporarily unlocked, then relocked",
+            "code": "#include <iostream>\n#include <mutex>\nusing namespace std;\n\nint main()\n{\n    mutex m;\n    unique_lock<mutex> lock(m);\n\n    cout << \"Locked, temporarily unlocked, then relocked\" << endl;\n    lock.unlock(); /* unique_lock allows manual unlock/relock, unlike lock_guard */\n    lock.lock();\n    return 0;\n}"
+          },
+          {
+            "name": "std::recursive_mutex",
+            "input": "same thread locks the mutex twice (nested calls)",
+            "output": "Outer lock acquired, Inner lock acquired (no deadlock)",
+            "code": "#include <iostream>\n#include <mutex>\nusing namespace std;\n\nrecursive_mutex rm;\n\nvoid inner()\n{\n    lock_guard<recursive_mutex> lock(rm);\n    cout << \"Inner lock acquired (no deadlock)\" << endl;\n}\n\nvoid outer()\n{\n    lock_guard<recursive_mutex> lock(rm);\n    cout << \"Outer lock acquired\" << endl;\n    inner();\n}\n\nint main()\n{\n    outer();\n    return 0;\n}"
+          },
+          {
+            "name": "std::timed_mutex with try_lock_for",
+            "input": "wait at most 100ms for a locked mutex",
+            "output": "Could not acquire the lock within the timeout",
+            "code": "#include <iostream>\n#include <mutex>\n#include <chrono>\nusing namespace std;\n\nint main()\n{\n    timed_mutex tm;\n    tm.lock(); /* held already, simulating contention */\n\n    if (!tm.try_lock_for(chrono::milliseconds(100)))\n        cout << \"Could not acquire the lock within the timeout\" << endl;\n\n    tm.unlock();\n    return 0;\n}"
+          },
+          {
+            "name": "std::condition_variable basics",
+            "input": "worker waits until notified",
+            "output": "Worker was notified and resumed",
+            "code": "#include <iostream>\n#include <thread>\n#include <mutex>\n#include <condition_variable>\nusing namespace std;\n\nmutex m;\ncondition_variable cv;\nbool ready = false;\n\nvoid worker()\n{\n    unique_lock<mutex> lock(m);\n    cv.wait(lock, []\n            { return ready; });\n    cout << \"Worker was notified and resumed\" << endl;\n}\n\nint main()\n{\n    thread t(worker);\n\n    {\n        lock_guard<mutex> lock(m);\n        ready = true;\n    }\n    cv.notify_one();\n\n    t.join();\n    return 0;\n}"
+          },
+          {
+            "name": "Producer-consumer using a condition_variable",
+            "input": "producer adds 5 items, consumer waits for each",
+            "output": "Consumed: 0, Consumed: 1, ... Consumed: 4",
+            "code": "#include <iostream>\n#include <thread>\n#include <queue>\n#include <mutex>\n#include <condition_variable>\nusing namespace std;\n\nqueue<int> buffer;\nmutex m;\ncondition_variable cv;\nbool done = false;\n\nvoid producer()\n{\n    for (int i = 0; i < 5; i++)\n    {\n        {\n            lock_guard<mutex> lock(m);\n            buffer.push(i);\n        }\n        cv.notify_one();\n    }\n    {\n        lock_guard<mutex> lock(m);\n        done = true;\n    }\n    cv.notify_one();\n}\n\nvoid consumer()\n{\n    while (true)\n    {\n        unique_lock<mutex> lock(m);\n        cv.wait(lock, []\n                { return !buffer.empty() || done; });\n\n        while (!buffer.empty())\n        {\n            cout << \"Consumed: \" << buffer.front() << endl;\n            buffer.pop();\n        }\n        if (done)\n            break;\n    }\n}\n\nint main()\n{\n    thread p(producer), c(consumer);\n    p.join();\n    c.join();\n    return 0;\n}"
+          },
+          {
+            "name": "std::atomic basics",
+            "input": "2 threads each incrementing 100000 times",
+            "output": "Final counter value: 200000 (correct without a mutex)",
+            "code": "#include <iostream>\n#include <thread>\n#include <atomic>\nusing namespace std;\n\natomic<int> counter(0);\n\nvoid increment()\n{\n    for (int i = 0; i < 100000; i++)\n        counter++;\n}\n\nint main()\n{\n    thread t1(increment), t2(increment);\n    t1.join();\n    t2.join();\n\n    cout << \"Final counter value: \" << counter << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::atomic vs mutex - conceptual performance comparison",
+            "input": "(none)",
+            "output": "Atomics avoid OS-level locking overhead for simple operations",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    /* std::atomic operations typically compile to a single lock-free CPU\n     * instruction (e.g. lock xadd), while a mutex may involve a futex\n     * syscall under contention - atomics are faster for simple counters. */\n    cout << \"Atomics avoid OS-level locking overhead for simple operations\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::async and std::future basics",
+            "input": "compute 6 * 7 asynchronously",
+            "output": "Result: 42",
+            "code": "#include <iostream>\n#include <future>\nusing namespace std;\n\nint compute()\n{\n    return 6 * 7;\n}\n\nint main()\n{\n    future<int> result = async(launch::async, compute);\n    cout << \"Result: \" << result.get() << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::promise and std::future",
+            "input": "a worker thread sets the promise's value",
+            "output": "Received from promise: 77",
+            "code": "#include <iostream>\n#include <thread>\n#include <future>\nusing namespace std;\n\nvoid setValue(promise<int> p)\n{\n    p.set_value(77);\n}\n\nint main()\n{\n    promise<int> p;\n    future<int> f = p.get_future();\n\n    thread t(setValue, move(p));\n    cout << \"Received from promise: \" << f.get() << endl;\n\n    t.join();\n    return 0;\n}"
+          },
+          {
+            "name": "std::packaged_task",
+            "input": "wrap a function as a packaged_task and run it on a thread",
+            "output": "Packaged task result: 15",
+            "code": "#include <iostream>\n#include <thread>\n#include <future>\nusing namespace std;\n\nint add(int a, int b) { return a + b; }\n\nint main()\n{\n    packaged_task<int(int, int)> task(add);\n    future<int> result = task.get_future();\n\n    thread t(move(task), 7, 8);\n    cout << \"Packaged task result: \" << result.get() << endl;\n\n    t.join();\n    return 0;\n}"
+          },
+          {
+            "name": "std::call_once",
+            "input": "3 threads all trying to initialize",
+            "output": "Initialized exactly once",
+            "code": "#include <iostream>\n#include <thread>\n#include <mutex>\nusing namespace std;\n\nonce_flag flag;\n\nvoid initialize()\n{\n    cout << \"Initialized exactly once\" << endl;\n}\n\nvoid run()\n{\n    call_once(flag, initialize);\n}\n\nint main()\n{\n    thread t1(run), t2(run), t3(run);\n    t1.join();\n    t2.join();\n    t3.join();\n    return 0;\n}"
+          },
+          {
+            "name": "Multiple threads incrementing a shared counter safely",
+            "input": "4 threads, 50000 increments each",
+            "output": "Final counter value: 200000",
+            "code": "#include <iostream>\n#include <thread>\n#include <mutex>\n#include <vector>\nusing namespace std;\n\nint counter = 0;\nmutex m;\n\nvoid increment()\n{\n    for (int i = 0; i < 50000; i++)\n    {\n        lock_guard<mutex> lock(m);\n        counter++;\n    }\n}\n\nint main()\n{\n    vector<thread> threads;\n    for (int i = 0; i < 4; i++)\n        threads.emplace_back(increment);\n\n    for (auto &t : threads)\n        t.join();\n\n    cout << \"Final counter value: \" << counter << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Race condition demo without synchronization",
+            "input": "2 threads incrementing without a mutex",
+            "output": "Final counter value is usually less than 200000 (lost updates)",
+            "code": "#include <iostream>\n#include <thread>\nusing namespace std;\n\nint counter = 0;\n\nvoid increment()\n{\n    for (int i = 0; i < 100000; i++)\n        counter++; /* not atomic: read-modify-write race */\n}\n\nint main()\n{\n    thread t1(increment), t2(increment);\n    t1.join();\n    t2.join();\n\n    cout << \"Final counter value (expected 200000, likely less): \" << counter << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Deadlock demo with two mutexes locked in different order",
+            "input": "thread A locks m1 then m2; thread B locks m2 then m1",
+            "output": "Both threads block forever waiting on each other (deadlock)",
+            "code": "#include <iostream>\n#include <thread>\n#include <mutex>\n#include <chrono>\nusing namespace std;\n\nmutex m1, m2;\n\nvoid threadA()\n{\n    lock_guard<mutex> lockA(m1);\n    this_thread::sleep_for(chrono::milliseconds(100));\n    lock_guard<mutex> lockB(m2); /* blocks: threadB holds m2 and wants m1 */\n}\n\nvoid threadB()\n{\n    lock_guard<mutex> lockB(m2);\n    this_thread::sleep_for(chrono::milliseconds(100));\n    lock_guard<mutex> lockA(m1); /* blocks: threadA holds m1 and wants m2 */\n}\n\nint main()\n{\n    thread a(threadA), b(threadB);\n    a.join(); /* this demo intentionally hangs, illustrating deadlock */\n    b.join();\n    return 0;\n}"
+          },
+          {
+            "name": "std::lock - locking multiple mutexes safely to avoid deadlock",
+            "input": "two threads locking the same two mutexes in reverse order",
+            "output": "Both threads complete without deadlocking",
+            "code": "#include <iostream>\n#include <thread>\n#include <mutex>\nusing namespace std;\n\nmutex m1, m2;\n\nvoid safeLock(int order)\n{\n    if (order == 1)\n        lock(m1, m2); /* std::lock acquires both atomically, avoiding deadlock */\n    else\n        lock(m2, m1);\n\n    lock_guard<mutex> lockA(m1, adopt_lock);\n    lock_guard<mutex> lockB(m2, adopt_lock);\n\n    cout << \"Thread with order \" << order << \" completed safely\" << endl;\n}\n\nint main()\n{\n    thread a(safeLock, 1), b(safeLock, 2);\n    a.join();\n    b.join();\n    return 0;\n}"
+          },
+          {
+            "name": "Basic thread pool implementation",
+            "input": "4 worker threads processing 8 tasks",
+            "output": "Each task processed exactly once by one of the workers",
+            "code": "#include <iostream>\n#include <thread>\n#include <vector>\n#include <mutex>\nusing namespace std;\n\nint nextTask = 0;\nmutex m;\n\nvoid worker(int id)\n{\n    while (true)\n    {\n        int task;\n        {\n            lock_guard<mutex> lock(m);\n            if (nextTask >= 8)\n                return;\n            task = nextTask++;\n        }\n        cout << \"Task \" << task << \" processed by worker \" << id << endl;\n    }\n}\n\nint main()\n{\n    vector<thread> workers;\n    for (int i = 0; i < 4; i++)\n        workers.emplace_back(worker, i);\n\n    for (auto &t : workers)\n        t.join();\n\n    return 0;\n}"
+          },
+          {
+            "name": "std::this_thread::sleep_for",
+            "input": "sleep for 200ms",
+            "output": "Woke up after sleeping",
+            "code": "#include <iostream>\n#include <thread>\n#include <chrono>\nusing namespace std;\n\nint main()\n{\n    this_thread::sleep_for(chrono::milliseconds(200));\n    cout << \"Woke up after sleeping\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::this_thread::get_id",
+            "input": "(none)",
+            "output": "Running on thread ID: 0x...",
+            "code": "#include <iostream>\n#include <thread>\nusing namespace std;\n\nint main()\n{\n    cout << \"Running on thread ID: \" << this_thread::get_id() << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Parallel sum using multiple threads",
+            "input": "array of 1,000,000 ints split across 4 threads",
+            "output": "Total sum computed by combining each thread's partial sum",
+            "code": "#include <iostream>\n#include <thread>\n#include <vector>\nusing namespace std;\n\nvoid sumRange(vector<int> &data, int start, int end, long &result)\n{\n    long sum = 0;\n    for (int i = start; i < end; i++)\n        sum += data[i];\n    result = sum;\n}\n\nint main()\n{\n    const int size = 1000000;\n    vector<int> data(size, 1);\n    const int numThreads = 4;\n    vector<thread> threads;\n    vector<long> partial(numThreads);\n    int chunk = size / numThreads;\n\n    for (int i = 0; i < numThreads; i++)\n    {\n        int start = i * chunk;\n        int end = (i == numThreads - 1) ? size : start + chunk;\n        threads.emplace_back(sumRange, ref(data), start, end, ref(partial[i]));\n    }\n\n    for (auto &t : threads)\n        t.join();\n\n    long total = 0;\n    for (long p : partial)\n        total += p;\n\n    cout << \"Total sum: \" << total << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::shared_mutex (reader-writer lock, C++17)",
+            "input": "multiple readers, one writer",
+            "output": "Readers run concurrently; the writer gets exclusive access",
+            "code": "#include <iostream>\n#include <shared_mutex>\n#include <mutex>\n#include <thread>\nusing namespace std;\n\nshared_mutex sm;\nint sharedValue = 0;\n\nvoid reader()\n{\n    shared_lock<shared_mutex> lock(sm); /* multiple readers allowed at once */\n    cout << \"Reader sees value: \" << sharedValue << endl;\n}\n\nvoid writer()\n{\n    unique_lock<shared_mutex> lock(sm); /* exclusive access for writing */\n    sharedValue = 42;\n    cout << \"Writer updated value to \" << sharedValue << endl;\n}\n\nint main()\n{\n    thread w(writer);\n    w.join();\n\n    thread r1(reader), r2(reader);\n    r1.join();\n    r2.join();\n    return 0;\n}"
+          },
+          {
+            "name": "Thread-safe singleton using std::call_once",
+            "input": "5 threads requesting the singleton instance",
+            "output": "Singleton created once",
+            "code": "#include <iostream>\n#include <thread>\n#include <mutex>\n#include <memory>\nusing namespace std;\n\nonce_flag flag;\nunique_ptr<int> instance;\n\nint *getInstance()\n{\n    call_once(flag, []\n              {\n\t\tinstance = make_unique<int>(1);\n\t\tcout << \"Singleton created once\" << endl; });\n    return instance.get();\n}\n\nint main()\n{\n    thread threads[5];\n    for (auto &t : threads)\n        t = thread(getInstance);\n    for (auto &t : threads)\n        t.join();\n    return 0;\n}"
+          },
+          {
+            "name": "Passing a lambda to a thread",
+            "input": "capture a local variable by value",
+            "output": "Lambda thread received captured value: 5",
+            "code": "#include <iostream>\n#include <thread>\nusing namespace std;\n\nint main()\n{\n    int value = 5;\n    thread t([value]()\n             { cout << \"Lambda thread received captured value: \" << value << endl; });\n    t.join();\n    return 0;\n}"
+          },
+          {
+            "name": "std::future::wait_for with a timeout",
+            "input": "a task that takes 500ms, checked with a 100ms timeout",
+            "output": "Task not finished yet after the timeout",
+            "code": "#include <iostream>\n#include <future>\n#include <thread>\n#include <chrono>\nusing namespace std;\n\nint slowTask()\n{\n    this_thread::sleep_for(chrono::milliseconds(500));\n    return 1;\n}\n\nint main()\n{\n    future<int> result = async(launch::async, slowTask);\n\n    if (result.wait_for(chrono::milliseconds(100)) == future_status::timeout)\n        cout << \"Task not finished yet after the timeout\" << endl;\n\n    result.wait(); /* wait for real completion before exiting */\n    return 0;\n}"
+          },
+          {
+            "name": "Joining all threads stored in a vector<thread>",
+            "input": "5 worker threads",
+            "output": "Worker 0..4 finished, All threads joined",
+            "code": "#include <iostream>\n#include <thread>\n#include <vector>\nusing namespace std;\n\nint main()\n{\n    vector<thread> threads;\n\n    for (int i = 0; i < 5; i++)\n        threads.emplace_back([i]\n                             { cout << \"Worker \" << i << \" finished\" << endl; });\n\n    for (auto &t : threads)\n        t.join();\n\n    cout << \"All threads joined\" << endl;\n    return 0;\n}"
+          }
+        ],
+        "path": "CPP/multithreading_sync.cpp"
+      },
+      {
+        "chapter": "OOP FUNDAMENTALS",
+        "folder": "CPP",
+        "programs": [
+          {
+            "name": "Define a class with private/public members",
+            "input": "(none)",
+            "output": "Name: Alice, Age: 30",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Person\n{\nprivate:\n    string name;\n    int age;\n\npublic:\n    void set(string n, int a)\n    {\n        name = n;\n        age = a;\n    }\n    void show() { cout << \"Name: \" << name << \", Age: \" << age << endl; }\n};\n\nint main()\n{\n    Person p;\n    p.set(\"Alice\", 30);\n    p.show();\n    return 0;\n}"
+          },
+          {
+            "name": "Create objects and call methods",
+            "input": "two Car objects",
+            "output": "Toyota is driving, Honda is driving",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Car\n{\npublic:\n    string brand;\n    void drive() { cout << brand << \" is driving\" << endl; }\n};\n\nint main()\n{\n    Car car1, car2;\n    car1.brand = \"Toyota\";\n    car2.brand = \"Honda\";\n    car1.drive();\n    car2.drive();\n    return 0;\n}"
+          },
+          {
+            "name": "Constructor basics",
+            "input": "(none)",
+            "output": "Object created via constructor",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Demo\n{\npublic:\n    Demo() { cout << \"Object created via constructor\" << endl; }\n};\n\nint main()\n{\n    Demo d;\n    return 0;\n}"
+          },
+          {
+            "name": "Parameterized constructor",
+            "input": "Point(3, 4)",
+            "output": "Point(3, 4)",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Point\n{\n    int x, y;\n\npublic:\n    Point(int a, int b) : x(a), y(b) {}\n    void show() { cout << \"Point(\" << x << \", \" << y << \")\" << endl; }\n};\n\nint main()\n{\n    Point p(3, 4);\n    p.show();\n    return 0;\n}"
+          },
+          {
+            "name": "Copy constructor",
+            "input": "copy an existing Box object",
+            "output": "Original width: 5, Copy width: 5",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Box\n{\npublic:\n    int width;\n    Box(int w) : width(w) {}\n    Box(const Box &other) : width(other.width) {}\n};\n\nint main()\n{\n    Box original(5);\n    Box copy = original;\n    cout << \"Original width: \" << original.width << \", Copy width: \" << copy.width << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Destructor",
+            "input": "(none)",
+            "output": "Constructed, Destructed",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Resource\n{\npublic:\n    Resource() { cout << \"Constructed\" << endl; }\n    ~Resource() { cout << \"Destructed\" << endl; }\n};\n\nint main()\n{\n    Resource r;\n    return 0;\n}"
+          },
+          {
+            "name": "Default arguments in a constructor",
+            "input": "no arguments, then an explicit argument",
+            "output": "Volume: 1, Volume: 27",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Cube\n{\n    int side;\n\npublic:\n    Cube(int s = 1) : side(s) {}\n    int volume() { return side * side * side; }\n};\n\nint main()\n{\n    Cube c1;\n    Cube c2(3);\n    cout << \"Volume: \" << c1.volume() << endl;\n    cout << \"Volume: \" << c2.volume() << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Using the \"this\" pointer",
+            "input": "same-named parameter as member variable",
+            "output": "Value set to: 42",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Holder\n{\n    int value;\n\npublic:\n    void setValue(int value) { this->value = value; }\n    void show() { cout << \"Value set to: \" << value << endl; }\n};\n\nint main()\n{\n    Holder h;\n    h.setValue(42);\n    h.show();\n    return 0;\n}"
+          },
+          {
+            "name": "Static data member shared across all objects",
+            "input": "create 3 objects",
+            "output": "Total objects created: 3",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Counter\n{\npublic:\n    static int count;\n    Counter() { count++; }\n};\n\nint Counter::count = 0;\n\nint main()\n{\n    Counter a, b, c;\n    cout << \"Total objects created: \" << Counter::count << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Static member function",
+            "input": "(none)",
+            "output": "Called without any object instance",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Utility\n{\npublic:\n    static void greet() { cout << \"Called without any object instance\" << endl; }\n};\n\nint main()\n{\n    Utility::greet();\n    return 0;\n}"
+          },
+          {
+            "name": "Const member function",
+            "input": "(none)",
+            "output": "Value: 10",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass ReadOnly\n{\n    int value = 10;\n\npublic:\n    int getValue() const { return value; }\n};\n\nint main()\n{\n    const ReadOnly obj;\n    cout << \"Value: \" << obj.getValue() << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Friend function accessing private members",
+            "input": "Box with width = 8",
+            "output": "Width via friend function: 8",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Box\n{\n    int width = 8;\n\npublic:\n    friend void printWidth(const Box &b);\n};\n\nvoid printWidth(const Box &b)\n{\n    cout << \"Width via friend function: \" << b.width << endl;\n}\n\nint main()\n{\n    Box b;\n    printWidth(b);\n    return 0;\n}"
+          },
+          {
+            "name": "Friend class",
+            "input": "(none)",
+            "output": "Engine started via friend class access",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Engine\n{\n    bool running = false;\n    friend class Mechanic;\n};\n\nclass Mechanic\n{\npublic:\n    void start(Engine &e)\n    {\n        e.running = true;\n        cout << \"Engine started via friend class access\" << endl;\n    }\n};\n\nint main()\n{\n    Engine e;\n    Mechanic m;\n    m.start(e);\n    return 0;\n}"
+          },
+          {
+            "name": "Single inheritance",
+            "input": "(none)",
+            "output": "Animal eats, Dog barks",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Animal\n{\npublic:\n    void eat() { cout << \"Animal eats\" << endl; }\n};\n\nclass Dog : public Animal\n{\npublic:\n    void bark() { cout << \"Dog barks\" << endl; }\n};\n\nint main()\n{\n    Dog d;\n    d.eat();\n    d.bark();\n    return 0;\n}"
+          },
+          {
+            "name": "Multiple inheritance",
+            "input": "(none)",
+            "output": "Flies, Swims",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Flyer\n{\npublic:\n    void fly() { cout << \"Flies\" << endl; }\n};\n\nclass Swimmer\n{\npublic:\n    void swim() { cout << \"Swims\" << endl; }\n};\n\nclass Duck : public Flyer, public Swimmer\n{\n};\n\nint main()\n{\n    Duck d;\n    d.fly();\n    d.swim();\n    return 0;\n}"
+          },
+          {
+            "name": "Multilevel inheritance",
+            "input": "(none)",
+            "output": "Base, Derived1, Derived2",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Base\n{\npublic:\n    void show() { cout << \"Base\" << endl; }\n};\n\nclass Derived1 : public Base\n{\npublic:\n    void show1() { cout << \"Derived1\" << endl; }\n};\n\nclass Derived2 : public Derived1\n{\npublic:\n    void show2() { cout << \"Derived2\" << endl; }\n};\n\nint main()\n{\n    Derived2 d;\n    d.show();\n    d.show1();\n    d.show2();\n    return 0;\n}"
+          },
+          {
+            "name": "Hierarchical inheritance",
+            "input": "(none)",
+            "output": "Car drives, Bike rides",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Vehicle\n{\npublic:\n    void info() { cout << \"Vehicle\" << endl; }\n};\n\nclass Car : public Vehicle\n{\npublic:\n    void drive() { cout << \"Car drives\" << endl; }\n};\n\nclass Bike : public Vehicle\n{\npublic:\n    void ride() { cout << \"Bike rides\" << endl; }\n};\n\nint main()\n{\n    Car c;\n    Bike b;\n    c.drive();\n    b.ride();\n    return 0;\n}"
+          },
+          {
+            "name": "Hybrid inheritance and the diamond problem",
+            "input": "(none)",
+            "output": "Compiler error/ambiguity without virtual inheritance (demonstrated in comments)",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Base\n{\npublic:\n    int value = 1;\n};\n\nclass Derived1 : public Base\n{\n};\n\nclass Derived2 : public Base\n{\n};\n\n/* Combined : public Derived1, public Derived2 would create TWO copies of Base,\n * so \"combined.value\" becomes ambiguous without virtual inheritance. */\nclass Combined : public Derived1, public Derived2\n{\n};\n\nint main()\n{\n    Combined c;\n    cout << \"Derived1::value = \" << c.Derived1::value << endl;\n    cout << \"Derived2::value = \" << c.Derived2::value << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Virtual base class to resolve the diamond problem",
+            "input": "(none)",
+            "output": "Single shared value: 1",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Base\n{\npublic:\n    int value = 1;\n};\n\nclass Derived1 : virtual public Base\n{\n};\n\nclass Derived2 : virtual public Base\n{\n};\n\nclass Combined : public Derived1, public Derived2\n{\n};\n\nint main()\n{\n    Combined c;\n    cout << \"Single shared value: \" << c.value << endl; /* no ambiguity now */\n    return 0;\n}"
+          },
+          {
+            "name": "Function overriding",
+            "input": "(none)",
+            "output": "Derived version called",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Base\n{\npublic:\n    void show() { cout << \"Base version called\" << endl; }\n};\n\nclass Derived : public Base\n{\npublic:\n    void show() { cout << \"Derived version called\" << endl; }\n};\n\nint main()\n{\n    Derived d;\n    d.show();\n    return 0;\n}"
+          },
+          {
+            "name": "Virtual functions and runtime polymorphism",
+            "input": "Base pointer pointing to a Derived object",
+            "output": "Derived::speak() called through a base pointer",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Animal\n{\npublic:\n    virtual void speak() { cout << \"Animal::speak()\" << endl; }\n};\n\nclass Dog : public Animal\n{\npublic:\n    void speak() override { cout << \"Derived::speak() called through a base pointer\" << endl; }\n};\n\nint main()\n{\n    Animal *a = new Dog();\n    a->speak(); /* resolved at runtime via the vtable */\n    delete a;\n    return 0;\n}"
+          },
+          {
+            "name": "Pure virtual functions and abstract classes",
+            "input": "(none)",
+            "output": "Circle area: 78.5",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Shape\n{\npublic:\n    virtual double area() const = 0; /* pure virtual: makes Shape abstract */\n};\n\nclass Circle : public Shape\n{\n    double radius;\n\npublic:\n    Circle(double r) : radius(r) {}\n    double area() const override { return 3.14 * radius * radius; }\n};\n\nint main()\n{\n    Shape *s = new Circle(5);\n    cout << \"Circle area: \" << s->area() << endl;\n    delete s;\n    return 0;\n}"
+          },
+          {
+            "name": "Function overloading (compile-time polymorphism)",
+            "input": "add(2, 3), add(2.5, 3.5)",
+            "output": "5, 6",
+            "code": "#include <iostream>\nusing namespace std;\n\nint add(int a, int b) { return a + b; }\ndouble add(double a, double b) { return a + b; }\n\nint main()\n{\n    cout << add(2, 3) << endl;\n    cout << add(2.5, 3.5) << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Constructor overloading",
+            "input": "Box(), Box(5)",
+            "output": "Side: 1, Side: 5",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Box\n{\n    int side;\n\npublic:\n    Box() : side(1) {}\n    Box(int s) : side(s) {}\n    void show() { cout << \"Side: \" << side << endl; }\n};\n\nint main()\n{\n    Box a, b(5);\n    a.show();\n    b.show();\n    return 0;\n}"
+          },
+          {
+            "name": "Access specifiers (public/private/protected)",
+            "input": "(none)",
+            "output": "Protected member accessible from derived class: 5",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Base\n{\nprotected:\n    int protectedValue = 5;\n\nprivate:\n    int privateValue = 10; /* not accessible from Derived */\n};\n\nclass Derived : public Base\n{\npublic:\n    void show() { cout << \"Protected member accessible from derived class: \" << protectedValue << endl; }\n};\n\nint main()\n{\n    Derived d;\n    d.show();\n    return 0;\n}"
+          },
+          {
+            "name": "Encapsulation using getters/setters",
+            "input": "setBalance(100)",
+            "output": "Balance: 100",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Account\n{\n    double balance = 0;\n\npublic:\n    void setBalance(double b) { balance = (b >= 0) ? b : 0; } /* validation kept internal */\n    double getBalance() const { return balance; }\n};\n\nint main()\n{\n    Account acc;\n    acc.setBalance(100);\n    cout << \"Balance: \" << acc.getBalance() << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Abstraction using an abstract class as an interface",
+            "input": "(none)",
+            "output": "Printing via an abstract Printer interface",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Printer\n{\npublic:\n    virtual void print() = 0;\n    virtual ~Printer() {}\n};\n\nclass ConsolePrinter : public Printer\n{\npublic:\n    void print() override { cout << \"Printing via an abstract Printer interface\" << endl; }\n};\n\nint main()\n{\n    Printer *p = new ConsolePrinter();\n    p->print();\n    delete p;\n    return 0;\n}"
+          },
+          {
+            "name": "Object composition (has-a relationship)",
+            "input": "Car has-a Engine",
+            "output": "Engine started, Car driving",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Engine\n{\npublic:\n    void start() { cout << \"Engine started\" << endl; }\n};\n\nclass Car\n{\n    Engine engine; /* composition: Car \"has-a\" Engine */\n\npublic:\n    void drive()\n    {\n        engine.start();\n        cout << \"Car driving\" << endl;\n    }\n};\n\nint main()\n{\n    Car car;\n    car.drive();\n    return 0;\n}"
+          },
+          {
+            "name": "Object slicing problem",
+            "input": "assigning a Derived object to a Base object (by value)",
+            "output": "Base::show() called (derived part is \"sliced off\")",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Base\n{\npublic:\n    virtual void show() { cout << \"Base::show() called (derived part is \\\"sliced off\\\")\" << endl; }\n};\n\nclass Derived : public Base\n{\npublic:\n    void show() override { cout << \"Derived::show() called\" << endl; }\n};\n\nint main()\n{\n    Derived d;\n    Base b = d; /* slicing: only the Base part is copied */\n    b.show();   /* calls Base::show(), NOT Derived::show() */\n    return 0;\n}"
+          },
+          {
+            "name": "Importance of a virtual destructor in polymorphic base classes",
+            "input": "deleting a Derived object through a Base pointer",
+            "output": "Derived destructor called, Base destructor called (both run correctly)",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Base\n{\npublic:\n    virtual ~Base() { cout << \"Base destructor called\" << endl; }\n};\n\nclass Derived : public Base\n{\npublic:\n    ~Derived() override { cout << \"Derived destructor called\" << endl; }\n};\n\nint main()\n{\n    Base *b = new Derived();\n    delete b; /* with a virtual destructor, both destructors run in the right order */\n    return 0;\n}"
+          }
+        ],
+        "path": "CPP/oop_fundamentals.cpp"
+      },
+      {
+        "chapter": "OPERATOR OVERLOADING AND TEMPLATES",
+        "folder": "CPP",
+        "programs": [
+          {
+            "name": "Overload the + operator for a Complex number class",
+            "input": "(2+3i) + (4+5i)",
+            "output": "6 + 8i",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Complex\n{\npublic:\n    double real, imag;\n    Complex(double r, double i) : real(r), imag(i) {}\n    Complex operator+(const Complex &other)\n    {\n        return Complex(real + other.real, imag + other.imag);\n    }\n    void show() { cout << real << \" + \" << imag << \"i\" << endl; }\n};\n\nint main()\n{\n    Complex a(2, 3), b(4, 5);\n    Complex c = a + b;\n    c.show();\n    return 0;\n}"
+          },
+          {
+            "name": "Overload the - operator",
+            "input": "(5+7i) - (2+3i)",
+            "output": "3 + 4i",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Complex\n{\npublic:\n    double real, imag;\n    Complex(double r, double i) : real(r), imag(i) {}\n    Complex operator-(const Complex &other)\n    {\n        return Complex(real - other.real, imag - other.imag);\n    }\n    void show() { cout << real << \" + \" << imag << \"i\" << endl; }\n};\n\nint main()\n{\n    Complex a(5, 7), b(2, 3);\n    Complex c = a - b;\n    c.show();\n    return 0;\n}"
+          },
+          {
+            "name": "Overload the == operator (comparison)",
+            "input": "Point(1,2) == Point(1,2)",
+            "output": "Points are equal",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Point\n{\n    int x, y;\n\npublic:\n    Point(int a, int b) : x(a), y(b) {}\n    bool operator==(const Point &other) { return x == other.x && y == other.y; }\n};\n\nint main()\n{\n    Point p1(1, 2), p2(1, 2);\n    cout << ((p1 == p2) ? \"Points are equal\" : \"Points differ\") << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Overload the << operator for printing (as a friend function)",
+            "input": "Point(3, 4)",
+            "output": "(3, 4)",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Point\n{\n    int x, y;\n\npublic:\n    Point(int a, int b) : x(a), y(b) {}\n    friend ostream &operator<<(ostream &os, const Point &p);\n};\n\nostream &operator<<(ostream &os, const Point &p)\n{\n    os << \"(\" << p.x << \", \" << p.y << \")\";\n    return os;\n}\n\nint main()\n{\n    Point p(3, 4);\n    cout << p << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Overload the >> operator for input",
+            "input": "\"10 20\" typed by the user",
+            "output": "Read point: (10, 20)",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Point\n{\npublic:\n    int x, y;\n    friend istream &operator>>(istream &is, Point &p);\n};\n\nistream &operator>>(istream &is, Point &p)\n{\n    is >> p.x >> p.y;\n    return is;\n}\n\nint main()\n{\n    Point p;\n    cin >> p;\n    cout << \"Read point: (\" << p.x << \", \" << p.y << \")\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Overload the [] (subscript) operator for a custom array class",
+            "input": "myArray[2] = 99",
+            "output": "99",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass MyArray\n{\n    int data[10] = {0};\n\npublic:\n    int &operator[](int index) { return data[index]; }\n};\n\nint main()\n{\n    MyArray arr;\n    arr[2] = 99;\n    cout << arr[2] << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Overload the () operator (functor)",
+            "input": "Multiplier(3)(5)",
+            "output": "15",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Multiplier\n{\n    int factor;\n\npublic:\n    Multiplier(int f) : factor(f) {}\n    int operator()(int value) { return value * factor; }\n};\n\nint main()\n{\n    Multiplier triple(3);\n    cout << triple(5) << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Overload the prefix ++ operator",
+            "input": "++counter starting at 5",
+            "output": "6",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Counter\n{\n    int value;\n\npublic:\n    Counter(int v) : value(v) {}\n    Counter &operator++()\n    {\n        value++;\n        return *this;\n    }\n    int get() { return value; }\n};\n\nint main()\n{\n    Counter c(5);\n    ++c;\n    cout << c.get() << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Overload the postfix ++ operator",
+            "input": "counter++ starting at 5",
+            "output": "Before: 5, After: 6",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Counter\n{\n    int value;\n\npublic:\n    Counter(int v) : value(v) {}\n    Counter operator++(int) /* dummy int marks it as postfix */\n    {\n        Counter old = *this;\n        value++;\n        return old;\n    }\n    int get() { return value; }\n};\n\nint main()\n{\n    Counter c(5);\n    Counter before = c++;\n    cout << \"Before: \" << before.get() << \", After: \" << c.get() << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Overload the assignment (=) operator for a deep copy",
+            "input": "assign one Buffer object to another",
+            "output": "Deep copy successful, both buffers hold independent data",
+            "code": "#include <iostream>\n#include <cstring>\nusing namespace std;\n\nclass Buffer\n{\n    char *data;\n\npublic:\n    Buffer(const char *text) { data = strdup(text); }\n    Buffer &operator=(const Buffer &other)\n    {\n        if (this != &other)\n        {\n            free(data);\n            data = strdup(other.data);\n        }\n        return *this;\n    }\n    ~Buffer() { free(data); }\n    const char *get() { return data; }\n};\n\nint main()\n{\n    Buffer a(\"original\");\n    Buffer b(\"temp\");\n    b = a; /* deep copy, not a shared pointer */\n    cout << \"Deep copy successful, both buffers hold independent data\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Overload the + operator as a friend function",
+            "input": "Vector2D(1,2) + Vector2D(3,4)",
+            "output": "(4, 6)",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Vector2D\n{\npublic:\n    int x, y;\n    Vector2D(int a, int b) : x(a), y(b) {}\n    friend Vector2D operator+(const Vector2D &a, const Vector2D &b);\n};\n\nVector2D operator+(const Vector2D &a, const Vector2D &b)\n{\n    return Vector2D(a.x + b.x, a.y + b.y);\n}\n\nint main()\n{\n    Vector2D v1(1, 2), v2(3, 4);\n    Vector2D result = v1 + v2;\n    cout << \"(\" << result.x << \", \" << result.y << \")\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Overload the -> operator (smart-pointer style)",
+            "input": "wrapping a raw pointer",
+            "output": "Accessing member through overloaded -> operator: 42",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Data\n{\npublic:\n    int value = 42;\n};\n\nclass Wrapper\n{\n    Data *ptr;\n\npublic:\n    Wrapper(Data *p) : ptr(p) {}\n    Data *operator->() { return ptr; }\n};\n\nint main()\n{\n    Data d;\n    Wrapper w(&d);\n    cout << \"Accessing member through overloaded -> operator: \" << w->value << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Overload the * (dereference) operator",
+            "input": "wrapping an int value",
+            "output": "Dereferenced value: 100",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Box\n{\n    int value;\n\npublic:\n    Box(int v) : value(v) {}\n    int operator*() { return value; }\n};\n\nint main()\n{\n    Box b(100);\n    cout << \"Dereferenced value: \" << *b << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Overload the < operator to sort custom objects",
+            "input": "sort a list of Student objects by marks",
+            "output": "Students sorted by marks ascending",
+            "code": "#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nclass Student\n{\npublic:\n    string name;\n    int marks;\n    bool operator<(const Student &other) const { return marks < other.marks; }\n};\n\nint main()\n{\n    vector<Student> students = {{\"A\", 80}, {\"B\", 60}, {\"C\", 90}};\n    sort(students.begin(), students.end());\n\n    for (auto &s : students)\n        cout << s.name << \": \" << s.marks << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Function template - generic max()",
+            "input": "max(3, 7), max(2.5, 1.5)",
+            "output": "7, 2.5",
+            "code": "#include <iostream>\nusing namespace std;\n\ntemplate <typename T>\nT myMax(T a, T b)\n{\n    return (a > b) ? a : b;\n}\n\nint main()\n{\n    cout << myMax(3, 7) << endl;\n    cout << myMax(2.5, 1.5) << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Function template - generic swap()",
+            "input": "swap(5, 10)",
+            "output": "a=10, b=5",
+            "code": "#include <iostream>\nusing namespace std;\n\ntemplate <typename T>\nvoid mySwap(T &a, T &b)\n{\n    T temp = a;\n    a = b;\n    b = temp;\n}\n\nint main()\n{\n    int a = 5, b = 10;\n    mySwap(a, b);\n    cout << \"a=\" << a << \", b=\" << b << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Class template - generic Stack<T>",
+            "input": "push 1, 2, 3 then pop",
+            "output": "Popped: 3",
+            "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\ntemplate <typename T>\nclass Stack\n{\n    vector<T> data;\n\npublic:\n    void push(T value) { data.push_back(value); }\n    T pop()\n    {\n        T top = data.back();\n        data.pop_back();\n        return top;\n    }\n};\n\nint main()\n{\n    Stack<int> s;\n    s.push(1);\n    s.push(2);\n    s.push(3);\n    cout << \"Popped: \" << s.pop() << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Class template - generic Pair<T1, T2>",
+            "input": "Pair<string, int>(\"age\", 30)",
+            "output": "age: 30",
+            "code": "#include <iostream>\nusing namespace std;\n\ntemplate <typename T1, typename T2>\nclass Pair\n{\npublic:\n    T1 first;\n    T2 second;\n    Pair(T1 a, T2 b) : first(a), second(b) {}\n};\n\nint main()\n{\n    Pair<string, int> p(\"age\", 30);\n    cout << p.first << \": \" << p.second << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Template with multiple type parameters and a return type",
+            "input": "add<int, double>(3, 2.5)",
+            "output": "5.5",
+            "code": "#include <iostream>\nusing namespace std;\n\ntemplate <typename T1, typename T2>\nauto add(T1 a, T2 b) -> decltype(a + b)\n{\n    return a + b;\n}\n\nint main()\n{\n    cout << add(3, 2.5) << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Template specialization",
+            "input": "describe<int>(5), describe<const char*>(\"hi\")",
+            "output": "Generic type, Specialized for strings: hi",
+            "code": "#include <iostream>\nusing namespace std;\n\ntemplate <typename T>\nvoid describe(T value)\n{\n    cout << \"Generic type\" << endl;\n}\n\ntemplate <>\nvoid describe(const char *value)\n{\n    cout << \"Specialized for strings: \" << value << endl;\n}\n\nint main()\n{\n    describe(5);\n    describe(\"hi\");\n    return 0;\n}"
+          },
+          {
+            "name": "Variadic templates (sum of N arguments)",
+            "input": "sum(1, 2, 3, 4)",
+            "output": "10",
+            "code": "#include <iostream>\nusing namespace std;\n\ntemplate <typename T>\nT sum(T value)\n{\n    return value;\n}\n\ntemplate <typename T, typename... Args>\nT sum(T first, Args... rest)\n{\n    return first + sum(rest...);\n}\n\nint main()\n{\n    cout << sum(1, 2, 3, 4) << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Template with a default template argument",
+            "input": "Container<int> and Container<>",
+            "output": "Uses default type when none is specified",
+            "code": "#include <iostream>\nusing namespace std;\n\ntemplate <typename T = int>\nclass Container\n{\npublic:\n    T value;\n    Container(T v) : value(v) {}\n};\n\nint main()\n{\n    Container<> c(5); /* uses default template argument T = int */\n    cout << \"Uses default type when none is specified: \" << c.value << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Template function overloading vs full specialization",
+            "input": "process(5) matches the overload for int explicitly",
+            "output": "Overload for int called: 5",
+            "code": "#include <iostream>\nusing namespace std;\n\ntemplate <typename T>\nvoid process(T value)\n{\n    cout << \"Generic template called\" << endl;\n}\n\nvoid process(int value)\n{\n    cout << \"Overload for int called: \" << value << endl;\n}\n\nint main()\n{\n    process(5);   /* non-template overload preferred over template */\n    process(2.5); /* falls back to the template version */\n    return 0;\n}"
+          },
+          {
+            "name": "Generic singly linked list using templates",
+            "input": "push 1, 2, 3",
+            "output": "3 2 1",
+            "code": "#include <iostream>\nusing namespace std;\n\ntemplate <typename T>\nstruct Node\n{\n    T data;\n    Node *next;\n};\n\ntemplate <typename T>\nclass LinkedList\n{\n    Node<T> *head = nullptr;\n\npublic:\n    void pushFront(T value)\n    {\n        Node<T> *node = new Node<T>{value, head};\n        head = node;\n    }\n    void print()\n    {\n        for (Node<T> *cur = head; cur != nullptr; cur = cur->next)\n            cout << cur->data << \" \";\n        cout << endl;\n    }\n};\n\nint main()\n{\n    LinkedList<int> list;\n    list.pushFront(1);\n    list.pushFront(2);\n    list.pushFront(3);\n    list.print();\n    return 0;\n}"
+          },
+          {
+            "name": "constexpr function template evaluated at compile time",
+            "input": "square(5)",
+            "output": "25",
+            "code": "#include <iostream>\nusing namespace std;\n\ntemplate <typename T>\nconstexpr T square(T value)\n{\n    return value * value;\n}\n\nint main()\n{\n    constexpr int result = square(5); /* computed at compile time */\n    cout << result << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "SFINAE / std::enable_if simple demo",
+            "input": "process(5) for integral types only",
+            "output": "Processing an integral type: 5",
+            "code": "#include <iostream>\n#include <type_traits>\nusing namespace std;\n\ntemplate <typename T>\ntypename enable_if<is_integral<T>::value, void>::type\nprocess(T value)\n{\n    cout << \"Processing an integral type: \" << value << endl;\n}\n\nint main()\n{\n    process(5); /* only compiles for integral types thanks to enable_if */\n    return 0;\n}"
+          },
+          {
+            "name": "Template metaprogramming - factorial computed at compile time",
+            "input": "Factorial<5>::value",
+            "output": "120",
+            "code": "#include <iostream>\nusing namespace std;\n\ntemplate <int N>\nstruct Factorial\n{\n    static const int value = N * Factorial<N - 1>::value;\n};\n\ntemplate <>\nstruct Factorial<0>\n{\n    static const int value = 1;\n};\n\nint main()\n{\n    cout << Factorial<5>::value << endl; /* computed entirely at compile time */\n    return 0;\n}"
+          },
+          {
+            "name": "Overload the += (compound assignment) operator",
+            "input": "Money(100) += Money(50)",
+            "output": "150",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Money\n{\n    int amount;\n\npublic:\n    Money(int a) : amount(a) {}\n    Money &operator+=(const Money &other)\n    {\n        amount += other.amount;\n        return *this;\n    }\n    int get() { return amount; }\n};\n\nint main()\n{\n    Money wallet(100);\n    Money bonus(50);\n    wallet += bonus;\n    cout << wallet.get() << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Overload the unary - operator (negation)",
+            "input": "-Point(3, 4)",
+            "output": "(-3, -4)",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Point\n{\npublic:\n    int x, y;\n    Point(int a, int b) : x(a), y(b) {}\n    Point operator-() const { return Point(-x, -y); }\n};\n\nint main()\n{\n    Point p(3, 4);\n    Point negated = -p;\n    cout << \"(\" << negated.x << \", \" << negated.y << \")\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Overload new/delete operators for custom memory tracking",
+            "input": "allocate and free one MyClass object",
+            "output": "Custom new called, Custom delete called",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass MyClass\n{\npublic:\n    void *operator new(size_t size)\n    {\n        cout << \"Custom new called\" << endl;\n        return malloc(size);\n    }\n    void operator delete(void *ptr)\n    {\n        cout << \"Custom delete called\" << endl;\n        free(ptr);\n    }\n};\n\nint main()\n{\n    MyClass *obj = new MyClass();\n    delete obj;\n    return 0;\n}"
+          }
+        ],
+        "path": "CPP/operator_templates.cpp"
+      },
+      {
+        "chapter": "SMART POINTERS AND MEMORY MANAGEMENT",
+        "folder": "CPP",
+        "programs": [
+          {
+            "name": "unique_ptr basics",
+            "input": "(none)",
+            "output": "Value: 42",
+            "code": "#include <iostream>\n#include <memory>\nusing namespace std;\n\nint main()\n{\n    unique_ptr<int> ptr(new int(42));\n    cout << \"Value: \" << *ptr << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "unique_ptr with a custom deleter",
+            "input": "(none)",
+            "output": "Custom deleter called",
+            "code": "#include <iostream>\n#include <memory>\nusing namespace std;\n\nint main()\n{\n    auto deleter = [](int *p)\n    {\n        cout << \"Custom deleter called\" << endl;\n        delete p;\n    };\n\n    unique_ptr<int, decltype(deleter)> ptr(new int(10), deleter);\n    return 0;\n}"
+          },
+          {
+            "name": "Moving a unique_ptr (transfer ownership)",
+            "input": "(none)",
+            "output": "ptr1 is now empty, ptr2 owns the value: 5",
+            "code": "#include <iostream>\n#include <memory>\nusing namespace std;\n\nint main()\n{\n    unique_ptr<int> ptr1(new int(5));\n    unique_ptr<int> ptr2 = move(ptr1); /* ownership transferred */\n\n    cout << \"ptr1 is now \" << (ptr1 == nullptr ? \"empty\" : \"not empty\") << endl;\n    cout << \"ptr2 owns the value: \" << *ptr2 << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "shared_ptr basics",
+            "input": "(none)",
+            "output": "Value: 100",
+            "code": "#include <iostream>\n#include <memory>\nusing namespace std;\n\nint main()\n{\n    shared_ptr<int> ptr(new int(100));\n    cout << \"Value: \" << *ptr << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "shared_ptr use_count() demo",
+            "input": "two shared_ptr instances pointing to the same object",
+            "output": "Use count: 2",
+            "code": "#include <iostream>\n#include <memory>\nusing namespace std;\n\nint main()\n{\n    shared_ptr<int> a(new int(5));\n    shared_ptr<int> b = a;\n\n    cout << \"Use count: \" << a.use_count() << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "weak_ptr to break a circular reference",
+            "input": "two objects referencing each other",
+            "output": "Both objects destroyed correctly (no memory leak)",
+            "code": "#include <iostream>\n#include <memory>\nusing namespace std;\n\nstruct B;\n\nstruct A\n{\n    shared_ptr<B> b;\n    ~A() { cout << \"A destroyed\" << endl; }\n};\n\nstruct B\n{\n    weak_ptr<A> a; /* weak_ptr avoids the reference cycle */\n    ~B() { cout << \"B destroyed\" << endl; }\n};\n\nint main()\n{\n    auto a = make_shared<A>();\n    auto b = make_shared<B>();\n    a->b = b;\n    b->a = a;\n\n    cout << \"Both objects destroyed correctly (no memory leak)\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "make_unique usage",
+            "input": "(none)",
+            "output": "25",
+            "code": "#include <iostream>\n#include <memory>\nusing namespace std;\n\nint main()\n{\n    auto ptr = make_unique<int>(25); /* safer than \"new\" + unique_ptr constructor */\n    cout << *ptr << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "make_shared usage",
+            "input": "(none)",
+            "output": "50",
+            "code": "#include <iostream>\n#include <memory>\nusing namespace std;\n\nint main()\n{\n    auto ptr = make_shared<int>(50); /* single allocation for object + control block */\n    cout << *ptr << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "shared_ptr with a custom deleter",
+            "input": "(none)",
+            "output": "Custom deleter for shared_ptr called",
+            "code": "#include <iostream>\n#include <memory>\nusing namespace std;\n\nint main()\n{\n    shared_ptr<int> ptr(new int(1), [](int *p)\n                        {\n\t\tcout << \"Custom deleter for shared_ptr called\" << endl;\n\t\tdelete p; });\n    return 0;\n}"
+          },
+          {
+            "name": "Smart pointer managing a dynamically allocated array",
+            "input": "array of 5 ints",
+            "output": "0 1 2 3 4",
+            "code": "#include <iostream>\n#include <memory>\nusing namespace std;\n\nint main()\n{\n    unique_ptr<int[]> arr(new int[5]);\n\n    for (int i = 0; i < 5; i++)\n        arr[i] = i;\n\n    for (int i = 0; i < 5; i++)\n        cout << arr[i] << \" \";\n    cout << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Raw pointer vs smart pointer comparison",
+            "input": "(none)",
+            "output": "Raw pointer requires manual delete; smart pointer cleans up automatically",
+            "code": "#include <iostream>\n#include <memory>\nusing namespace std;\n\nint main()\n{\n    int *raw = new int(1);\n    delete raw; /* must remember to do this manually */\n\n    unique_ptr<int> smart(new int(1)); /* cleaned up automatically at scope end */\n\n    cout << \"Raw pointer requires manual delete; smart pointer cleans up automatically\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "new/delete basics",
+            "input": "(none)",
+            "output": "Value: 7",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    int *ptr = new int(7);\n    cout << \"Value: \" << *ptr << endl;\n    delete ptr;\n    return 0;\n}"
+          },
+          {
+            "name": "new[]/delete[] for dynamic arrays",
+            "input": "array of 3 ints",
+            "output": "10 20 30",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    int *arr = new int[3]{10, 20, 30};\n\n    for (int i = 0; i < 3; i++)\n        cout << arr[i] << \" \";\n    cout << endl;\n\n    delete[] arr; /* must use delete[] for arrays, not delete */\n    return 0;\n}"
+          },
+          {
+            "name": "Memory leak demonstration (missing delete)",
+            "input": "allocate memory in a loop without freeing it",
+            "output": "Leaked 1000 integers (no delete called - demonstration only)",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    for (int i = 0; i < 1000; i++)\n        new int(i); /* leaked: no matching delete, avoid this in real code */\n\n    cout << \"Leaked 1000 integers (no delete called - demonstration only)\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Dangling pointer demonstration",
+            "input": "use a pointer after the memory it points to is freed",
+            "output": "Pointer set to nullptr immediately after delete to avoid dangling use",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    int *ptr = new int(5);\n    delete ptr;\n    ptr = nullptr; /* best practice: avoid a dangling pointer */\n\n    cout << \"Pointer set to nullptr immediately after delete to avoid dangling use\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "RAII pattern with a custom resource-managing class",
+            "input": "(none)",
+            "output": "File-like resource opened, File-like resource closed automatically",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass FileHandle\n{\npublic:\n    FileHandle() { cout << \"File-like resource opened\" << endl; }\n    ~FileHandle() { cout << \"File-like resource closed automatically\" << endl; }\n};\n\nint main()\n{\n    FileHandle f; /* resource released deterministically when f goes out of scope */\n    return 0;\n}"
+          },
+          {
+            "name": "Rule of Three - copy constructor, copy assignment, destructor",
+            "input": "class managing a raw resource",
+            "output": "Deep copy created independently of the original",
+            "code": "#include <iostream>\n#include <cstring>\nusing namespace std;\n\nclass Buffer\n{\n    char *data;\n\npublic:\n    Buffer(const char *text) { data = strdup(text); }\n    Buffer(const Buffer &other) { data = strdup(other.data); } /* copy constructor */\n    Buffer &operator=(const Buffer &other)                     /* copy assignment */\n    {\n        if (this != &other)\n        {\n            free(data);\n            data = strdup(other.data);\n        }\n        return *this;\n    }\n    ~Buffer() { free(data); } /* destructor */\n};\n\nint main()\n{\n    Buffer a(\"hello\");\n    Buffer b = a; /* uses copy constructor */\n    cout << \"Deep copy created independently of the original\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Rule of Five - adds move constructor and move assignment",
+            "input": "class managing a raw resource, moved instead of copied",
+            "output": "Resource moved without an extra deep copy",
+            "code": "#include <iostream>\n#include <cstring>\nusing namespace std;\n\nclass Buffer\n{\n    char *data;\n\npublic:\n    Buffer(const char *text) { data = strdup(text); }\n    Buffer(const Buffer &other) { data = strdup(other.data); }\n    Buffer(Buffer &&other) noexcept : data(other.data) { other.data = nullptr; } /* move ctor */\n    Buffer &operator=(Buffer &&other) noexcept                                   /* move assignment */\n    {\n        if (this != &other)\n        {\n            free(data);\n            data = other.data;\n            other.data = nullptr;\n        }\n        return *this;\n    }\n    ~Buffer() { free(data); }\n};\n\nint main()\n{\n    Buffer a(\"hello\");\n    Buffer b = move(a); /* uses move constructor, no deep copy */\n    cout << \"Resource moved without an extra deep copy\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Move semantics using std::move",
+            "input": "move a std::string instead of copying it",
+            "output": "source is now empty, destination holds: Hello World",
+            "code": "#include <iostream>\n#include <string>\nusing namespace std;\n\nint main()\n{\n    string source = \"Hello World\";\n    string destination = move(source); /* avoids copying the string's buffer */\n\n    cout << \"source is now \" << (source.empty() ? \"empty\" : \"not empty\") << endl;\n    cout << \"destination holds: \" << destination << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::swap combined with move semantics",
+            "input": "swap two vectors",
+            "output": "Vectors swapped without copying their elements",
+            "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main()\n{\n    vector<int> a = {1, 2, 3};\n    vector<int> b = {4, 5, 6};\n\n    swap(a, b); /* internally uses move semantics, no element-by-element copy */\n    cout << \"Vectors swapped without copying their elements\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Simplified custom unique_ptr implementation",
+            "input": "(none)",
+            "output": "Value: 15, then automatically deleted at scope end",
+            "code": "#include <iostream>\nusing namespace std;\n\ntemplate <typename T>\nclass SimpleUniquePtr\n{\n    T *ptr;\n\npublic:\n    explicit SimpleUniquePtr(T *p) : ptr(p) {}\n    ~SimpleUniquePtr() { delete ptr; }\n    T &operator*() { return *ptr; }\n    SimpleUniquePtr(const SimpleUniquePtr &) = delete; /* non-copyable, like std::unique_ptr */\n};\n\nint main()\n{\n    SimpleUniquePtr<int> ptr(new int(15));\n    cout << \"Value: \" << *ptr << \", then automatically deleted at scope end\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "shared_ptr circular reference problem (memory leak without weak_ptr)",
+            "input": "two shared_ptrs referencing each other",
+            "output": "Circular shared_ptr reference would leak memory (fixed by using weak_ptr)",
+            "code": "#include <iostream>\n#include <memory>\nusing namespace std;\n\nstruct Node\n{\n    shared_ptr<Node> next; /* if both nodes point to each other, neither's count reaches 0 */\n    ~Node() { cout << \"Node destroyed\" << endl; }\n};\n\nint main()\n{\n    cout << \"Circular shared_ptr reference would leak memory (fixed by using weak_ptr)\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "weak_ptr::lock() usage",
+            "input": "check if the managed object still exists",
+            "output": "Object still alive: 7, Object has been destroyed",
+            "code": "#include <iostream>\n#include <memory>\nusing namespace std;\n\nint main()\n{\n    weak_ptr<int> weak;\n    {\n        shared_ptr<int> shared = make_shared<int>(7);\n        weak = shared;\n\n        if (auto locked = weak.lock())\n            cout << \"Object still alive: \" << *locked << endl;\n    }\n\n    if (weak.expired())\n        cout << \"Object has been destroyed\" << endl;\n\n    return 0;\n}"
+          },
+          {
+            "name": "Smart pointers stored in a container (vector of unique_ptr)",
+            "input": "3 dynamically allocated ints",
+            "output": "1 2 3",
+            "code": "#include <iostream>\n#include <vector>\n#include <memory>\nusing namespace std;\n\nint main()\n{\n    vector<unique_ptr<int>> values;\n    values.push_back(make_unique<int>(1));\n    values.push_back(make_unique<int>(2));\n    values.push_back(make_unique<int>(3));\n\n    for (auto &v : values)\n        cout << *v << \" \";\n    cout << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Passing a unique_ptr to a function (by value = move)",
+            "input": "transfer ownership into a function",
+            "output": "Function now owns the value: 99",
+            "code": "#include <iostream>\n#include <memory>\nusing namespace std;\n\nvoid takeOwnership(unique_ptr<int> ptr)\n{\n    cout << \"Function now owns the value: \" << *ptr << endl;\n}\n\nint main()\n{\n    unique_ptr<int> ptr = make_unique<int>(99);\n    takeOwnership(move(ptr)); /* must explicitly move; unique_ptr can't be copied */\n    return 0;\n}"
+          },
+          {
+            "name": "Returning a unique_ptr from a function",
+            "input": "factory function creating a new object",
+            "output": "Created value: 33",
+            "code": "#include <iostream>\n#include <memory>\nusing namespace std;\n\nunique_ptr<int> createValue()\n{\n    return make_unique<int>(33); /* implicitly moved out via NRVO/move semantics */\n}\n\nint main()\n{\n    unique_ptr<int> ptr = createValue();\n    cout << \"Created value: \" << *ptr << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "enable_shared_from_this usage",
+            "input": "an object that needs to hand out a shared_ptr to itself",
+            "output": "Retrieved a valid shared_ptr to self",
+            "code": "#include <iostream>\n#include <memory>\nusing namespace std;\n\nclass Widget : public enable_shared_from_this<Widget>\n{\npublic:\n    shared_ptr<Widget> getSelf() { return shared_from_this(); }\n};\n\nint main()\n{\n    auto widget = make_shared<Widget>();\n    auto self = widget->getSelf();\n\n    cout << (self != nullptr ? \"Retrieved a valid shared_ptr to self\" : \"Failed\") << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Placement new",
+            "input": "constructing an object in pre-allocated memory",
+            "output": "Object constructed in place with value: 21",
+            "code": "#include <iostream>\nusing namespace std;\n\nclass Point\n{\npublic:\n    int x;\n    Point(int v) : x(v) {}\n};\n\nint main()\n{\n    alignas(Point) char buffer[sizeof(Point)];\n    Point *p = new (buffer) Point(21); /* construct directly into \"buffer\" */\n\n    cout << \"Object constructed in place with value: \" << p->x << endl;\n    p->~Point(); /* must manually call the destructor for placement new */\n    return 0;\n}"
+          },
+          {
+            "name": "Custom allocator concept demo",
+            "input": "a minimal allocator that logs allocations",
+            "output": "Allocating 4 bytes, Custom allocator used successfully",
+            "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\ntemplate <typename T>\nstruct LoggingAllocator\n{\n    using value_type = T;\n    LoggingAllocator() = default;\n\n    T *allocate(size_t n)\n    {\n        cout << \"Allocating \" << n * sizeof(T) << \" bytes\" << endl;\n        return static_cast<T *>(::operator new(n * sizeof(T)));\n    }\n    void deallocate(T *p, size_t) { ::operator delete(p); }\n};\n\nint main()\n{\n    vector<int, LoggingAllocator<int>> v;\n    v.push_back(1);\n    cout << \"Custom allocator used successfully\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Comparing manual memory management vs smart pointers",
+            "input": "same task done with new/delete, then with unique_ptr",
+            "output": "Manual: value=1 (must remember delete); Smart: value=1 (auto-cleaned)",
+            "code": "#include <iostream>\n#include <memory>\nusing namespace std;\n\nint main()\n{\n    int *manual = new int(1);\n    cout << \"Manual: value=\" << *manual << \" (must remember delete)\" << endl;\n    delete manual;\n\n    unique_ptr<int> smart = make_unique<int>(1);\n    cout << \"Smart: value=\" << *smart << \" (auto-cleaned)\" << endl;\n    return 0;\n}"
+          }
+        ],
+        "path": "CPP/smart_pointers_memory.cpp"
+      },
+      {
+        "chapter": "STL CONTAINERS",
+        "folder": "CPP",
+        "programs": [
+          {
+            "name": "std::vector basics - push_back and iterate",
+            "input": "10, 20, 30",
+            "output": "10 20 30",
+            "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main()\n{\n    vector<int> v;\n    v.push_back(10);\n    v.push_back(20);\n    v.push_back(30);\n\n    for (int x : v)\n        cout << x << \" \";\n    cout << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::vector - insert and erase",
+            "input": "{10, 20, 30}, insert 15 at index 1, erase index 2",
+            "output": "10 15 30",
+            "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main()\n{\n    vector<int> v = {10, 20, 30};\n    v.insert(v.begin() + 1, 15);\n    v.erase(v.begin() + 2);\n\n    for (int x : v)\n        cout << x << \" \";\n    cout << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::vector - sort using std::sort",
+            "input": "{5, 2, 8, 1}",
+            "output": "1 2 5 8",
+            "code": "#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nint main()\n{\n    vector<int> v = {5, 2, 8, 1};\n    sort(v.begin(), v.end());\n\n    for (int x : v)\n        cout << x << \" \";\n    cout << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::list basics (doubly linked list container)",
+            "input": "push_back 1, 2, push_front 0",
+            "output": "0 1 2",
+            "code": "#include <iostream>\n#include <list>\nusing namespace std;\n\nint main()\n{\n    list<int> l;\n    l.push_back(1);\n    l.push_back(2);\n    l.push_front(0);\n\n    for (int x : l)\n        cout << x << \" \";\n    cout << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::deque basics (double-ended queue)",
+            "input": "push_back 2, push_front 1",
+            "output": "1 2",
+            "code": "#include <iostream>\n#include <deque>\nusing namespace std;\n\nint main()\n{\n    deque<int> dq;\n    dq.push_back(2);\n    dq.push_front(1);\n\n    for (int x : dq)\n        cout << x << \" \";\n    cout << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::set basics (unique sorted elements)",
+            "input": "insert 5, 3, 5, 1",
+            "output": "1 3 5",
+            "code": "#include <iostream>\n#include <set>\nusing namespace std;\n\nint main()\n{\n    set<int> s = {5, 3, 5, 1};\n\n    for (int x : s)\n        cout << x << \" \";\n    cout << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::multiset basics (allows duplicate elements, kept sorted)",
+            "input": "insert 5, 3, 5, 1",
+            "output": "1 3 5 5",
+            "code": "#include <iostream>\n#include <set>\nusing namespace std;\n\nint main()\n{\n    multiset<int> ms = {5, 3, 5, 1};\n\n    for (int x : ms)\n        cout << x << \" \";\n    cout << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::map basics (sorted key-value pairs)",
+            "input": "{\"b\":2, \"a\":1}",
+            "output": "a: 1, b: 2",
+            "code": "#include <iostream>\n#include <map>\nusing namespace std;\n\nint main()\n{\n    map<string, int> m;\n    m[\"b\"] = 2;\n    m[\"a\"] = 1;\n\n    for (auto &[key, value] : m) /* iterates in sorted key order */\n        cout << key << \": \" << value << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::multimap basics (multiple values per key)",
+            "input": "insert two values under key \"fruit\"",
+            "output": "fruit: apple, fruit: banana",
+            "code": "#include <iostream>\n#include <map>\nusing namespace std;\n\nint main()\n{\n    multimap<string, string> mm;\n    mm.insert({\"fruit\", \"apple\"});\n    mm.insert({\"fruit\", \"banana\"});\n\n    for (auto &[key, value] : mm)\n        cout << key << \": \" << value << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::unordered_map basics (hash map, no ordering guarantee)",
+            "input": "{\"x\":1, \"y\":2}",
+            "output": "Lookup \"x\": 1",
+            "code": "#include <iostream>\n#include <unordered_map>\nusing namespace std;\n\nint main()\n{\n    unordered_map<string, int> um = {{\"x\", 1}, {\"y\", 2}};\n    cout << \"Lookup \\\"x\\\": \" << um[\"x\"] << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::unordered_set basics (hash set, no ordering guarantee)",
+            "input": "insert 1, 2, 2, 3",
+            "output": "Set contains 3 unique elements",
+            "code": "#include <iostream>\n#include <unordered_set>\nusing namespace std;\n\nint main()\n{\n    unordered_set<int> us = {1, 2, 2, 3};\n    cout << \"Set contains \" << us.size() << \" unique elements\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::stack basics (LIFO)",
+            "input": "push 1, 2, 3",
+            "output": "3 2 1",
+            "code": "#include <iostream>\n#include <stack>\nusing namespace std;\n\nint main()\n{\n    stack<int> st;\n    st.push(1);\n    st.push(2);\n    st.push(3);\n\n    while (!st.empty())\n    {\n        cout << st.top() << \" \";\n        st.pop();\n    }\n    cout << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::queue basics (FIFO)",
+            "input": "push 1, 2, 3",
+            "output": "1 2 3",
+            "code": "#include <iostream>\n#include <queue>\nusing namespace std;\n\nint main()\n{\n    queue<int> q;\n    q.push(1);\n    q.push(2);\n    q.push(3);\n\n    while (!q.empty())\n    {\n        cout << q.front() << \" \";\n        q.pop();\n    }\n    cout << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::priority_queue basics (max-heap by default)",
+            "input": "push 3, 1, 4, 1, 5",
+            "output": "5 4 3 1 1",
+            "code": "#include <iostream>\n#include <queue>\nusing namespace std;\n\nint main()\n{\n    priority_queue<int> pq;\n    for (int x : {3, 1, 4, 1, 5})\n        pq.push(x);\n\n    while (!pq.empty())\n    {\n        cout << pq.top() << \" \";\n        pq.pop();\n    }\n    cout << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::pair basics",
+            "input": "make_pair(\"age\", 30)",
+            "output": "age: 30",
+            "code": "#include <iostream>\nusing namespace std;\n\nint main()\n{\n    pair<string, int> p = make_pair(\"age\", 30);\n    cout << p.first << \": \" << p.second << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::tuple basics",
+            "input": "make_tuple(\"Alice\", 30, 5.6)",
+            "output": "Alice, 30, 5.6",
+            "code": "#include <iostream>\n#include <tuple>\nusing namespace std;\n\nint main()\n{\n    auto person = make_tuple(\"Alice\", 30, 5.6);\n    cout << get<0>(person) << \", \" << get<1>(person) << \", \" << get<2>(person) << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Iterators - begin/end traversal",
+            "input": "{1, 2, 3}",
+            "output": "1 2 3",
+            "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main()\n{\n    vector<int> v = {1, 2, 3};\n\n    for (auto it = v.begin(); it != v.end(); ++it)\n        cout << *it << \" \";\n    cout << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::find algorithm",
+            "input": "search for 30 in {10, 20, 30, 40}",
+            "output": "Found 30 in the vector",
+            "code": "#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nint main()\n{\n    vector<int> v = {10, 20, 30, 40};\n    auto it = find(v.begin(), v.end(), 30);\n\n    if (it != v.end())\n        cout << \"Found \" << *it << \" in the vector\" << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::accumulate algorithm",
+            "input": "{1, 2, 3, 4, 5}",
+            "output": "Sum: 15",
+            "code": "#include <iostream>\n#include <vector>\n#include <numeric>\nusing namespace std;\n\nint main()\n{\n    vector<int> v = {1, 2, 3, 4, 5};\n    int sum = accumulate(v.begin(), v.end(), 0);\n    cout << \"Sum: \" << sum << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::transform algorithm",
+            "input": "{1, 2, 3} doubled",
+            "output": "2 4 6",
+            "code": "#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nint main()\n{\n    vector<int> v = {1, 2, 3};\n    vector<int> result(v.size());\n\n    transform(v.begin(), v.end(), result.begin(), [](int x)\n              { return x * 2; });\n\n    for (int x : result)\n        cout << x << \" \";\n    cout << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::for_each algorithm with a lambda",
+            "input": "{1, 2, 3}",
+            "output": "1 2 3",
+            "code": "#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nint main()\n{\n    vector<int> v = {1, 2, 3};\n    for_each(v.begin(), v.end(), [](int x)\n             { cout << x << \" \"; });\n    cout << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::count_if with a lambda predicate",
+            "input": "count even numbers in {1, 2, 3, 4, 5, 6}",
+            "output": "Even count: 3",
+            "code": "#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nint main()\n{\n    vector<int> v = {1, 2, 3, 4, 5, 6};\n    int evenCount = count_if(v.begin(), v.end(), [](int x)\n                             { return x % 2 == 0; });\n    cout << \"Even count: \" << evenCount << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::sort with a custom comparator (descending order)",
+            "input": "{5, 2, 8, 1}",
+            "output": "8 5 2 1",
+            "code": "#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nint main()\n{\n    vector<int> v = {5, 2, 8, 1};\n    sort(v.begin(), v.end(), greater<int>());\n\n    for (int x : v)\n        cout << x << \" \";\n    cout << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Sort a vector of custom objects by a field",
+            "input": "Employees sorted by salary",
+            "output": "Employees printed in ascending salary order",
+            "code": "#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nstruct Employee\n{\n    string name;\n    int salary;\n};\n\nint main()\n{\n    vector<Employee> employees = {{\"A\", 5000}, {\"B\", 3000}, {\"C\", 7000}};\n\n    sort(employees.begin(), employees.end(), [](const Employee &a, const Employee &b)\n         { return a.salary < b.salary; });\n\n    for (auto &e : employees)\n        cout << e.name << \": \" << e.salary << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::map iteration and modification",
+            "input": "increment every value in a map by 10",
+            "output": "a: 11, b: 22",
+            "code": "#include <iostream>\n#include <map>\nusing namespace std;\n\nint main()\n{\n    map<string, int> m = {{\"a\", 1}, {\"b\", 12}};\n\n    for (auto &[key, value] : m)\n        value += 10;\n\n    for (auto &[key, value] : m)\n        cout << key << \": \" << value << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::array (fixed-size container)",
+            "input": "{1, 2, 3}",
+            "output": "Size: 3, Sum: 6",
+            "code": "#include <iostream>\n#include <array>\n#include <numeric>\nusing namespace std;\n\nint main()\n{\n    array<int, 3> arr = {1, 2, 3};\n    cout << \"Size: \" << arr.size() << \", Sum: \" << accumulate(arr.begin(), arr.end(), 0) << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Range-based for loop over containers",
+            "input": "{10, 20, 30}",
+            "output": "10 20 30",
+            "code": "#include <iostream>\n#include <vector>\nusing namespace std;\n\nint main()\n{\n    vector<int> v = {10, 20, 30};\n\n    for (const auto &x : v)\n        cout << x << \" \";\n    cout << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::string as a container (common operations)",
+            "input": "\"Hello\"",
+            "output": "Length: 5, Uppercase: HELLO",
+            "code": "#include <iostream>\n#include <algorithm>\nusing namespace std;\n\nint main()\n{\n    string s = \"Hello\";\n    cout << \"Length: \" << s.length() << endl;\n\n    transform(s.begin(), s.end(), s.begin(), ::toupper);\n    cout << \"Uppercase: \" << s << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "std::bitset basics",
+            "input": "bitset<8> representing the number 5",
+            "output": "00000101",
+            "code": "#include <iostream>\n#include <bitset>\nusing namespace std;\n\nint main()\n{\n    bitset<8> bits(5);\n    cout << bits << endl;\n    return 0;\n}"
+          },
+          {
+            "name": "Combining STL algorithms - remove_if + erase idiom",
+            "input": "{1, 2, 3, 4, 5, 6}, remove even numbers",
+            "output": "1 3 5",
+            "code": "#include <iostream>\n#include <vector>\n#include <algorithm>\nusing namespace std;\n\nint main()\n{\n    vector<int> v = {1, 2, 3, 4, 5, 6};\n\n    v.erase(remove_if(v.begin(), v.end(), [](int x)\n                      { return x % 2 == 0; }),\n            v.end());\n\n    for (int x : v)\n        cout << x << \" \";\n    cout << endl;\n    return 0;\n}"
+          }
+        ],
+        "path": "CPP/stl_containers.cpp"
       }
     ]
   },
@@ -834,6 +2335,193 @@ const CATALOG = [
           }
         ],
         "path": "Linux/message_queues.c, Linux/message_queues_theory.txt"
+      },
+      {
+        "chapter": "MULTITHREADING",
+        "folder": "Linux/multithread",
+        "programs": [
+          {
+            "name": "Create a basic thread using pthread_create",
+            "input": "(none)",
+            "output": "Hello from the new thread!",
+            "code": "#include <stdio.h>\n#include <pthread.h>\n\nstatic void *run(void *arg)\n{\n\t(void)arg;\n\tprintf(\"Hello from the new thread!\\n\");\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t t;\n\n\tpthread_create(&t, NULL, run, NULL);\n\tpthread_join(t, NULL);\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Pass a single argument to a thread",
+            "input": "42",
+            "output": "Thread received value: 42",
+            "code": "#include <stdio.h>\n#include <pthread.h>\n\nstatic void *run(void *arg)\n{\n\tint value = *(int *)arg;\n\tprintf(\"Thread received value: %d\\n\", value);\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t t;\n\tint value = 42;\n\n\tpthread_create(&t, NULL, run, &value);\n\tpthread_join(t, NULL);\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Pass multiple values to a thread using a struct",
+            "input": "name=\"Worker\", id=7",
+            "output": "Worker #7 started",
+            "code": "#include <stdio.h>\n#include <pthread.h>\n\nstruct ThreadArgs\n{\n\tconst char *name;\n\tint id;\n};\n\nstatic void *run(void *arg)\n{\n\tstruct ThreadArgs *args = (struct ThreadArgs *)arg;\n\tprintf(\"%s #%d started\\n\", args->name, args->id);\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t t;\n\tstruct ThreadArgs args = {\"Worker\", 7};\n\n\tpthread_create(&t, NULL, run, &args);\n\tpthread_join(t, NULL);\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Return a value from a thread via pthread_exit",
+            "input": "(none)",
+            "output": "Thread returned: 99",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n\nstatic void *run(void *arg)\n{\n\t(void)arg;\n\tint *result = malloc(sizeof(int));\n\t*result = 99;\n\tpthread_exit(result);\n}\n\nint main(void)\n{\n\tpthread_t t;\n\tvoid *returnValue;\n\n\tpthread_create(&t, NULL, run, NULL);\n\tpthread_join(t, &returnValue);\n\n\tprintf(\"Thread returned: %d\\n\", *(int *)returnValue);\n\tfree(returnValue);\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Join a thread and retrieve its return value with pthread_join",
+            "input": "(none)",
+            "output": "Joined thread, result = 15",
+            "code": "#include <stdio.h>\n#include <pthread.h>\n\nstatic void *run(void *arg)\n{\n\t(void)arg;\n\treturn (void *)(long)15;\n}\n\nint main(void)\n{\n\tpthread_t t;\n\tvoid *result;\n\n\tpthread_create(&t, NULL, run, NULL);\n\tpthread_join(t, &result);\n\n\tprintf(\"Joined thread, result = %ld\\n\", (long)result);\n\treturn 0;\n}"
+          },
+          {
+            "name": "Detach a thread using pthread_detach",
+            "input": "(none)",
+            "output": "Detached thread running independently",
+            "code": "#include <stdio.h>\n#include <unistd.h>\n#include <pthread.h>\n\nstatic void *run(void *arg)\n{\n\t(void)arg;\n\tprintf(\"Detached thread running independently\\n\");\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t t;\n\n\tpthread_create(&t, NULL, run, NULL);\n\tpthread_detach(t); /* no need to join; resources auto-reclaimed on exit */\n\tsleep(1);\t\t\t/* give the detached thread time to finish for this demo */\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Create multiple threads in a loop",
+            "input": "5 threads",
+            "output": "Thread 0 running, Thread 1 running, ... Thread 4 running",
+            "code": "#include <stdio.h>\n#include <pthread.h>\n\nstatic void *run(void *arg)\n{\n\tint id = *(int *)arg;\n\tprintf(\"Thread %d running\\n\", id);\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t threads[5];\n\tint ids[5];\n\n\tfor (int i = 0; i < 5; i++)\n\t{\n\t\tids[i] = i;\n\t\tpthread_create(&threads[i], NULL, run, &ids[i]);\n\t}\n\tfor (int i = 0; i < 5; i++)\n\t\tpthread_join(threads[i], NULL);\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Get the current thread ID using pthread_self",
+            "input": "(none)",
+            "output": "Running inside thread ID: 140234...",
+            "code": "#include <stdio.h>\n#include <pthread.h>\n\nstatic void *run(void *arg)\n{\n\t(void)arg;\n\tprintf(\"Running inside thread ID: %lu\\n\", (unsigned long)pthread_self());\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t t;\n\n\tpthread_create(&t, NULL, run, NULL);\n\tpthread_join(t, NULL);\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Compare thread IDs using pthread_equal",
+            "input": "(none)",
+            "output": "Main thread and worker thread have different IDs",
+            "code": "#include <stdio.h>\n#include <pthread.h>\n\npthread_t mainThreadId;\n\nstatic void *run(void *arg)\n{\n\t(void)arg;\n\tif (!pthread_equal(pthread_self(), mainThreadId))\n\t\tprintf(\"Main thread and worker thread have different IDs\\n\");\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t t;\n\n\tmainThreadId = pthread_self();\n\tpthread_create(&t, NULL, run, NULL);\n\tpthread_join(t, NULL);\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Cancel a thread using pthread_cancel",
+            "input": "(none)",
+            "output": "Worker thread was cancelled before completing its loop",
+            "code": "#include <stdio.h>\n#include <unistd.h>\n#include <pthread.h>\n\nstatic void *run(void *arg)\n{\n\t(void)arg;\n\tfor (int i = 0; i < 10; i++)\n\t{\n\t\tprintf(\"Working... %d\\n\", i);\n\t\tsleep(1); /* sleep is a cancellation point */\n\t}\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t t;\n\n\tpthread_create(&t, NULL, run, NULL);\n\tsleep(2);\n\tpthread_cancel(t);\n\tpthread_join(t, NULL);\n\tprintf(\"Worker thread was cancelled before completing its loop\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Check cancellation points explicitly using pthread_testcancel",
+            "input": "(none)",
+            "output": "Thread exits at its own checkpoint after being cancelled",
+            "code": "#include <stdio.h>\n#include <pthread.h>\n\nstatic void *run(void *arg)\n{\n\t(void)arg;\n\tfor (int i = 0; i < 1000000; i++)\n\t{\n\t\tif (i % 100000 == 0)\n\t\t\tpthread_testcancel(); /* explicit cancellation checkpoint */\n\t}\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t t;\n\n\tpthread_create(&t, NULL, run, NULL);\n\tpthread_cancel(t);\n\tpthread_join(t, NULL);\n\tprintf(\"Thread exits at its own checkpoint after being cancelled\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Thread-local storage using pthread_key_create",
+            "input": "(none)",
+            "output": "Thread 0 local value: 100, Thread 1 local value: 200",
+            "code": "#include <stdio.h>\n#include <pthread.h>\n\npthread_key_t key;\n\nstatic void *run(void *arg)\n{\n\tint *value = arg;\n\tpthread_setspecific(key, value);\n\n\tint *stored = pthread_getspecific(key);\n\tprintf(\"Thread local value: %d\\n\", *stored);\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t t1, t2;\n\tint a = 100, b = 200;\n\n\tpthread_key_create(&key, NULL);\n\tpthread_create(&t1, NULL, run, &a);\n\tpthread_create(&t2, NULL, run, &b);\n\tpthread_join(t1, NULL);\n\tpthread_join(t2, NULL);\n\tpthread_key_delete(key);\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Set a custom stack size using pthread_attr_t",
+            "input": "1 MB stack",
+            "output": "Thread created with a 1 MB stack size",
+            "code": "#include <stdio.h>\n#include <pthread.h>\n\nstatic void *run(void *arg)\n{\n\t(void)arg;\n\tprintf(\"Thread created with a 1 MB stack size\\n\");\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t t;\n\tpthread_attr_t attr;\n\n\tpthread_attr_init(&attr);\n\tpthread_attr_setstacksize(&attr, 1024 * 1024);\n\n\tpthread_create(&t, &attr, run, NULL);\n\tpthread_join(t, NULL);\n\n\tpthread_attr_destroy(&attr);\n\treturn 0;\n}"
+          },
+          {
+            "name": "Create a detached thread from the start via pthread_attr_setdetachstate",
+            "input": "(none)",
+            "output": "Thread created already detached, no join needed",
+            "code": "#include <stdio.h>\n#include <unistd.h>\n#include <pthread.h>\n\nstatic void *run(void *arg)\n{\n\t(void)arg;\n\tprintf(\"Thread created already detached, no join needed\\n\");\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t t;\n\tpthread_attr_t attr;\n\n\tpthread_attr_init(&attr);\n\tpthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);\n\n\tpthread_create(&t, &attr, run, NULL);\n\tpthread_attr_destroy(&attr);\n\tsleep(1); /* let the detached thread finish for this demo */\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Implement a simple fixed-size thread pool processing a task queue",
+            "input": "4 worker threads, 8 queued tasks",
+            "output": "Each task printed as \"Task N processed by worker\" from one of the 4 workers",
+            "code": "#include <stdio.h>\n#include <pthread.h>\n\n#define NUM_WORKERS 4\n#define NUM_TASKS 8\n\nint nextTask = 0;\npthread_mutex_t queueLock = PTHREAD_MUTEX_INITIALIZER;\n\nstatic void *worker(void *arg)\n{\n\tint workerId = *(int *)arg;\n\n\twhile (1)\n\t{\n\t\tint task;\n\n\t\tpthread_mutex_lock(&queueLock);\n\t\tif (nextTask >= NUM_TASKS)\n\t\t{\n\t\t\tpthread_mutex_unlock(&queueLock);\n\t\t\tbreak;\n\t\t}\n\t\ttask = nextTask++;\n\t\tpthread_mutex_unlock(&queueLock);\n\n\t\tprintf(\"Task %d processed by worker %d\\n\", task, workerId);\n\t}\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t workers[NUM_WORKERS];\n\tint ids[NUM_WORKERS];\n\n\tfor (int i = 0; i < NUM_WORKERS; i++)\n\t{\n\t\tids[i] = i;\n\t\tpthread_create(&workers[i], NULL, worker, &ids[i]);\n\t}\n\tfor (int i = 0; i < NUM_WORKERS; i++)\n\t\tpthread_join(workers[i], NULL);\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Run initialization code exactly once using pthread_once",
+            "input": "3 threads all trying to initialize",
+            "output": "Initialized exactly once (printed only one time despite 3 threads)",
+            "code": "#include <stdio.h>\n#include <pthread.h>\n\npthread_once_t initFlag = PTHREAD_ONCE_INIT;\n\nstatic void initialize(void)\n{\n\tprintf(\"Initialized exactly once\\n\");\n}\n\nstatic void *run(void *arg)\n{\n\t(void)arg;\n\tpthread_once(&initFlag, initialize);\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t threads[3];\n\n\tfor (int i = 0; i < 3; i++)\n\t\tpthread_create(&threads[i], NULL, run, NULL);\n\tfor (int i = 0; i < 3; i++)\n\t\tpthread_join(threads[i], NULL);\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Barrier synchronization using pthread_barrier_t",
+            "input": "3 threads that must all reach a checkpoint before continuing",
+            "output": "All 3 threads pass the barrier together, then continue",
+            "code": "#include <stdio.h>\n#include <pthread.h>\n\npthread_barrier_t barrier;\n\nstatic void *run(void *arg)\n{\n\tint id = *(int *)arg;\n\n\tprintf(\"Thread %d waiting at barrier\\n\", id);\n\tpthread_barrier_wait(&barrier);\n\tprintf(\"Thread %d passed the barrier\\n\", id);\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t threads[3];\n\tint ids[3] = {0, 1, 2};\n\n\tpthread_barrier_init(&barrier, NULL, 3);\n\tfor (int i = 0; i < 3; i++)\n\t\tpthread_create(&threads[i], NULL, run, &ids[i]);\n\tfor (int i = 0; i < 3; i++)\n\t\tpthread_join(threads[i], NULL);\n\tpthread_barrier_destroy(&barrier);\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Read-write lock allowing multiple readers or one writer (pthread_rwlock_t)",
+            "input": "3 reader threads, 1 writer thread",
+            "output": "Readers run concurrently; the writer gets exclusive access",
+            "code": "#include <stdio.h>\n#include <pthread.h>\n\npthread_rwlock_t lock = PTHREAD_RWLOCK_INITIALIZER;\nint sharedValue = 0;\n\nstatic void *reader(void *arg)\n{\n\t(void)arg;\n\tpthread_rwlock_rdlock(&lock);\n\tprintf(\"Reader sees value: %d\\n\", sharedValue);\n\tpthread_rwlock_unlock(&lock);\n\treturn NULL;\n}\n\nstatic void *writer(void *arg)\n{\n\t(void)arg;\n\tpthread_rwlock_wrlock(&lock);\n\tsharedValue = 42;\n\tprintf(\"Writer updated value to %d\\n\", sharedValue);\n\tpthread_rwlock_unlock(&lock);\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t readers[3], w;\n\n\tpthread_create(&w, NULL, writer, NULL);\n\tfor (int i = 0; i < 3; i++)\n\t\tpthread_create(&readers[i], NULL, reader, NULL);\n\n\tpthread_join(w, NULL);\n\tfor (int i = 0; i < 3; i++)\n\t\tpthread_join(readers[i], NULL);\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Spinlock using pthread_spinlock_t",
+            "input": "2 threads incrementing a shared counter",
+            "output": "Final counter value: 200000",
+            "code": "#include <stdio.h>\n#include <pthread.h>\n\npthread_spinlock_t spinlock;\nint counter = 0;\n\nstatic void *increment(void *arg)\n{\n\t(void)arg;\n\tfor (int i = 0; i < 100000; i++)\n\t{\n\t\tpthread_spin_lock(&spinlock);\n\t\tcounter++;\n\t\tpthread_spin_unlock(&spinlock);\n\t}\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t t1, t2;\n\n\tpthread_spin_init(&spinlock, PTHREAD_PROCESS_PRIVATE);\n\tpthread_create(&t1, NULL, increment, NULL);\n\tpthread_create(&t2, NULL, increment, NULL);\n\tpthread_join(t1, NULL);\n\tpthread_join(t2, NULL);\n\n\tprintf(\"Final counter value: %d\\n\", counter);\n\tpthread_spin_destroy(&spinlock);\n\treturn 0;\n}"
+          },
+          {
+            "name": "Thread-safe singleton pattern using pthread_once",
+            "input": "5 threads requesting the singleton instance",
+            "output": "Singleton created once (printed only one time despite 5 threads)",
+            "code": "#include <stdio.h>\n#include <stdlib.h>\n#include <pthread.h>\n\nstatic int *instance = NULL;\nstatic pthread_once_t once = PTHREAD_ONCE_INIT;\n\nstatic void createInstance(void)\n{\n\tinstance = malloc(sizeof(int));\n\t*instance = 1;\n\tprintf(\"Singleton created once\\n\");\n}\n\nstatic int *getInstance(void)\n{\n\tpthread_once(&once, createInstance);\n\treturn instance;\n}\n\nstatic void *run(void *arg)\n{\n\t(void)arg;\n\tgetInstance();\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t threads[5];\n\n\tfor (int i = 0; i < 5; i++)\n\t\tpthread_create(&threads[i], NULL, run, NULL);\n\tfor (int i = 0; i < 5; i++)\n\t\tpthread_join(threads[i], NULL);\n\n\tfree(instance);\n\treturn 0;\n}"
+          },
+          {
+            "name": "Parallel array sum split across multiple threads",
+            "input": "array of 1,000,000 ints split across 4 threads",
+            "output": "Total sum computed by combining each thread's partial sum",
+            "code": "#include <stdio.h>\n#include <pthread.h>\n\n#define SIZE 1000000\n#define NUM_THREADS 4\n\nint data[SIZE];\nlong partialSums[NUM_THREADS];\n\nstruct Range\n{\n\tint start, end, threadIndex;\n};\n\nstatic void *sumRange(void *arg)\n{\n\tstruct Range *range = arg;\n\tlong sum = 0;\n\n\tfor (int i = range->start; i < range->end; i++)\n\t\tsum += data[i];\n\n\tpartialSums[range->threadIndex] = sum;\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t threads[NUM_THREADS];\n\tstruct Range ranges[NUM_THREADS];\n\tint chunk = SIZE / NUM_THREADS;\n\tlong total = 0;\n\n\tfor (int i = 0; i < SIZE; i++)\n\t\tdata[i] = 1;\n\n\tfor (int i = 0; i < NUM_THREADS; i++)\n\t{\n\t\tranges[i].start = i * chunk;\n\t\tranges[i].end = (i == NUM_THREADS - 1) ? SIZE : (i + 1) * chunk;\n\t\tranges[i].threadIndex = i;\n\t\tpthread_create(&threads[i], NULL, sumRange, &ranges[i]);\n\t}\n\n\tfor (int i = 0; i < NUM_THREADS; i++)\n\t{\n\t\tpthread_join(threads[i], NULL);\n\t\ttotal += partialSums[i];\n\t}\n\n\tprintf(\"Total sum: %ld\\n\", total);\n\treturn 0;\n}"
+          },
+          {
+            "name": "Producer-consumer with multiple producer and consumer threads",
+            "input": "2 producers, 2 consumers, shared bounded buffer",
+            "output": "All produced items are eventually consumed exactly once",
+            "code": "#include <stdio.h>\n#include <pthread.h>\n#include <semaphore.h>\n\n#define BUFFER_SIZE 10\nint buffer[BUFFER_SIZE];\nint in = 0, out = 0;\nsem_t emptySlots, fullSlots;\npthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;\n\nstatic void *producer(void *arg)\n{\n\tint id = *(int *)arg;\n\n\tfor (int i = 0; i < 5; i++)\n\t{\n\t\tsem_wait(&emptySlots);\n\t\tpthread_mutex_lock(&mutex);\n\t\tbuffer[in] = id * 100 + i;\n\t\tin = (in + 1) % BUFFER_SIZE;\n\t\tpthread_mutex_unlock(&mutex);\n\t\tsem_post(&fullSlots);\n\t}\n\treturn NULL;\n}\n\nstatic void *consumer(void *arg)\n{\n\t(void)arg;\n\tfor (int i = 0; i < 5; i++)\n\t{\n\t\tsem_wait(&fullSlots);\n\t\tpthread_mutex_lock(&mutex);\n\t\tint value = buffer[out];\n\t\tout = (out + 1) % BUFFER_SIZE;\n\t\tpthread_mutex_unlock(&mutex);\n\t\tsem_post(&emptySlots);\n\t\tprintf(\"Consumed: %d\\n\", value);\n\t}\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t producers[2], consumers[2];\n\tint ids[2] = {1, 2};\n\n\tsem_init(&emptySlots, 0, BUFFER_SIZE);\n\tsem_init(&fullSlots, 0, 0);\n\n\tfor (int i = 0; i < 2; i++)\n\t\tpthread_create(&producers[i], NULL, producer, &ids[i]);\n\tfor (int i = 0; i < 2; i++)\n\t\tpthread_create(&consumers[i], NULL, consumer, NULL);\n\n\tfor (int i = 0; i < 2; i++)\n\t\tpthread_join(producers[i], NULL);\n\tfor (int i = 0; i < 2; i++)\n\t\tpthread_join(consumers[i], NULL);\n\n\tsem_destroy(&emptySlots);\n\tsem_destroy(&fullSlots);\n\treturn 0;\n}"
+          },
+          {
+            "name": "Set a thread's scheduling policy and priority (pthread_attr_setschedpolicy)",
+            "input": "SCHED_FIFO, priority 10 (requires elevated privileges to take effect)",
+            "output": "Thread attributes configured for real-time scheduling",
+            "code": "#include <stdio.h>\n#include <pthread.h>\n\nstatic void *run(void *arg)\n{\n\t(void)arg;\n\tprintf(\"Thread running with requested real-time scheduling attributes\\n\");\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t t;\n\tpthread_attr_t attr;\n\tstruct sched_param param;\n\n\tpthread_attr_init(&attr);\n\tpthread_attr_setschedpolicy(&attr, SCHED_FIFO);\n\tparam.sched_priority = 10;\n\tpthread_attr_setschedparam(&attr, &param);\n\tpthread_attr_setinheritsched(&attr, PTHREAD_EXPLICIT_SCHED);\n\n\tif (pthread_create(&t, &attr, run, NULL) != 0)\n\t\tprintf(\"Requires elevated privileges; falling back to default scheduling\\n\");\n\telse\n\t\tpthread_join(t, NULL);\n\n\tpthread_attr_destroy(&attr);\n\treturn 0;\n}"
+          },
+          {
+            "name": "Block signals in worker threads, handle them only in a dedicated thread",
+            "input": "SIGUSR1 sent to the process",
+            "output": "Signal handling thread received signal 10 (SIGUSR1)",
+            "code": "#include <stdio.h>\n#include <signal.h>\n#include <pthread.h>\n\nstatic void *signalHandlerThread(void *arg)\n{\n\tsigset_t *set = arg;\n\tint signalNumber;\n\n\tsigwait(set, &signalNumber);\n\tprintf(\"Signal handling thread received signal %d\\n\", signalNumber);\n\treturn NULL;\n}\n\nint main(void)\n{\n\tsigset_t set;\n\tpthread_t t;\n\n\tsigemptyset(&set);\n\tsigaddset(&set, SIGUSR1);\n\tpthread_sigmask(SIG_BLOCK, &set, NULL); /* block in all threads created after this */\n\n\tpthread_create(&t, NULL, signalHandlerThread, &set);\n\traise(SIGUSR1); /* simulate an external signal for this demo */\n\tpthread_join(t, NULL);\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Use atomic operations (C11 stdatomic) instead of a mutex for a counter",
+            "input": "2 threads each incrementing 100000 times",
+            "output": "Final counter value: 200000 (correct without any mutex)",
+            "code": "#include <stdio.h>\n#include <stdatomic.h>\n#include <pthread.h>\n\natomic_int counter = 0;\n\nstatic void *increment(void *arg)\n{\n\t(void)arg;\n\tfor (int i = 0; i < 100000; i++)\n\t\tatomic_fetch_add(&counter, 1);\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t t1, t2;\n\n\tpthread_create(&t1, NULL, increment, NULL);\n\tpthread_create(&t2, NULL, increment, NULL);\n\tpthread_join(t1, NULL);\n\tpthread_join(t2, NULL);\n\n\tprintf(\"Final counter value: %d\\n\", atomic_load(&counter));\n\treturn 0;\n}"
+          },
+          {
+            "name": "Pin a thread to a specific CPU core using pthread_setaffinity_np",
+            "input": "pin to CPU core 0",
+            "output": "Thread affinity set to CPU core 0",
+            "code": "#define _GNU_SOURCE\n#include <stdio.h>\n#include <pthread.h>\n\nstatic void *run(void *arg)\n{\n\t(void)arg;\n\tprintf(\"Thread affinity set to CPU core 0\\n\");\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t t;\n\tcpu_set_t cpuset;\n\n\tpthread_create(&t, NULL, run, NULL);\n\n\tCPU_ZERO(&cpuset);\n\tCPU_SET(0, &cpuset);\n\tpthread_setaffinity_np(t, sizeof(cpu_set_t), &cpuset);\n\n\tpthread_join(t, NULL);\n\treturn 0;\n}"
+          },
+          {
+            "name": "Timed join using pthread_timedjoin_np (GNU extension)",
+            "input": "wait at most 2 seconds for a slow thread",
+            "output": "Timed out waiting for the thread to finish",
+            "code": "#define _GNU_SOURCE\n#include <stdio.h>\n#include <time.h>\n#include <unistd.h>\n#include <pthread.h>\n\nstatic void *slowWork(void *arg)\n{\n\t(void)arg;\n\tsleep(5);\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t t;\n\tstruct timespec timeout;\n\n\tpthread_create(&t, NULL, slowWork, NULL);\n\n\tclock_gettime(CLOCK_REALTIME, &timeout);\n\ttimeout.tv_sec += 2;\n\n\tif (pthread_timedjoin_np(t, NULL, &timeout) != 0)\n\t\tprintf(\"Timed out waiting for the thread to finish\\n\");\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Register cleanup handlers with pthread_cleanup_push/pop",
+            "input": "thread cancelled mid-execution",
+            "output": "Cleanup handler ran: releasing resources",
+            "code": "#include <stdio.h>\n#include <pthread.h>\n\nstatic void cleanup(void *arg)\n{\n\t(void)arg;\n\tprintf(\"Cleanup handler ran: releasing resources\\n\");\n}\n\nstatic void *run(void *arg)\n{\n\t(void)arg;\n\tpthread_cleanup_push(cleanup, NULL);\n\n\tfor (;;)\n\t\tpthread_testcancel(); /* cancellation point; cleanup runs when cancelled */\n\n\tpthread_cleanup_pop(0); /* unreachable in this demo, kept for correct pairing */\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t t;\n\n\tpthread_create(&t, NULL, run, NULL);\n\tpthread_cancel(t);\n\tpthread_join(t, NULL);\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Graceful thread shutdown using a shared \"stop\" flag",
+            "input": "worker checks the flag every iteration instead of being forcibly cancelled",
+            "output": "Worker exiting gracefully after stop flag was set",
+            "code": "#include <stdio.h>\n#include <unistd.h>\n#include <pthread.h>\n#include <stdatomic.h>\n\natomic_int stopRequested = 0;\n\nstatic void *run(void *arg)\n{\n\t(void)arg;\n\twhile (!atomic_load(&stopRequested))\n\t\tusleep(100000); /* poll the flag periodically instead of hard-cancelling */\n\n\tprintf(\"Worker exiting gracefully after stop flag was set\\n\");\n\treturn NULL;\n}\n\nint main(void)\n{\n\tpthread_t t;\n\n\tpthread_create(&t, NULL, run, NULL);\n\tsleep(1);\n\tatomic_store(&stopRequested, 1);\n\tpthread_join(t, NULL);\n\n\treturn 0;\n}"
+          },
+          {
+            "name": "Measure and compare execution time of single-threaded vs multi-threaded work",
+            "input": "sum of 40,000,000 numbers, single thread vs 4 threads",
+            "output": "Single-threaded time: 0.12s, Multi-threaded time: 0.04s",
+            "code": "#include <stdio.h>\n#include <time.h>\n#include <pthread.h>\n\n#define TOTAL 40000000\n#define THREAD_COUNT 4\n\nlong partial[THREAD_COUNT];\n\nstruct Range\n{\n\tlong start, end, index;\n};\n\nstatic void *sumRange(void *arg)\n{\n\tstruct Range *range = arg;\n\tlong sum = 0;\n\n\tfor (long i = range->start; i < range->end; i++)\n\t\tsum += i;\n\n\tpartial[range->index] = sum;\n\treturn NULL;\n}\n\nstatic double elapsedSeconds(struct timespec start, struct timespec end)\n{\n\treturn (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;\n}\n\nint main(void)\n{\n\tstruct timespec start, end;\n\tlong singleSum = 0;\n\n\tclock_gettime(CLOCK_MONOTONIC, &start);\n\tfor (long i = 0; i < TOTAL; i++)\n\t\tsingleSum += i;\n\tclock_gettime(CLOCK_MONOTONIC, &end);\n\tprintf(\"Single-threaded time: %.4fs\\n\", elapsedSeconds(start, end));\n\n\tpthread_t threads[THREAD_COUNT];\n\tstruct Range ranges[THREAD_COUNT];\n\tlong chunk = TOTAL / THREAD_COUNT;\n\n\tclock_gettime(CLOCK_MONOTONIC, &start);\n\tfor (int i = 0; i < THREAD_COUNT; i++)\n\t{\n\t\tranges[i].start = i * chunk;\n\t\tranges[i].end = (i == THREAD_COUNT - 1) ? TOTAL : (i + 1) * chunk;\n\t\tranges[i].index = i;\n\t\tpthread_create(&threads[i], NULL, sumRange, &ranges[i]);\n\t}\n\tfor (int i = 0; i < THREAD_COUNT; i++)\n\t\tpthread_join(threads[i], NULL);\n\tclock_gettime(CLOCK_MONOTONIC, &end);\n\tprintf(\"Multi-threaded time: %.4fs\\n\", elapsedSeconds(start, end));\n\n\treturn 0;\n}"
+          }
+        ],
+        "path": "Linux/multithread/multithreading.c"
       },
       {
         "chapter": "SYNCHRONIZATION USING MUTEX",
