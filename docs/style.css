@@ -133,6 +133,59 @@ main { padding: 24px; max-width: 1100px; margin: 0 auto; }
 
 .program.open .program-header { color: var(--accent); }
 
+.notes {
+  margin-top: 16px;
+}
+
+.notes label {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.note-input {
+  display: block;
+  width: 100%;
+  min-height: 76px;
+  resize: vertical;
+  background: #16171d;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font: inherit;
+  padding: 10px;
+}
+
+.note-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.note-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.save-note {
+  background: var(--accent);
+  border: 0;
+  border-radius: 5px;
+  color: #111827;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 7px 12px;
+}
+
+.save-note:hover { filter: brightness(1.1); }
+
+.note-status {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 pre {
   background: #16171d;
   border: 1px solid var(--border);

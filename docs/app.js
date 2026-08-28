@@ -5,10 +5,26 @@ function escapeHtml(str) {
     .replace(/>/g, "&gt;");
 }
 
+const NOTES_STORAGE_KEY = "program-library-notes";
+
+function getSavedNotes() {
+  try {
+    return JSON.parse(localStorage.getItem(NOTES_STORAGE_KEY) || "{}");
+  } catch (error) {
+    return {};
+  }
+}
+
+function getProgramKey(program) {
+  return `${program.name}|${program.code}`;
+}
+
 function renderProgram(program) {
   const hasIo = program.input || program.output;
+  const programKey = encodeURIComponent(getProgramKey(program));
+  const savedNote = getSavedNotes()[getProgramKey(program)] || "";
   return `
-    <div class="program">
+    <div class="program" data-program-key="${programKey}">
       <div class="program-header">
         <span class="program-name">${escapeHtml(program.name)}</span>
       </div>
@@ -25,6 +41,14 @@ function renderProgram(program) {
             <pre>${escapeHtml(program.output || "(none)")}</pre>
           </div>
         </div>` : ""}
+        <div class="notes">
+          <label for="note-${programKey}">Personal note</label>
+          <textarea id="note-${programKey}" class="note-input" placeholder="Add a note about this program...">${escapeHtml(savedNote)}</textarea>
+          <div class="note-actions">
+            <button type="button" class="save-note">Save note</button>
+            <span class="note-status" aria-live="polite"></span>
+          </div>
+        </div>
       </div>
     </div>`;
 }
@@ -86,6 +110,18 @@ function render(catalog) {
     header.addEventListener("click", (e) => {
       e.stopPropagation();
       header.parentElement.classList.toggle("open");
+    });
+  });
+
+  container.querySelectorAll(".save-note").forEach((button) => {
+    button.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const program = button.closest(".program");
+      const note = program.querySelector(".note-input").value;
+      const notes = getSavedNotes();
+      notes[decodeURIComponent(program.dataset.programKey)] = note;
+      localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notes));
+      program.querySelector(".note-status").textContent = "Saved";
     });
   });
 }
