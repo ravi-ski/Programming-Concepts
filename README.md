@@ -5,7 +5,8 @@ networking/concept notes, browsable through a small offline GUI.
 
 ## Opening the Program Library GUI
 
-The GUI is a static, no-build web page — no server required.
+The GUI can be opened as a static, no-build web page. Use the local server
+when you want read counters to be written to the repository.
 
 ### On this laptop
 
@@ -18,6 +19,19 @@ The GUI is a static, no-build web page — no server required.
    program/question name to expand its code (or answer text) along with
    sample input/output.
 3. Use the search box at the top to filter chapters/programs by name.
+
+### Saving read counters from VS Code
+
+To save `+1 Read` changes into a file that can be committed to GitHub, run:
+
+```powershell
+python tools\library_server.py
+```
+
+Then open `http://localhost:8000`. The server writes counters to
+[`docs/progress.json`](docs/progress.json). Commit that file and push it to
+`main`; GitHub Pages will display the committed counters. Opening
+`docs/index.html` directly still works, but changes there stay in the browser.
 
 ### On a phone/tablet, or any device without the laptop (GitHub Pages)
 
@@ -83,4 +97,5 @@ SQL/          SQL scripts
 docs/         Static GUI (index.html, app.js, style.css, generated data.js) —
               also the GitHub Pages source folder
 tools/        generate_catalog.py — builds docs/data.js from source files
+              library_server.py — saves local read counters to docs/progress.json
 ```

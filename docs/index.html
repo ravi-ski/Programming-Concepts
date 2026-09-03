@@ -8,10 +8,35 @@
 <body>
   <header>
     <h1>Program Library</h1>
-    <input id="search" type="search" placeholder="Search chapters or programs..." />
+    <div class="header-actions">
+      <input id="search" type="search" placeholder="Search chapters, programs, or questions..." />
+      <button id="add-question" type="button">+ Add Q&A</button>
+      <button id="toggle-header" class="icon-button" type="button" aria-label="Minimize toolbar" title="Minimize toolbar">&minus;</button>
+    </div>
   </header>
 
   <main id="chapters"></main>
+
+  <div id="question-dialog" class="dialog-backdrop" hidden>
+    <form id="question-form" class="dialog" method="dialog">
+      <div class="dialog-header">
+        <h2>Add a question and answer</h2>
+        <button id="close-dialog" class="close-dialog" type="button" aria-label="Close">&times;</button>
+      </div>
+      <label for="question-section">Section</label>
+      <select id="question-section" required></select>
+      <label for="question-chapter">Chapter</label>
+      <select id="question-chapter" required></select>
+      <label for="question-title">Question</label>
+      <input id="question-title" type="text" placeholder="e.g. What is a pointer?" required />
+      <label for="question-answer">Answer</label>
+      <textarea id="question-answer" placeholder="Write your answer here..." required></textarea>
+      <div class="dialog-actions">
+        <button id="cancel-dialog" class="secondary-button" type="button">Cancel</button>
+        <button class="primary-button" type="submit">Add Q&A</button>
+      </div>
+    </form>
+  </div>
 
   <script src="data.js"></script>
   <script src="app.js"></script>

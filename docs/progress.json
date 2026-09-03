@@ -1,0 +1,4 @@
+{
+  "Swap two numbers using a single pointer|void swapSingle(int *a, int *b)\n{\n\tint temp = *a;\n\t*a = *b;\n\t*b = temp;\n}": 1,
+  "Dangling pointer and how to avoid it|void danglingPointerDemo(void)\n{\n\tint *ptr = malloc(sizeof(int));\n\n\tif (ptr == NULL)\n\t\treturn;\n\n\t*ptr = 42;\n\tprintf(\"Before free: %d\\n\", *ptr);\n\n\tfree(ptr);\n\tptr = NULL; /* avoids a dangling pointer */\n\n\tif (ptr == NULL)\n\t\tprintf(\"Pointer safely reset to NULL after free\\n\");\n}": 1
+}
