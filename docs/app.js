@@ -33,8 +33,10 @@ const PROGRAM_EDITS_STORAGE_KEY = "program-library-program-edits";
 const PROGRAM_READS_STORAGE_KEY = "program-library-program-reads";
 const PROGRAM_LEVELS_STORAGE_KEY = "program-library-program-levels";
 const DELETED_ITEMS_STORAGE_KEY = "program-library-deleted-items";
+const SORT_MODE_STORAGE_KEY = "program-library-sort-mode";
 let repositoryReads = null;
 let repositoryProgramEdits = null;
+let databaseState = null;
 
 function getProgramKey(program) {
   return `${program.name}|${program.code}`;
@@ -44,7 +46,28 @@ function getReadKey(program) {
   return program.id || getProgramKey(program);
 }
 
+function priorityValue(program) {
+  const level = getSavedProgramLevels()[databaseState ? program.id : getProgramKey(program)] || "Not set";
+  return { High: 3, Medium: 2, Low: 1, "Not set": 0 }[level] || 0;
+}
+
+function readCount(program) {
+  return getSavedProgramReads()[getReadKey(program)] || 0;
+}
+
+function getChapterSortKey(sectionName, chapterName) {
+  return `${SORT_MODE_STORAGE_KEY}|${sectionName}|${chapterName}`;
+}
+
+function sortPrograms(programs, sectionName, chapterName) {
+  const mode = localStorage.getItem(getChapterSortKey(sectionName, chapterName)) || "priority";
+  return [...programs].sort((left, right) => mode === "reads"
+    ? readCount(right) - readCount(left) || priorityValue(right) - priorityValue(left)
+    : priorityValue(right) - priorityValue(left) || readCount(right) - readCount(left));
+}
+
 function getSavedProgramEdits() {
+  if (databaseState) return databaseState.programEdits;
   if (repositoryProgramEdits) return repositoryProgramEdits;
   try {
     return JSON.parse(localStorage.getItem(PROGRAM_EDITS_STORAGE_KEY) || "{}");
@@ -69,6 +92,17 @@ async function loadRepositoryProgramEdits() {
   render(CATALOG);
 }
 
+async function loadDatabaseState() {
+  try {
+    const response = await fetch("api/state?ts=" + Date.now());
+    if (!response.ok) throw new Error("Database API unavailable");
+    databaseState = await response.json();
+    render(CATALOG);
+  } catch (error) {
+    Promise.all([loadRepositoryReads(), loadRepositoryProgramEdits()]);
+  }
+}
+
 function saveRepositoryProgramEdits(edits) {
   fetch("api/program-edits", {
     body: JSON.stringify(edits),
@@ -86,6 +120,7 @@ function getLocalProgramEdits() {
 }
 
 function getSavedProgramReads() {
+  if (databaseState) return databaseState.reads;
   if (repositoryReads) return repositoryReads;
   try {
     return JSON.parse(localStorage.getItem(PROGRAM_READS_STORAGE_KEY) || "{}");
@@ -121,6 +156,7 @@ async function loadRepositoryReads() {
 }
 
 function getSavedProgramLevels() {
+  if (databaseState) return databaseState.levels;
   try {
     return JSON.parse(localStorage.getItem(PROGRAM_LEVELS_STORAGE_KEY) || "{}");
   } catch (error) {
@@ -129,6 +165,7 @@ function getSavedProgramLevels() {
 }
 
 function getDeletedItems() {
+  if (databaseState) return databaseState.deleted;
   try {
     return JSON.parse(localStorage.getItem(DELETED_ITEMS_STORAGE_KEY) || "{}");
   } catch (error) {
@@ -140,6 +177,10 @@ function incrementProgramRead(programElement) {
   const key = programElement.dataset.readKey || decodeURIComponent(programElement.dataset.programKey);
   const reads = getSavedProgramReads();
   reads[key] = (reads[key] || 0) + 1;
+  if (databaseState) databaseState.reads = reads;
+  if (databaseState) {
+    fetch("api/reads/" + encodeURIComponent(key), { method: "POST" }).catch(() => {});
+  }
   localStorage.setItem(PROGRAM_READS_STORAGE_KEY, JSON.stringify(reads));
   fetch("api/progress", {
     body: JSON.stringify(reads),
@@ -153,6 +194,10 @@ function deleteItem(itemKey) {
   if (!window.confirm("Delete this item from the library?")) return;
   const deletedItems = getDeletedItems();
   deletedItems[itemKey] = true;
+  if (databaseState) databaseState.deleted = deletedItems;
+  if (databaseState) {
+    fetch("api/items/" + encodeURIComponent(itemKey), { method: "DELETE" }).catch(() => {});
+  }
   localStorage.setItem(DELETED_ITEMS_STORAGE_KEY, JSON.stringify(deletedItems));
   applyFilter(document.getElementById("search").value);
 }
@@ -162,6 +207,7 @@ function isDeleted(itemKey) {
 }
 
 function getSavedQuestions() {
+  if (databaseState) return databaseState.questions;
   try {
     return JSON.parse(localStorage.getItem(QUESTIONS_STORAGE_KEY) || "[]");
   } catch (error) {
@@ -175,12 +221,33 @@ function getQuestionsForChapter(sectionName, chapterName) {
   );
 }
 
+function catalogWithDatabaseQuestions() {
+  if (!databaseState) return CATALOG;
+  const catalog = CATALOG.map((section) => ({
+    ...section,
+    chapters: section.chapters.map((chapter) => ({ ...chapter, programs: [...chapter.programs] })),
+  }));
+  databaseState.questions.forEach((question) => {
+    let section = catalog.find((item) => item.section === question.section);
+    if (!section) {
+      section = { section: question.section, chapters: [] };
+      catalog.push(section);
+    }
+    let chapter = section.chapters.find((item) => item.chapter === question.chapter);
+    if (!chapter) {
+      chapter = { chapter: question.chapter, folder: "Custom", programs: [] };
+      section.chapters.push(chapter);
+    }
+  });
+  return catalog;
+}
+
 function renderQuestion(question) {
   const questionKey = encodeURIComponent(JSON.stringify(question));
   const itemKey = `${question.section}|${question.chapter}|${question.question}`;
   const answerHtml = sanitizeAnswerHtml(question.answer);
   return `
-    <div class="question program" data-question-key="${questionKey}" data-item-key="${escapeHtml(itemKey)}">
+    <div class="question program" data-question-key="${questionKey}" data-question-id="${escapeHtml(question.id || "")}" data-item-key="${escapeHtml(itemKey)}">
       <div class="program-header">
         <span class="question-badge">Q&A</span>
         <span class="program-name">${escapeHtml(question.question)}</span>
@@ -196,7 +263,7 @@ function renderQuestion(question) {
     </div>`;
 }
 
-function saveQuestionAnswer(questionElement) {
+async function saveQuestionAnswer(questionElement) {
   const question = JSON.parse(decodeURIComponent(questionElement.dataset.questionKey));
   const answerInput = questionElement.querySelector(".question-answer-input");
   const questions = getSavedQuestions();
@@ -205,21 +272,31 @@ function saveQuestionAnswer(questionElement) {
   );
   if (index === -1) return;
   questions[index].answer = sanitizeAnswerHtml(answerInput.innerHTML.trim());
+  if (databaseState && question.id) {
+    const response = await fetch("api/questions/" + encodeURIComponent(question.id), {
+      body: JSON.stringify({ answer: questions[index].answer }),
+      headers: { "Content-Type": "application/json" },
+      method: "PUT",
+    });
+    if (!response.ok) throw new Error("Unable to save the answer");
+  }
   localStorage.setItem(QUESTIONS_STORAGE_KEY, JSON.stringify(questions));
   applyFilter(document.getElementById("search").value);
 }
 
 function renderProgram(program) {
-  const savedEdit = getSavedProgramEdits()[getProgramKey(program)] || {};
+  const editKey = databaseState ? program.id : getProgramKey(program);
+  const savedEdit = getSavedProgramEdits()[editKey] || {};
   const editedProgram = { ...program, ...savedEdit };
   const hasIo = editedProgram.input || editedProgram.output;
   const programKey = encodeURIComponent(getProgramKey(program));
   const readKey = getReadKey(program);
   const readCount = getSavedProgramReads()[readKey] || 0;
-  const level = getSavedProgramLevels()[getProgramKey(program)] || "Not set";
+  const levelKey = databaseState ? program.id : getProgramKey(program);
+  const level = getSavedProgramLevels()[levelKey] || "Not set";
   const answerHtml = savedEdit.code === undefined ? escapeHtml(program.code) : sanitizeAnswerHtml(savedEdit.code);
   return `
-    <div class="program" data-program-key="${programKey}" data-read-key="${escapeHtml(readKey)}" data-program-name="${escapeHtml(editedProgram.name)}">
+    <div class="program" data-program-key="${programKey}" data-program-id="${escapeHtml(program.id || "")}" data-read-key="${escapeHtml(readKey)}" data-program-name="${escapeHtml(editedProgram.name)}">
       <div class="program-header">
         <span class="program-name">${escapeHtml(editedProgram.name)}</span>
         <span class="read-count">Read ${readCount} time${readCount === 1 ? "" : "s"}</span>
@@ -255,14 +332,23 @@ function renderProgram(program) {
     </div>`;
 }
 
-function saveProgramEdit(programElement) {
-  const key = decodeURIComponent(programElement.dataset.programKey);
+async function saveProgramEdit(programElement) {
+  const key = databaseState ? programElement.dataset.programId : decodeURIComponent(programElement.dataset.programKey);
   const edits = getSavedProgramEdits();
   edits[key] = {
     code: sanitizeAnswerHtml(programElement.querySelector(".program-code-input").innerHTML.trim()),
   };
   localStorage.setItem(PROGRAM_EDITS_STORAGE_KEY, JSON.stringify(edits));
+  if (databaseState && programElement.dataset.programId) {
+    const response = await fetch("api/programs/" + encodeURIComponent(programElement.dataset.programId), {
+      body: JSON.stringify(edits[key]),
+      headers: { "Content-Type": "application/json" },
+      method: "PUT",
+    });
+    if (!response.ok) throw new Error("Unable to save the answer");
+  }
   repositoryProgramEdits = edits;
+  if (databaseState) databaseState.programEdits = edits;
   saveRepositoryProgramEdits(edits);
   applyFilter(document.getElementById("search").value);
 }
@@ -270,7 +356,10 @@ function saveProgramEdit(programElement) {
 function renderChapter(chapter) {
   const questions = (chapter.matchingQuestions || getQuestionsForChapter(chapter.sectionName, chapter.chapter))
     .filter((question) => !isDeleted(`${question.section}|${question.chapter}|${question.question}`));
-  const programs = chapter.programs.filter((program) => !isDeleted(getProgramKey(program)));
+  const sectionName = chapter.sectionName || "";
+  const sortKey = getChapterSortKey(sectionName, chapter.chapter);
+  const sortMode = localStorage.getItem(sortKey) || "priority";
+  const programs = sortPrograms(chapter.programs.filter((program) => !isDeleted(getProgramKey(program))), sectionName, chapter.chapter);
   const itemCount = programs.length + questions.length;
   return `
     <div class="chapter">
@@ -279,7 +368,11 @@ function renderChapter(chapter) {
           <span class="chapter-title">${escapeHtml(chapter.chapter)}</span>
           <span class="chapter-folder">${escapeHtml(chapter.folder)}</span>
         </div>
-        <span class="chapter-count">${itemCount} item(s)</span>
+          <span class="chapter-count">${itemCount} item(s)</span>
+          <select class="chapter-sort" data-sort-key="${escapeHtml(sortKey)}" aria-label="Sort this chapter" title="Sort this chapter">
+            <option value="priority" ${sortMode === "priority" ? "selected" : ""}>Complexity</option>
+            <option value="reads" ${sortMode === "reads" ? "selected" : ""}>Reads</option>
+          </select>
       </div>
       <div class="chapter-body">
         ${programs.map(renderProgram).join("")}
@@ -313,7 +406,9 @@ function render(catalog) {
     container.innerHTML = `<div class="empty">No programs found yet. Add @PROGRAM blocks to your source files and regenerate the catalog.</div>`;
     return;
   }
-  container.innerHTML = catalog.map(renderSection).join("");
+  container.innerHTML = catalogWithDatabaseQuestions().filter((section) =>
+    catalog.some((item) => item.section === section.section)
+  ).map(renderSection).join("");
 
   container.querySelectorAll(".section-header").forEach((header) => {
     header.addEventListener("click", () => {
@@ -325,6 +420,15 @@ function render(catalog) {
     header.addEventListener("click", (e) => {
       e.stopPropagation();
       header.parentElement.classList.toggle("open");
+    });
+  });
+
+  container.querySelectorAll(".chapter-sort").forEach((select) => {
+    select.addEventListener("click", (event) => event.stopPropagation());
+    select.addEventListener("change", (event) => {
+      event.stopPropagation();
+      localStorage.setItem(select.dataset.sortKey, select.value);
+      applyFilter(document.getElementById("search").value);
     });
   });
 
@@ -347,10 +451,18 @@ function render(catalog) {
     select.addEventListener("change", (e) => {
       e.stopPropagation();
       const program = select.closest(".program");
-      const key = decodeURIComponent(program.dataset.programKey);
+      const key = databaseState ? program.dataset.programId : decodeURIComponent(program.dataset.programKey);
       const levels = getSavedProgramLevels();
       levels[key] = select.value;
+      if (databaseState) databaseState.levels = levels;
       localStorage.setItem(PROGRAM_LEVELS_STORAGE_KEY, JSON.stringify(levels));
+      if (databaseState) {
+        fetch("api/levels/" + encodeURIComponent(program.dataset.programId), {
+          body: JSON.stringify({ level: select.value }),
+          headers: { "Content-Type": "application/json" },
+          method: "POST",
+        }).catch(() => {});
+      }
       const levelBadge = program.querySelector(".program-level");
       levelBadge.className = `program-level level-${select.value.toLowerCase().replace(" ", "-")}`;
       levelBadge.textContent = select.value;
@@ -360,7 +472,8 @@ function render(catalog) {
   container.querySelectorAll(".delete-item").forEach((button) => {
     button.addEventListener("click", (e) => {
       e.stopPropagation();
-      deleteItem(button.closest(".program").dataset.itemKey || decodeURIComponent(button.closest(".program").dataset.programKey));
+      const program = button.closest(".program");
+      deleteItem(program.dataset.itemKey || (databaseState ? program.dataset.programId : decodeURIComponent(program.dataset.programKey)));
     });
   });
 
@@ -385,7 +498,7 @@ function render(catalog) {
       });
       question.querySelector(".save-question").addEventListener("click", (event) => {
         event.stopPropagation();
-        saveQuestionAnswer(question);
+        saveQuestionAnswer(question).catch((error) => window.alert(error.message));
       });
       question.querySelector(".cancel-question").addEventListener("click", (event) => {
         event.stopPropagation();
@@ -397,7 +510,7 @@ function render(catalog) {
   container.querySelectorAll(".save-question").forEach((button) => {
     button.addEventListener("click", (e) => {
       e.stopPropagation();
-      saveQuestionAnswer(button.closest(".question"));
+      saveQuestionAnswer(button.closest(".question")).catch((error) => window.alert(error.message));
     });
   });
 
@@ -431,7 +544,7 @@ function render(catalog) {
       button.insertAdjacentHTML("afterend", `<div class="program-actions"><button type="button" class="save-program">Save answer</button><button type="button" class="cancel-program">Cancel</button></div>`);
       program.querySelector(".save-program").addEventListener("click", (event) => {
         event.stopPropagation();
-        saveProgramEdit(program);
+        saveProgramEdit(program).catch((error) => window.alert(error.message));
       });
       program.querySelector(".cancel-program").addEventListener("click", (event) => {
         event.stopPropagation();
@@ -443,7 +556,7 @@ function render(catalog) {
   container.querySelectorAll(".save-program").forEach((button) => {
     button.addEventListener("click", (e) => {
       e.stopPropagation();
-      saveProgramEdit(button.closest(".program"));
+      saveProgramEdit(button.closest(".program")).catch((error) => window.alert(error.message));
     });
   });
 
@@ -457,18 +570,27 @@ function render(catalog) {
 
 function populateQuestionSections() {
   const sectionSelect = document.getElementById("question-section");
-  sectionSelect.innerHTML = CATALOG.map((section) =>
+  sectionSelect.innerHTML = catalogWithDatabaseQuestions().map((section) =>
     `<option value="${escapeHtml(section.section)}">${escapeHtml(section.section)}</option>`
-  ).join("");
+  ).join("") + `<option value="__new__">New section...</option>`;
   updateQuestionChapters();
 }
 
 function updateQuestionChapters() {
-  const section = CATALOG.find((item) => item.section === document.getElementById("question-section").value);
+  const sectionSelect = document.getElementById("question-section");
+  const newSection = document.getElementById("new-section");
+  const isNewSection = sectionSelect.value === "__new__";
+  newSection.hidden = !isNewSection;
+  newSection.required = isNewSection;
+  const section = catalogWithDatabaseQuestions().find((item) => item.section === sectionSelect.value);
   const chapterSelect = document.getElementById("question-chapter");
+  chapterSelect.hidden = isNewSection;
+  chapterSelect.required = !isNewSection;
   chapterSelect.innerHTML = (section ? section.chapters : []).map((chapter) =>
     `<option value="${escapeHtml(chapter.chapter)}">${escapeHtml(chapter.chapter)}</option>`
-  ).join("");
+  ).join("") + (isNewSection ? "" : `<option value="__new__">New chapter...</option>`);
+  document.getElementById("new-chapter").hidden = false;
+  document.getElementById("new-chapter").required = isNewSection;
 }
 
 function closeQuestionDialog() {
@@ -476,15 +598,37 @@ function closeQuestionDialog() {
   document.getElementById("question-form").reset();
 }
 
-function addQuestion(event) {
+async function addQuestion(event) {
   event.preventDefault();
-  const questions = getSavedQuestions();
-  questions.push({
-    section: document.getElementById("question-section").value,
-    chapter: document.getElementById("question-chapter").value,
+  const sectionSelect = document.getElementById("question-section");
+  const chapterSelect = document.getElementById("question-chapter");
+  const sectionName = sectionSelect.value === "__new__"
+    ? document.getElementById("new-section").value.trim()
+    : sectionSelect.value;
+  const chapterName = sectionSelect.value === "__new__" || chapterSelect.value === "__new__"
+    ? document.getElementById("new-chapter").value.trim()
+    : chapterSelect.value;
+  const question = {
+    section: sectionName,
+    chapter: chapterName,
     question: document.getElementById("question-title").value.trim(),
     answer: document.getElementById("question-answer").value.trim(),
-  });
+  };
+  const questions = getSavedQuestions();
+  questions.push(question);
+  if (databaseState) {
+    fetch("api/questions", {
+      body: JSON.stringify(question),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    }).then((response) => response.json()).then((savedQuestion) => {
+      question.id = savedQuestion.id;
+      databaseState.questions = questions;
+      applyFilter(document.getElementById("search").value);
+    }).catch(() => {});
+  } else {
+    applyFilter(document.getElementById("search").value);
+  }
   localStorage.setItem(QUESTIONS_STORAGE_KEY, JSON.stringify(questions));
   closeQuestionDialog();
   applyFilter(document.getElementById("search").value);
@@ -492,8 +636,9 @@ function addQuestion(event) {
 
 function applyFilter(query) {
   const q = query.trim().toLowerCase();
-  if (!q) return render(CATALOG);
-  const filtered = CATALOG
+  const sourceCatalog = catalogWithDatabaseQuestions();
+  if (!q) return render(sourceCatalog);
+  const filtered = sourceCatalog
     .map((section) => {
       const chapters = section.chapters
         .map((chapter) => {
@@ -541,4 +686,4 @@ document.getElementById("question-dialog").addEventListener("click", (event) => 
   if (event.target.id === "question-dialog") closeQuestionDialog();
 });
 
-Promise.all([loadRepositoryReads(), loadRepositoryProgramEdits()]);
+loadDatabaseState();
