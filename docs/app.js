@@ -11,7 +11,7 @@ function sanitizeAnswerHtml(html) {
   const template = document.createElement("template");
   template.innerHTML = html;
   template.content.querySelectorAll("*").forEach((element) => {
-    if (!["B", "STRONG", "U", "SPAN", "BR", "DIV"].includes(element.tagName)) {
+    if (!["B", "STRONG", "U", "SPAN", "BR", "DIV", "P", "UL", "OL", "LI", "H1", "H2", "H3", "H4", "H5", "H6", "BLOCKQUOTE", "CODE", "PRE", "FONT"].includes(element.tagName)) {
       element.replaceWith(...element.childNodes);
       return;
     }
@@ -21,13 +21,44 @@ function sanitizeAnswerHtml(html) {
         return;
       }
       const styles = attribute.value.split(";").map((style) => style.trim()).filter((style) =>
-        /^(color:\s*(#[0-9a-f]{3,8}|rgb\([^)]*\)|[a-z]+)|font-weight:\s*(bold|700)|text-decoration(?:-line)?:\s*underline)\s*$/i.test(style)
+        /^(color:\s*(#[0-9a-f]{3,8}|rgb\([^)]*\)|[a-z]+)|font-weight:\s*(bold|700)|text-decoration(?:-line)?:\s*underline|font-size:\s*(small|medium|large|[0-9]+(?:px|pt|em|rem|%)))\s*$/i.test(style)
       );
       if (styles.length) element.setAttribute("style", styles.join("; "));
       else element.removeAttribute(attribute.name);
     });
   });
   return template.innerHTML;
+}
+
+function applyAnswerFontSize(editor, size) {
+  const selection = window.getSelection();
+  const selectedText = selection ? selection.toString() : "";
+  const wholeAnswerSelected = selectedText.trim() && selectedText.trim() === editor.innerText.trim();
+  document.execCommand("fontSize", false, "1");
+  editor.querySelectorAll('font[size="1"]').forEach((element) => {
+    const span = document.createElement("span");
+    span.style.fontSize = size;
+    span.innerHTML = element.innerHTML;
+    element.replaceWith(span);
+  });
+  if (wholeAnswerSelected) {
+    editor.style.fontSize = size;
+    editor.querySelectorAll("*").forEach((element) => element.style.fontSize = size);
+  }
+}
+
+function rememberEditorSelection(editor) {
+  const selection = window.getSelection();
+  if (selection && selection.rangeCount && editor.contains(selection.anchorNode)) {
+    editor._savedRange = selection.getRangeAt(0).cloneRange();
+  }
+}
+
+function restoreEditorSelection(editor) {
+  if (!editor._savedRange) return;
+  const selection = window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(editor._savedRange);
 }
 
 const QUESTIONS_STORAGE_KEY = "program-library-questions";
@@ -328,7 +359,7 @@ function renderProgram(program) {
         <button type="button" class="edit-program-title">Edit question</button>
       </div>
       <div class="program-body">
-        <pre class="answer-code"><code>${answerHtml}</code></pre>
+        <div class="answer-code">${answerHtml}</div>
         ${hasIo ? `
         <div class="io-grid">
           <div>
@@ -541,7 +572,7 @@ function render(catalog) {
       e.stopPropagation();
       const question = button.closest(".question");
       const answer = question.querySelector(".answer");
-      answer.innerHTML = `<div class="format-toolbar" role="toolbar" aria-label="Answer formatting"><button type="button" data-command="bold"><strong>B</strong></button><button type="button" data-command="underline"><u>U</u></button><select class="answer-color" aria-label="Text color"><option value="">Color</option><option value="#ff9b9b">Red</option><option value="#f4cf78">Yellow</option><option value="#8be0d1">Teal</option><option value="#6ea8fe">Blue</option></select></div><div class="question-answer-input" contenteditable="true" role="textbox" aria-label="Answer">${sanitizeAnswerHtml(answer.innerHTML)}</div><div class="question-actions"><button type="button" class="save-question">Save answer</button><button type="button" class="cancel-question">Cancel</button></div>`;
+      answer.innerHTML = `<div class="format-toolbar" role="toolbar" aria-label="Answer formatting"><button type="button" data-command="bold"><strong>B</strong></button><button type="button" data-command="underline"><u>U</u></button><select class="answer-size" aria-label="Text size"><option value="">Size</option><option value="12px">Small</option><option value="16px">Normal</option><option value="20px">Large</option><option value="26px">Extra large</option></select><select class="answer-color" aria-label="Text color"><option value="">Color</option><option value="#ff9b9b">Red</option><option value="#f4cf78">Yellow</option><option value="#8be0d1">Teal</option><option value="#6ea8fe">Blue</option></select></div><div class="question-answer-input" contenteditable="true" role="textbox" aria-label="Answer">${sanitizeAnswerHtml(answer.innerHTML)}</div><div class="question-actions"><button type="button" class="save-question">Save answer</button><button type="button" class="cancel-question">Cancel</button></div>`;
       button.hidden = true;
       const editor = question.querySelector(".question-answer-input");
       editor.focus();
@@ -551,7 +582,17 @@ function render(catalog) {
         control.addEventListener("click", () => document.execCommand(control.dataset.command, false));
       });
       question.querySelector(".answer-color").addEventListener("change", (event) => {
+        restoreEditorSelection(editor);
         if (event.target.value) document.execCommand("foreColor", false, event.target.value);
+        event.target.value = "";
+        editor.focus();
+      });
+      question.querySelectorAll(".answer-color, .answer-size").forEach((control) => {
+        control.addEventListener("mousedown", () => rememberEditorSelection(editor));
+      });
+      question.querySelector(".answer-size").addEventListener("change", (event) => {
+        restoreEditorSelection(editor);
+        if (event.target.value) applyAnswerFontSize(editor, event.target.value);
         event.target.value = "";
         editor.focus();
       });
@@ -614,10 +655,10 @@ function render(catalog) {
     button.addEventListener("click", (e) => {
       e.stopPropagation();
       const program = button.closest(".program");
-      const code = program.querySelector("code").textContent;
+      const code = program.querySelector(".answer-code").innerHTML;
       const body = program.querySelector(".program-body");
       button.hidden = true;
-      body.querySelector("pre").outerHTML = `<div class="format-toolbar" role="toolbar" aria-label="Answer formatting"><button type="button" data-command="bold"><strong>B</strong></button><button type="button" data-command="underline"><u>U</u></button><select class="answer-color" aria-label="Text color"><option value="">Color</option><option value="#ff9b9b">Red</option><option value="#f4cf78">Yellow</option><option value="#8be0d1">Teal</option><option value="#6ea8fe">Blue</option></select></div><pre class="program-code-input" contenteditable="true" role="textbox" aria-label="Answer">${escapeHtml(code)}</pre>`;
+      body.querySelector(".answer-code").outerHTML = `<div class="format-toolbar" role="toolbar" aria-label="Answer formatting"><button type="button" data-command="bold"><strong>B</strong></button><button type="button" data-command="underline"><u>U</u></button><select class="answer-size" aria-label="Text size"><option value="">Size</option><option value="12px">Small</option><option value="16px">Normal</option><option value="20px">Large</option><option value="26px">Extra large</option></select><select class="answer-color" aria-label="Text color"><option value="">Color</option><option value="#ff9b9b">Red</option><option value="#f4cf78">Yellow</option><option value="#8be0d1">Teal</option><option value="#6ea8fe">Blue</option></select></div><div class="program-code-input" contenteditable="true" role="textbox" aria-label="Answer">${sanitizeAnswerHtml(code)}</div>`;
       const editor = program.querySelector(".program-code-input");
       editor.focus();
       document.execCommand("styleWithCSS", false, true);
@@ -626,7 +667,17 @@ function render(catalog) {
         control.addEventListener("click", () => document.execCommand(control.dataset.command, false));
       });
       program.querySelector(".answer-color").addEventListener("change", (event) => {
+        restoreEditorSelection(editor);
         if (event.target.value) document.execCommand("foreColor", false, event.target.value);
+        event.target.value = "";
+        editor.focus();
+      });
+      program.querySelectorAll(".answer-color, .answer-size").forEach((control) => {
+        control.addEventListener("mousedown", () => rememberEditorSelection(editor));
+      });
+      program.querySelector(".answer-size").addEventListener("change", (event) => {
+        restoreEditorSelection(editor);
+        if (event.target.value) applyAnswerFontSize(editor, event.target.value);
         event.target.value = "";
         editor.focus();
       });
@@ -763,7 +814,11 @@ function applyFilter(query) {
           const availablePrograms = chapter.programs.filter((program) => !isDeleted(getProgramKey(program)));
           const programs = chapterMatches
             ? availablePrograms
-            : availablePrograms.filter((p) => p.name.toLowerCase().includes(q));
+            : availablePrograms.filter((p) => {
+              const editKey = databaseState ? p.id : getProgramKey(p);
+              const savedName = getSavedProgramEdits()[editKey]?.name || p.name;
+              return savedName.toLowerCase().includes(q);
+            });
           const questions = getQuestionsForChapter(section.section, chapter.chapter)
             .filter((question) => !isDeleted(`${question.section}|${question.chapter}|${question.question}`));
           const matchingQuestions = chapterMatches
