@@ -1,8 +1,10 @@
 function escapeHtml(str) {
-  return str
+  return String(str ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
 }
 
 function sanitizeAnswerHtml(html) {
@@ -244,7 +246,7 @@ function catalogWithDatabaseQuestions() {
 
 function renderQuestion(question) {
   const questionKey = encodeURIComponent(JSON.stringify(question));
-  const itemKey = `${question.section}|${question.chapter}|${question.question}`;
+  const itemKey = question.id ? `question:${question.id}` : `${question.section}|${question.chapter}|${question.question}`;
   const answerHtml = sanitizeAnswerHtml(question.answer);
   return `
     <div class="question program" data-question-key="${questionKey}" data-question-id="${escapeHtml(question.id || "")}" data-item-key="${escapeHtml(itemKey)}">
@@ -324,7 +326,6 @@ function renderProgram(program) {
         <span class="read-count">Read ${readCount} time${readCount === 1 ? "" : "s"}</span>
         <span class="program-level level-${level.toLowerCase().replace(" ", "-")}">${escapeHtml(level)}</span>
         <button type="button" class="edit-program-title">Edit question</button>
-        <button type="button" class="edit-program header-edit">Edit answer</button>
       </div>
       <div class="program-body">
         <pre class="answer-code"><code>${answerHtml}</code></pre>
@@ -349,6 +350,7 @@ function renderProgram(program) {
               <option value="High" ${level === "High" ? "selected" : ""}>High</option>
             </select>
           </label>
+          <button type="button" class="edit-program">Edit answer</button>
           <button type="button" class="delete-item">Delete</button>
         </div>
       </div>
@@ -388,7 +390,7 @@ async function saveProgramTitle(programElement, oldTitle) {
   const existing = edits[key] || {};
   if (databaseState && programId) {
     const response = await fetch("api/programs/" + encodeURIComponent(programId), {
-      body: JSON.stringify({ code: existing.code || original.code, name: newTitle }),
+      body: JSON.stringify({ code: existing.code === undefined ? original.code : existing.code, name: newTitle }),
       headers: { "Content-Type": "application/json" },
       method: "PUT",
     });
@@ -397,6 +399,7 @@ async function saveProgramTitle(programElement, oldTitle) {
   edits[key] = { ...existing, name: newTitle };
   localStorage.setItem(PROGRAM_EDITS_STORAGE_KEY, JSON.stringify(edits));
   if (databaseState) databaseState.programEdits = edits;
+  saveRepositoryProgramEdits(edits);
   applyFilter(document.getElementById("search").value);
 }
 
@@ -651,6 +654,10 @@ function render(catalog) {
       input.focus();
       input.select();
       input.addEventListener("click", (clickEvent) => clickEvent.stopPropagation());
+      input.addEventListener("keydown", (keyEvent) => {
+        if (keyEvent.key === "Enter") saveProgramTitle(program, oldTitle).catch((error) => window.alert(error.message));
+        if (keyEvent.key === "Escape") applyFilter(document.getElementById("search").value);
+      });
       input.insertAdjacentHTML("afterend", `<div class="program-title-actions"><button type="button" class="save-program-title">Save</button><button type="button" class="cancel-program-title">Cancel</button></div>`);
       program.querySelector(".save-program-title").addEventListener("click", (saveEvent) => {
         saveEvent.stopPropagation();

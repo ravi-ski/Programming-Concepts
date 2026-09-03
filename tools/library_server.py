@@ -40,6 +40,10 @@ def connection():
         );
         CREATE TABLE IF NOT EXISTS settings (name TEXT PRIMARY KEY);
     """)
+    columns = {row[1] for row in db.execute("PRAGMA table_info(program_state)")}
+    if "name" not in columns:
+        db.execute("ALTER TABLE program_state ADD COLUMN name TEXT")
+        db.commit()
     if db.execute("SELECT 1 FROM settings WHERE name = 'json_migration'").fetchone() is None:
         migrate_json_state(db)
         db.execute("INSERT INTO settings(name) VALUES ('json_migration')")
@@ -56,11 +60,11 @@ def migrate_json_state(db):
     if PROGRAM_EDITS.exists():
         edits = json.loads(PROGRAM_EDITS.read_text(encoding="utf-8"))
         for program_key, edit in edits.items():
-            if isinstance(edit, dict) and isinstance(edit.get("code"), str):
+            if isinstance(edit, dict) and (isinstance(edit.get("code"), str) or isinstance(edit.get("name"), str)):
                 program_name = program_key.split("|", 1)[0]
                 program_id = next((program["id"] for section in catalog_data() for chapter in section["chapters"] for program in chapter["programs"] if program["name"] == program_name), None)
                 if program_id:
-                    db.execute("INSERT OR IGNORE INTO program_state(program_id, answer) VALUES (?, ?)", (program_id, edit["code"]))
+                    db.execute("INSERT OR IGNORE INTO program_state(program_id, answer, name) VALUES (?, ?, ?)", (program_id, edit.get("code"), edit.get("name")))
 
 
 def state():
@@ -127,8 +131,8 @@ class LibraryHandler(SimpleHTTPRequestHandler):
                     raise ValueError("Progress must contain non-negative integers")
                 output_file = PROGRESS
             else:
-                if not all(isinstance(value, dict) and isinstance(value.get("code"), str) for value in progress.values()):
-                    raise ValueError("Program edits must contain code strings")
+                if not all(isinstance(value, dict) and (isinstance(value.get("code"), str) or isinstance(value.get("name"), str)) for value in progress.values()):
+                    raise ValueError("Program edits must contain code or name strings")
                 output_file = PROGRAM_EDITS
             output_file.write_text(json.dumps(progress, indent=2) + "\n", encoding="utf-8")
         except (ValueError, json.JSONDecodeError):
@@ -149,7 +153,7 @@ class LibraryHandler(SimpleHTTPRequestHandler):
             program_id = self.unquote(match.group(1))
             payload = self.read_json()
             db = connection()
-                        db.execute("INSERT INTO program_state(program_id, answer, name) VALUES (?, ?, ?) ON CONFLICT(program_id) DO UPDATE SET answer = excluded.answer, name = COALESCE(excluded.name, program_state.name)", (program_id, payload["code"], payload.get("name")))
+            db.execute("INSERT INTO program_state(program_id, answer, name) VALUES (?, ?, ?) ON CONFLICT(program_id) DO UPDATE SET answer = COALESCE(excluded.answer, program_state.answer), name = COALESCE(excluded.name, program_state.name)", (program_id, payload.get("code"), payload.get("name")))
             db.commit()
             db.close()
             self.send_response(204)
