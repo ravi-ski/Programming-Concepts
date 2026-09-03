@@ -7,5 +7,8 @@
   },
   "C_pointers_003": {
     "code": "void incrementByValue(int x)\n{\n\tx = x + 1;\n\tprintf(\"By value (inside function): %d\\n\", x);\n}\n\nvoid incrementByReference(int *x)\n{\n\t*x = *x + 1;\n\tprintf(\"By reference (inside function): %d\\n\", *x);\n}<br><br>one line<br>two line<br>three line"
+  },
+  "C_pointers_019": {
+    "code": "const char *getGreeting(void)\n{\n\treturn \"Hello from a function returning a pointer!\";\n}\n\nconst char *(*greetingFuncPtr)(void) = getGreeting;"
   }
 }

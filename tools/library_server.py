@@ -35,7 +35,8 @@ def connection():
             reads INTEGER NOT NULL DEFAULT 0,
             level TEXT NOT NULL DEFAULT 'Not set',
             deleted INTEGER NOT NULL DEFAULT 0,
-            answer TEXT
+            answer TEXT,
+            name TEXT
         );
         CREATE TABLE IF NOT EXISTS settings (name TEXT PRIMARY KEY);
     """)
@@ -72,7 +73,7 @@ def state():
         "reads": {row["program_id"]: row["reads"] for row in records if row["reads"]},
         "levels": {row["program_id"]: row["level"] for row in records if row["level"] != "Not set"},
         "deleted": {row["program_id"]: True for row in records if row["deleted"]},
-        "programEdits": {row["program_id"]: {"code": row["answer"]} for row in records if row["answer"] is not None},
+        "programEdits": {row["program_id"]: {**({"code": row["answer"]} if row["answer"] is not None else {}), **({"name": row["name"]} if row["name"] is not None else {})} for row in records if row["answer"] is not None or row["name"] is not None},
     }
 
 
@@ -148,7 +149,7 @@ class LibraryHandler(SimpleHTTPRequestHandler):
             program_id = self.unquote(match.group(1))
             payload = self.read_json()
             db = connection()
-            db.execute("INSERT INTO program_state(program_id, answer) VALUES (?, ?) ON CONFLICT(program_id) DO UPDATE SET answer = excluded.answer", (program_id, payload["code"]))
+                        db.execute("INSERT INTO program_state(program_id, answer, name) VALUES (?, ?, ?) ON CONFLICT(program_id) DO UPDATE SET answer = excluded.answer, name = COALESCE(excluded.name, program_state.name)", (program_id, payload["code"], payload.get("name")))
             db.commit()
             db.close()
             self.send_response(204)
@@ -158,7 +159,10 @@ class LibraryHandler(SimpleHTTPRequestHandler):
         if match:
             payload = self.read_json()
             db = connection()
-            db.execute("UPDATE questions SET answer = ? WHERE id = ?", (payload["answer"], int(match.group(1))))
+            if "question" in payload:
+                db.execute("UPDATE questions SET question = ?, answer = ? WHERE id = ?", (payload["question"], payload["answer"], int(match.group(1))))
+            else:
+                db.execute("UPDATE questions SET answer = ? WHERE id = ?", (payload["answer"], int(match.group(1))))
             db.commit()
             db.close()
             self.send_response(204)

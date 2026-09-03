@@ -251,6 +251,7 @@ function renderQuestion(question) {
       <div class="program-header">
         <span class="question-badge">Q&A</span>
         <span class="program-name">${escapeHtml(question.question)}</span>
+        <button type="button" class="edit-question-title">Edit question</button>
       </div>
       <div class="program-body">
         <div class="answer-label">Answer</div>
@@ -261,6 +262,27 @@ function renderQuestion(question) {
         </div>
       </div>
     </div>`;
+}
+
+async function saveQuestionTitle(questionElement, oldQuestion) {
+  const input = questionElement.querySelector(".question-title-input");
+  const newQuestion = input.value.trim();
+  if (!newQuestion) return;
+  const question = JSON.parse(decodeURIComponent(questionElement.dataset.questionKey));
+  const questions = getSavedQuestions();
+  const index = questions.findIndex((item) => item.id === question.id || item.question === oldQuestion);
+  if (index === -1) return;
+  if (databaseState && question.id) {
+    const response = await fetch("api/questions/" + encodeURIComponent(question.id), {
+      body: JSON.stringify({ answer: questions[index].answer, question: newQuestion }),
+      headers: { "Content-Type": "application/json" },
+      method: "PUT",
+    });
+    if (!response.ok) throw new Error("Unable to save the question");
+  }
+  questions[index].question = newQuestion;
+  localStorage.setItem(QUESTIONS_STORAGE_KEY, JSON.stringify(questions));
+  applyFilter(document.getElementById("search").value);
 }
 
 async function saveQuestionAnswer(questionElement) {
@@ -301,6 +323,8 @@ function renderProgram(program) {
         <span class="program-name">${escapeHtml(editedProgram.name)}</span>
         <span class="read-count">Read ${readCount} time${readCount === 1 ? "" : "s"}</span>
         <span class="program-level level-${level.toLowerCase().replace(" ", "-")}">${escapeHtml(level)}</span>
+        <button type="button" class="edit-program-title">Edit question</button>
+        <button type="button" class="edit-program header-edit">Edit answer</button>
       </div>
       <div class="program-body">
         <pre class="answer-code"><code>${answerHtml}</code></pre>
@@ -325,7 +349,6 @@ function renderProgram(program) {
               <option value="High" ${level === "High" ? "selected" : ""}>High</option>
             </select>
           </label>
-          <button type="button" class="edit-program">Edit answer</button>
           <button type="button" class="delete-item">Delete</button>
         </div>
       </div>
@@ -350,6 +373,30 @@ async function saveProgramEdit(programElement) {
   repositoryProgramEdits = edits;
   if (databaseState) databaseState.programEdits = edits;
   saveRepositoryProgramEdits(edits);
+  applyFilter(document.getElementById("search").value);
+}
+
+async function saveProgramTitle(programElement, oldTitle) {
+  const input = programElement.querySelector(".program-title-input");
+  const newTitle = input.value.trim();
+  if (!newTitle) return;
+  const programId = programElement.dataset.programId;
+  const original = CATALOG.flatMap((section) => section.chapters.flatMap((chapter) => chapter.programs)).find((program) => program.id === programId);
+  if (!original) return;
+  const edits = getSavedProgramEdits();
+  const key = databaseState ? programId : decodeURIComponent(programElement.dataset.programKey);
+  const existing = edits[key] || {};
+  if (databaseState && programId) {
+    const response = await fetch("api/programs/" + encodeURIComponent(programId), {
+      body: JSON.stringify({ code: existing.code || original.code, name: newTitle }),
+      headers: { "Content-Type": "application/json" },
+      method: "PUT",
+    });
+    if (!response.ok) throw new Error("Unable to save the question");
+  }
+  edits[key] = { ...existing, name: newTitle };
+  localStorage.setItem(PROGRAM_EDITS_STORAGE_KEY, JSON.stringify(edits));
+  if (databaseState) databaseState.programEdits = edits;
   applyFilter(document.getElementById("search").value);
 }
 
@@ -516,6 +563,36 @@ function render(catalog) {
     });
   });
 
+  container.querySelectorAll(".edit-question-title").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const question = button.closest(".question");
+      const title = question.querySelector(".program-name");
+      const oldQuestion = title.textContent;
+      title.outerHTML = `<input class="question-title-input" type="text" value="${escapeHtml(oldQuestion)}" aria-label="Question" />`;
+      button.hidden = true;
+      const input = question.querySelector(".question-title-input");
+      input.focus();
+      input.select();
+      input.addEventListener("click", (clickEvent) => clickEvent.stopPropagation());
+      input.addEventListener("keydown", (keyEvent) => {
+        if (keyEvent.key === "Enter") {
+          saveQuestionTitle(question, oldQuestion).catch((error) => window.alert(error.message));
+        }
+        if (keyEvent.key === "Escape") applyFilter(document.getElementById("search").value);
+      });
+      input.insertAdjacentHTML("afterend", `<div class="question-title-actions"><button type="button" class="save-question-title">Save</button><button type="button" class="cancel-question-title">Cancel</button></div>`);
+      question.querySelector(".save-question-title").addEventListener("click", (saveEvent) => {
+        saveEvent.stopPropagation();
+        saveQuestionTitle(question, oldQuestion).catch((error) => window.alert(error.message));
+      });
+      question.querySelector(".cancel-question-title").addEventListener("click", (cancelEvent) => {
+        cancelEvent.stopPropagation();
+        applyFilter(document.getElementById("search").value);
+      });
+    });
+  });
+
   container.querySelectorAll(".save-question").forEach((button) => {
     button.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -557,6 +634,30 @@ function render(catalog) {
       });
       program.querySelector(".cancel-program").addEventListener("click", (event) => {
         event.stopPropagation();
+        applyFilter(document.getElementById("search").value);
+      });
+    });
+  });
+
+  container.querySelectorAll(".edit-program-title").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const program = button.closest(".program");
+      const title = program.querySelector(".program-name");
+      const oldTitle = title.textContent;
+      title.outerHTML = `<input class="program-title-input" type="text" value="${escapeHtml(oldTitle)}" aria-label="Question" />`;
+      button.hidden = true;
+      const input = program.querySelector(".program-title-input");
+      input.focus();
+      input.select();
+      input.addEventListener("click", (clickEvent) => clickEvent.stopPropagation());
+      input.insertAdjacentHTML("afterend", `<div class="program-title-actions"><button type="button" class="save-program-title">Save</button><button type="button" class="cancel-program-title">Cancel</button></div>`);
+      program.querySelector(".save-program-title").addEventListener("click", (saveEvent) => {
+        saveEvent.stopPropagation();
+        saveProgramTitle(program, oldTitle).catch((error) => window.alert(error.message));
+      });
+      program.querySelector(".cancel-program-title").addEventListener("click", (cancelEvent) => {
+        cancelEvent.stopPropagation();
         applyFilter(document.getElementById("search").value);
       });
     });
