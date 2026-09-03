@@ -387,7 +387,7 @@ function renderSection(section) {
       getQuestionsForChapter(section.section, c.chapter)
         .filter((question) => !isDeleted(`${question.section}|${question.chapter}|${question.question}`)).length, 0);
   return `
-    <div class="section">
+    <div class="section" data-section-key="${escapeHtml(section.section)}">
       <div class="section-header">
         <div><span class="chevron">&#9656;</span>
           <span class="section-title">${escapeHtml(section.section)}</span>
@@ -406,9 +406,18 @@ function render(catalog) {
     container.innerHTML = `<div class="empty">No programs found yet. Add @PROGRAM blocks to your source files and regenerate the catalog.</div>`;
     return;
   }
+  const openSections = new Set([...container.querySelectorAll(".section.open")].map((section) => section.dataset.sectionKey));
+  const openChapters = new Set([...container.querySelectorAll(".chapter.open .chapter-sort")].map((select) => select.dataset.sortKey));
   container.innerHTML = catalogWithDatabaseQuestions().filter((section) =>
     catalog.some((item) => item.section === section.section)
   ).map(renderSection).join("");
+
+  container.querySelectorAll(".section").forEach((section) => {
+    if (openSections.has(section.dataset.sectionKey)) section.classList.add("open");
+  });
+  container.querySelectorAll(".chapter").forEach((chapter) => {
+    if (openChapters.has(chapter.querySelector(".chapter-sort")?.dataset.sortKey)) chapter.classList.add("open");
+  });
 
   container.querySelectorAll(".section-header").forEach((header) => {
     header.addEventListener("click", () => {

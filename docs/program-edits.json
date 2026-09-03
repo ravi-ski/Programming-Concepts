@@ -1,5 +1,11 @@
 {
-  "Swap two numbers using a single pointer|void swapSingle(int *a, int *b)\n{\n\tint temp = *a;\n\t*a = *b;\n\t*b = temp;\n}": {
-    "code": "void swapSingle(int *a, int *b)\n{\n\tint temp = *a;\n\t*a = *b;\n\t*b = temp;\n}<br><br>test the progrma"
+  "C_pointers_001": {
+    "code": "saved test answerasdfasdfasdfasdf<br><br><br><br>asdfasdfasdf<br><br><br>asdfasdfasdfasdfasdfasdfasdf"
+  },
+  "C_pointers_002": {
+    "code": "void swapPointers(int **p1, int **p2)\n{\n\tint *temp = *p1;\n\t*p1 = *p2;\n\t*p2 = temp;\n}asdfasdfasdfasdfasdf"
+  },
+  "C_pointers_003": {
+    "code": "void incrementByValue(int x)\n{\n\tx = x + 1;\n\tprintf(\"By value (inside function): %d\\n\", x);\n}\n\nvoid incrementByReference(int *x)\n{\n\t*x = *x + 1;\n\tprintf(\"By reference (inside function): %d\\n\", *x);\n}<br><br>one line<br>two line<br>three line"
   }
 }

@@ -5,8 +5,9 @@ networking/concept notes, browsable through a small offline GUI.
 
 ## Opening the Program Library GUI
 
-The GUI can be opened as a static, no-build web page. Use the local server
-when you want read counters to be written to the repository.
+The GUI is available as a static page, and it can also run as a dynamic
+SQLite-backed website. Use the dynamic server when you want to create and edit
+content from the webpage itself.
 
 ### On this laptop
 
@@ -20,19 +21,25 @@ when you want read counters to be written to the repository.
    sample input/output.
 3. Use the search box at the top to filter chapters/programs by name.
 
-### Saving read counters from VS Code
+### Running the dynamic local website
 
-To save `+1 Read` changes into a file that can be committed to GitHub, run:
+From the repository root, run:
 
 ```powershell
 python tools\library_server.py
 ```
 
-Then open `http://localhost:8000`. The server writes counters to
-[`docs/progress.json`](docs/progress.json) and program answer edits to
-[`docs/program-edits.json`](docs/program-edits.json). Commit those files and
-push them to `main`; GitHub Pages will display the committed data. Opening
-`docs/index.html` directly still works, but changes there stay in the browser.
+Then open `http://localhost:8000`. Questions, answer edits, read counters,
+levels, and deletions are stored in `data/library.sqlite3`. The database is
+ignored by Git so local runtime data is not accidentally committed.
+
+Use this localhost URL for all create and edit operations. The page waits for
+the database response before refreshing, so a successful save is not lost.
+
+GitHub Pages can serve the static catalog, but it cannot run this Python API or
+write to SQLite. For a public dynamic website, deploy this server to a host
+that runs Python and use a persistent database. GitHub can still host the
+source code, while the dynamic website runs on that server.
 
 ### On a phone/tablet, or any device without the laptop (GitHub Pages)
 
@@ -47,8 +54,9 @@ can study from any browser tab once it's enabled:
 4. Bookmark that URL on your phone/tablet — no laptop, clone, or install
    needed, just an internet connection and a browser tab.
 
-Since it's a static page, any push to `main` (after running the catalog
-generator below) automatically updates the live site within a minute or two.
+For the static GitHub Pages version, any push to `main` after regenerating the
+catalog updates the live site within a minute or two. Dynamic data requires the
+Python server and database deployment described above.
 
 ## Regenerating the catalog
 
@@ -95,7 +103,7 @@ Linux/        Linux systems programming + theory (fork, IPC, mutex, boot, etc.)
 Networking/   Networking concept notes (VLAN, Linux networking commands)
 Python/       Python programs
 SQL/          SQL scripts
-docs/         Static GUI (index.html, app.js, style.css, generated data.js) —
+docs/         GUI (index.html, app.js, style.css, generated data.js) —
               also the GitHub Pages source folder
 tools/        generate_catalog.py — builds docs/data.js from source files
               library_server.py — saves local progress and answer edits to docs/*.json
