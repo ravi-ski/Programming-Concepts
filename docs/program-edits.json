@@ -1,1 +1,5 @@
-{}
+{
+  "Swap two numbers using a single pointer|void swapSingle(int *a, int *b)\n{\n\tint temp = *a;\n\t*a = *b;\n\t*b = temp;\n}": {
+    "code": "void swapSingle(int *a, int *b)\n{\n\tint temp = *a;\n\t*a = *b;\n\t*b = temp;\n}<br><br>test the progrma"
+  }
+}

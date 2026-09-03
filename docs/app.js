@@ -57,12 +57,24 @@ async function loadRepositoryProgramEdits() {
   try {
     const response = await fetch(`program-edits.json?ts=${Date.now()}`);
     if (!response.ok) throw new Error("Program edits file unavailable");
-    repositoryProgramEdits = await response.json();
-    repositoryProgramEdits = { ...getLocalProgramEdits(), ...repositoryProgramEdits };
+    const repositoryEdits = await response.json();
+    const localEdits = getLocalProgramEdits();
+    repositoryProgramEdits = { ...localEdits, ...repositoryEdits };
+    if (JSON.stringify(repositoryEdits) !== JSON.stringify(repositoryProgramEdits)) {
+      saveRepositoryProgramEdits(repositoryProgramEdits);
+    }
   } catch (error) {
     repositoryProgramEdits = getLocalProgramEdits();
   }
   render(CATALOG);
+}
+
+function saveRepositoryProgramEdits(edits) {
+  fetch("api/program-edits", {
+    body: JSON.stringify(edits),
+    headers: { "Content-Type": "application/json" },
+    method: "POST",
+  }).catch(() => {});
 }
 
 function getLocalProgramEdits() {
@@ -251,11 +263,7 @@ function saveProgramEdit(programElement) {
   };
   localStorage.setItem(PROGRAM_EDITS_STORAGE_KEY, JSON.stringify(edits));
   repositoryProgramEdits = edits;
-  fetch("api/program-edits", {
-    body: JSON.stringify(edits),
-    headers: { "Content-Type": "application/json" },
-    method: "POST",
-  }).catch(() => {});
+  saveRepositoryProgramEdits(edits);
   applyFilter(document.getElementById("search").value);
 }
 
