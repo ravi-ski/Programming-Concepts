@@ -40,6 +40,10 @@ function getProgramKey(program) {
   return `${program.name}|${program.code}`;
 }
 
+function getReadKey(program) {
+  return program.id || getProgramKey(program);
+}
+
 function getSavedProgramEdits() {
   if (repositoryProgramEdits) return repositoryProgramEdits;
   try {
@@ -82,7 +86,22 @@ async function loadRepositoryReads() {
   try {
     const response = await fetch(`progress.json?ts=${Date.now()}`);
     if (!response.ok) throw new Error("Progress file unavailable");
-    repositoryReads = await response.json();
+    const originalReads = await response.json();
+    const migratedReads = {};
+    CATALOG.forEach((section) => section.chapters.forEach((chapter) => chapter.programs.forEach((program) => {
+      const oldKey = getProgramKey(program);
+      const readKey = getReadKey(program);
+      if (originalReads[readKey] !== undefined) migratedReads[readKey] = originalReads[readKey];
+      else if (originalReads[oldKey] !== undefined) migratedReads[readKey] = originalReads[oldKey];
+    })));
+    repositoryReads = migratedReads;
+    if (JSON.stringify(originalReads) !== JSON.stringify(migratedReads)) {
+      fetch("api/progress", {
+        body: JSON.stringify(migratedReads),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      }).catch(() => {});
+    }
   } catch (error) {
     repositoryReads = getSavedProgramReads();
   }
@@ -106,7 +125,7 @@ function getDeletedItems() {
 }
 
 function incrementProgramRead(programElement) {
-  const key = decodeURIComponent(programElement.dataset.programKey);
+  const key = programElement.dataset.readKey || decodeURIComponent(programElement.dataset.programKey);
   const reads = getSavedProgramReads();
   reads[key] = (reads[key] || 0) + 1;
   localStorage.setItem(PROGRAM_READS_STORAGE_KEY, JSON.stringify(reads));
@@ -183,11 +202,12 @@ function renderProgram(program) {
   const editedProgram = { ...program, ...savedEdit };
   const hasIo = editedProgram.input || editedProgram.output;
   const programKey = encodeURIComponent(getProgramKey(program));
-  const readCount = getSavedProgramReads()[getProgramKey(program)] || 0;
+  const readKey = getReadKey(program);
+  const readCount = getSavedProgramReads()[readKey] || 0;
   const level = getSavedProgramLevels()[getProgramKey(program)] || "Not set";
   const answerHtml = savedEdit.code === undefined ? escapeHtml(program.code) : sanitizeAnswerHtml(savedEdit.code);
   return `
-    <div class="program" data-program-key="${programKey}" data-program-name="${escapeHtml(editedProgram.name)}">
+    <div class="program" data-program-key="${programKey}" data-read-key="${escapeHtml(readKey)}" data-program-name="${escapeHtml(editedProgram.name)}">
       <div class="program-header">
         <span class="program-name">${escapeHtml(editedProgram.name)}</span>
         <span class="read-count">Read ${readCount} time${readCount === 1 ? "" : "s"}</span>

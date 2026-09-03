@@ -104,6 +104,8 @@ def build_catalog():
         key = (section_name, chapter_title)
         existing = chapter_index.get(key)
         if existing is not None:
+            for program_index, program in enumerate(programs, start=len(existing["programs"]) + 1):
+                program["id"] = f"{rel.with_suffix('').as_posix().replace('/', '_')}_{program_index:03d}"
             existing["programs"].extend(programs)
             existing["paths"].append(str(rel).replace("\\", "/"))
             continue
@@ -114,6 +116,8 @@ def build_catalog():
             "paths": [str(rel).replace("\\", "/")],
             "programs": programs,
         }
+        for program_index, program in enumerate(programs, start=1):
+            program["id"] = f"{rel.with_suffix('').as_posix().replace('/', '_')}_{program_index:03d}"
         chapter_index[key] = chapter
         sections[section_name].append(chapter)
 
