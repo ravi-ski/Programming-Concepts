@@ -29,8 +29,9 @@ python tools\library_server.py
 ```
 
 Then open `http://localhost:8000`. The server writes counters to
-[`docs/progress.json`](docs/progress.json). Commit that file and push it to
-`main`; GitHub Pages will display the committed counters. Opening
+[`docs/progress.json`](docs/progress.json) and program answer edits to
+[`docs/program-edits.json`](docs/program-edits.json). Commit those files and
+push them to `main`; GitHub Pages will display the committed data. Opening
 `docs/index.html` directly still works, but changes there stay in the browser.
 
 ### On a phone/tablet, or any device without the laptop (GitHub Pages)
@@ -97,5 +98,5 @@ SQL/          SQL scripts
 docs/         Static GUI (index.html, app.js, style.css, generated data.js) —
               also the GitHub Pages source folder
 tools/        generate_catalog.py — builds docs/data.js from source files
-              library_server.py — saves local read counters to docs/progress.json
+              library_server.py — saves local progress and answer edits to docs/*.json
 ```

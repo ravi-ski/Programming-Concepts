@@ -34,12 +34,34 @@ const PROGRAM_READS_STORAGE_KEY = "program-library-program-reads";
 const PROGRAM_LEVELS_STORAGE_KEY = "program-library-program-levels";
 const DELETED_ITEMS_STORAGE_KEY = "program-library-deleted-items";
 let repositoryReads = null;
+let repositoryProgramEdits = null;
 
 function getProgramKey(program) {
   return `${program.name}|${program.code}`;
 }
 
 function getSavedProgramEdits() {
+  if (repositoryProgramEdits) return repositoryProgramEdits;
+  try {
+    return JSON.parse(localStorage.getItem(PROGRAM_EDITS_STORAGE_KEY) || "{}");
+  } catch (error) {
+    return {};
+  }
+}
+
+async function loadRepositoryProgramEdits() {
+  try {
+    const response = await fetch(`program-edits.json?ts=${Date.now()}`);
+    if (!response.ok) throw new Error("Program edits file unavailable");
+    repositoryProgramEdits = await response.json();
+    repositoryProgramEdits = { ...getLocalProgramEdits(), ...repositoryProgramEdits };
+  } catch (error) {
+    repositoryProgramEdits = getLocalProgramEdits();
+  }
+  render(CATALOG);
+}
+
+function getLocalProgramEdits() {
   try {
     return JSON.parse(localStorage.getItem(PROGRAM_EDITS_STORAGE_KEY) || "{}");
   } catch (error) {
@@ -208,6 +230,12 @@ function saveProgramEdit(programElement) {
     code: sanitizeAnswerHtml(programElement.querySelector(".program-code-input").innerHTML.trim()),
   };
   localStorage.setItem(PROGRAM_EDITS_STORAGE_KEY, JSON.stringify(edits));
+  repositoryProgramEdits = edits;
+  fetch("api/program-edits", {
+    body: JSON.stringify(edits),
+    headers: { "Content-Type": "application/json" },
+    method: "POST",
+  }).catch(() => {});
   applyFilter(document.getElementById("search").value);
 }
 
@@ -485,4 +513,4 @@ document.getElementById("question-dialog").addEventListener("click", (event) => 
   if (event.target.id === "question-dialog") closeQuestionDialog();
 });
 
-render(CATALOG);
+Promise.all([loadRepositoryReads(), loadRepositoryProgramEdits()]);
